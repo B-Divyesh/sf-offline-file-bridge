@@ -152,7 +152,8 @@ function previewFolder(): string {
 
 function pricing(): string {
   const active = isPro();
-  return `<div class="price-note"><div><p class="annotation">advanced field kit</p><div class="price">$14<small>one-time purchase</small></div></div><div><h2 id="pro-title">Keep more folder bridges</h2><p>Bridge Pro adds up to eight folders and keeps 30 refresh records per folder. The free version keeps one folder.</p><ul class="check-list"><li>One-time license for your devices</li><li>Core file export stays free</li><li>Sociobot handles checkout and refunds</li></ul>${active ? `<p class="notice success">Bridge Pro is active on this device.</p>` : `<p><a class="button" href="${CHECKOUT}">Buy Bridge Pro</a></p><form class="license-form" data-license-form><label class="sr-only" for="license-token">License token</label><input id="license-token" name="license" autocomplete="off" placeholder="Paste your license token" required><button class="button small secondary" type="submit">Verify license</button></form>`}</div></div>`;
+  const revoked = license && license.checkedAt > 0 && !license.valid ? `<p class="notice">This license is no longer active. Buy a new license or restore another.</p>` : "";
+  return `<div class="price-note"><div><p class="annotation">advanced field kit</p><div class="price">$14<small>one-time purchase</small></div></div><div><h2 id="pro-title">Keep more folder bridges</h2><p>Bridge Pro adds up to eight folders and keeps 30 refresh records per folder. The free version keeps one folder.</p><ul class="check-list"><li>One-time license for your devices</li><li>Core file export stays free</li><li>Sociobot handles checkout and refunds</li></ul>${revoked}${active ? `<p class="notice success">Bridge Pro is active on this device.</p>` : `<p><a class="button" href="${CHECKOUT}">Buy Bridge Pro <span class="sr-only">at the external secure checkout</span></a></p><form class="license-form" data-license-form><label class="sr-only" for="license-token">License token</label><input id="license-token" name="license" autocomplete="off" placeholder="Paste your license token" required><button class="button small secondary" type="submit">Verify license</button></form>`}</div></div>`;
 }
 
 function demoPage(): string { return appPage(true); }
@@ -480,8 +481,10 @@ async function verifyLicense(token: string, force = false): Promise<void> {
   const cached = localStorage.getItem(VERDICT_KEY);
   if (cached) {
     const parsed = JSON.parse(cached) as LicenseState;
-    license = parsed;
-    if (!force && Date.now() - parsed.checkedAt < 86400000) return;
+    if (parsed.token === token) {
+      license = parsed;
+      if (!force && Date.now() - parsed.checkedAt < 86400000) return;
+    }
   }
   try {
     const response = await fetch(`https://api.sociobot.in/api/v1/products/${PRODUCT}/verify?license=${encodeURIComponent(token)}`);
@@ -492,14 +495,20 @@ async function verifyLicense(token: string, force = false): Promise<void> {
   }
 }
 
-async function captureLicense(): Promise<void> {
+function captureLicense(): void {
   const params = new URLSearchParams(location.search); const fromUrl = params.get("license");
   if (fromUrl) {
     localStorage.setItem(LICENSE_KEY, fromUrl); params.delete("license");
     history.replaceState({}, "", `${location.pathname}${params.size ? `?${params}` : ""}`);
   }
   const token = fromUrl || localStorage.getItem(LICENSE_KEY);
-  if (token) await verifyLicense(token);
+  if (!token) return;
+  const cached = localStorage.getItem(VERDICT_KEY);
+  if (cached) {
+    const parsed = JSON.parse(cached) as LicenseState;
+    if (parsed.token === token) license = parsed;
+  }
+  void verifyLicense(token, Boolean(fromUrl)).then(() => renderRoute());
 }
 
 async function loadRelease(): Promise<void> {
@@ -522,7 +531,7 @@ window.addEventListener("offline", () => { online = false; void renderRoute(); }
 
 async function start(): Promise<void> {
   if (isNative && normalizePath(location.pathname) === "/") history.replaceState({}, "", "/app");
-  await captureLicense();
+  captureLicense();
   await renderRoute();
   if ("serviceWorker" in navigator && !isNative) {
     navigator.serviceWorker.register("/sw.js").then((registration) => {

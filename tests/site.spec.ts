@@ -25,6 +25,12 @@ test("mobile landing has no horizontal overflow", async ({ page }) => {
   await expect(page.getByRole("link", { name: /Try it with sample data/ })).toBeVisible();
 });
 
+test("demo query opens the isolated sample", async ({ page }) => {
+  await page.goto("/?demo=1");
+  await expect(page.getByText("Demo — sample data, nothing is saved")).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Open your offline folders");
+});
+
 test("keyboard navigation reaches the primary action", async ({ page }) => {
   await page.goto("/");
   await page.keyboard.press("Tab");

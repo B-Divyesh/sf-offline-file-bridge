@@ -41,6 +41,7 @@ test("@claim:freshness shows the last successful refresh", async ({ page }) => {
   await page.getByRole("button", { name: "Refresh local copy" }).click();
   await expect(page.getByText("Ready · synced just now")).toBeVisible();
   await expect(page.getByText("3", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("280.0 KB", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("Field notes was removed.")).toHaveCount(0);
 });
 
@@ -67,6 +68,38 @@ test("@claim:free-tier keeps one folder and lists the Pro price", async ({ page 
   await page.goto("/");
   await expect(page.getByText("One folder is free.")).toBeVisible();
   await expect(page.getByText("$14")).toBeVisible();
+  await expect(page.getByText("Bridge Pro adds up to eight folders and keeps 30 refresh records per folder.")).toBeVisible();
   const buy = page.getByRole("link", { name: "Buy Bridge Pro" });
   await expect(buy).toHaveAttribute("href", "https://api.sociobot.in/api/v1/products/offline-file-bridge/checkout");
+  await page.goto("/app");
+  await page.locator("#folder-input").setInputFiles("tests/fixtures/bridge-folder");
+  await page.getByRole("button", { name: "Choose a folder" }).click();
+  await expect(page.getByText("The free version keeps one folder. Remove it first or add a Bridge Pro license.")).toBeVisible();
+  await page.evaluate(async () => {
+    const token = "test-pro";
+    localStorage.setItem("sb_license:offline-file-bridge", token);
+    localStorage.setItem("sb_license:offline-file-bridge:verdict", JSON.stringify({ token, valid: true, checkedAt: Date.now() }));
+    const database = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open("offline-file-bridge-real", 1);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    const transaction = database.transaction("mirrors", "readwrite");
+    for (let index = 2; index <= 8; index += 1) transaction.objectStore("mirrors").put({ id: `seed-${index}`, name: `Folder ${index}`, source: "test", createdAt: Date.now(), syncedAt: Date.now(), files: [], history: [] });
+    await new Promise<void>((resolve) => { transaction.oncomplete = () => resolve(); });
+    database.close();
+  });
+  await page.reload();
+  await page.getByRole("button", { name: "Choose a folder" }).click();
+  await expect(page.getByText("Bridge Pro keeps up to eight folders. Remove one before adding another.")).toBeVisible();
+});
+
+test("@claim:browser-persistence keeps selected files after reload", async ({ page }) => {
+  await page.goto("/app");
+  await page.locator("#folder-input").setInputFiles("tests/fixtures/bridge-folder");
+  await expect(page.getByText("offline-note.txt")).toBeVisible();
+  await expect(page.getByText("2", { exact: true }).first()).toBeVisible();
+  await page.reload();
+  await expect(page.getByText("offline-note.txt")).toBeVisible();
+  await expect(page.getByText("route.csv")).toBeVisible();
 });

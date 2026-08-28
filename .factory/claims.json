@@ -43,9 +43,16 @@
   },
   {
     "id": "free-tier",
-    "claim": "One folder is free, and Bridge Pro costs $14 once",
+    "claim": "One folder is free; Bridge Pro costs $14 once and keeps up to eight folders with 30 refresh records each",
     "where": "landing facts, pricing, terms",
     "test": "npm test -- --grep @claim:free-tier",
-    "sandbox": "fresh landing page; assert the free limit, exact price, and Sociobot checkout URL"
+    "sandbox": "fresh landing page; assert the free limit, Pro capacity, exact price, and Sociobot checkout URL"
+  },
+  {
+    "id": "browser-persistence",
+    "claim": "Browser-selected files persist across reloads",
+    "where": "README browser/PWA feature list, app",
+    "test": "npm test -- --grep @claim:browser-persistence",
+    "sandbox": "fresh browser context; select two in-memory files through the folder input, reload /app, and assert both remain"
   }
 ]

@@ -43,6 +43,9 @@ Audited 28 August 2026. Counts treat contractions and hyphenated terms as one wo
 | Sociobot handles checkout and refunds | 5 | Pass |
 | Buy Bridge Pro | 3 | Pass |
 | Verify license | 2 | Pass |
+| Bridge Pro is active on this device. | 7 | Pass |
+| This license is no longer active. | 6 | Pass |
+| Buy a new license or restore another. | 7 | Pass |
 
 ## Terminology
 

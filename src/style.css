@@ -205,6 +205,7 @@ h3 { font-size: 1.16rem; }
   h1 { font-size: clamp(2.6rem, 14vw, 4rem); }
   .hero { gap: 42px; min-height: 0; }
   .section { padding: 64px 0; }
+  .ruled-heading::after { right: 0; }
   .preview-note, .preview-panel, .split-note, .price-note { padding: 24px 18px; }
   .app-head { align-items: start; flex-direction: column; }
   .folder-header { flex-direction: column; padding-left: 44px; }
