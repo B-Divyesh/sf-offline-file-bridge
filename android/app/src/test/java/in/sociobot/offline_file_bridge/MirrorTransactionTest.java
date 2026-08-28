@@ -17,14 +17,14 @@ public class MirrorTransactionTest {
         File root = Files.createTempDirectory("ofb-mirror").toFile();
         File completed = new File(root, "field-notes");
         assertTrue(completed.mkdirs());
-        Files.writeString(new File(completed, "ready.txt").toPath(), "previous", StandardCharsets.UTF_8);
+        Files.write(new File(completed, "ready.txt").toPath(), "previous".getBytes(StandardCharsets.UTF_8));
         File staging = MirrorTransaction.createStagingDirectory(completed);
 
-        Files.writeString(new File(staging, "partial.txt").toPath(), "partial", StandardCharsets.UTF_8);
+        Files.write(new File(staging, "partial.txt").toPath(), "partial".getBytes(StandardCharsets.UTF_8));
         MirrorTransaction.deleteTree(staging); // Simulates a source read failing before replacement.
 
         assertTrue(new File(completed, "ready.txt").isFile());
-        assertEquals("previous", Files.readString(new File(completed, "ready.txt").toPath()));
+        assertEquals("previous", new String(Files.readAllBytes(new File(completed, "ready.txt").toPath()), StandardCharsets.UTF_8));
         MirrorTransaction.deleteTree(root);
     }
 
@@ -33,14 +33,14 @@ public class MirrorTransactionTest {
         File root = Files.createTempDirectory("ofb-mirror").toFile();
         File completed = new File(root, "field-notes");
         assertTrue(completed.mkdirs());
-        Files.writeString(new File(completed, "ready.txt").toPath(), "previous", StandardCharsets.UTF_8);
+        Files.write(new File(completed, "ready.txt").toPath(), "previous".getBytes(StandardCharsets.UTF_8));
         File staging = MirrorTransaction.createStagingDirectory(completed);
-        Files.writeString(new File(staging, "ready.txt").toPath(), "replacement", StandardCharsets.UTF_8);
+        Files.write(new File(staging, "ready.txt").toPath(), "replacement".getBytes(StandardCharsets.UTF_8));
 
         MirrorTransaction.replaceCompletedMirror(completed, staging);
 
         assertFalse(staging.exists());
-        assertEquals("replacement", Files.readString(new File(completed, "ready.txt").toPath()));
+        assertEquals("replacement", new String(Files.readAllBytes(new File(completed, "ready.txt").toPath()), StandardCharsets.UTF_8));
         MirrorTransaction.deleteTree(root);
     }
 }
