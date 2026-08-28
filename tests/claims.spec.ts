@@ -23,7 +23,7 @@ test("@claim:demo-sandbox uses only its demo storage namespace", async ({ page }
   expect(databases).not.toContain("offline-file-bridge-real");
 });
 
-test("@claim:local-only sends no demo file data off-device", async ({ page }) => {
+test("@claim:local-only sends no selected or demo file data off-device", async ({ page }) => {
   const foreignRequests: string[] = [];
   page.on("request", (request) => {
     const url = new URL(request.url());
@@ -33,6 +33,9 @@ test("@claim:local-only sends no demo file data off-device", async ({ page }) =>
   await page.getByRole("button", { name: "Refresh local copy" }).click();
   await page.getByRole("button", { name: "Share / open" }).nth(1).click();
   await expect(page.getByRole("dialog")).toContainText("specimen-log.csv");
+  await page.goto("/app");
+  await page.locator("#folder-input").setInputFiles("tests/fixtures/bridge-folder");
+  await page.getByRole("button", { name: "Share / open" }).first().click();
   expect(foreignRequests).toEqual([]);
 });
 
@@ -92,6 +95,10 @@ test("@claim:free-tier keeps one folder and lists the Pro price", async ({ page 
   await page.reload();
   await page.getByRole("button", { name: "Choose a folder" }).click();
   await expect(page.getByText("Bridge Pro keeps up to eight folders. Remove one before adding another.")).toBeVisible();
+
+  await page.goto("/demo");
+  for (let index = 0; index < 31; index += 1) await page.getByRole("button", { name: "Refresh local copy" }).click();
+  await expect(page.getByText("Refresh history: 30 / 30 records")).toBeVisible();
 });
 
 test("@claim:checkout opens the registered hosted checkout", async ({ request }) => {

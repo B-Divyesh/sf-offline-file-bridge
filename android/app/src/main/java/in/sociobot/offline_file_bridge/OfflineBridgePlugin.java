@@ -32,9 +32,7 @@ public class OfflineBridgePlugin extends Plugin {
 
     @PluginMethod
     public void chooseFolder(PluginCall call) {
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-        startActivityForResult(call, intent, "folderChosen");
+        startActivityForResult(call, createFolderPickerIntent(), "folderChosen");
     }
 
     @ActivityCallback
@@ -55,7 +53,7 @@ public class OfflineBridgePlugin extends Plugin {
             getPrefs().edit().putString(id + ":uri", uri.toString()).putString(id + ":name", safeDisplayName(folder.getName())).apply();
             call.resolve(copied);
         } catch (Exception error) {
-            if (!hadSavedGrant) releaseFolderGrant(uri);
+            if (!hadSavedGrant) releaseFolderGrant(getContext(), uri);
             call.reject("The folder could not be copied. Choose it again and allow access.", error);
         }
     }
@@ -96,11 +94,7 @@ public class OfflineBridgePlugin extends Plugin {
                 call.reject("The local file is missing. Refresh the folder, then try again.");
                 return;
             }
-            Uri contentUri = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".fileprovider", file);
-            Intent open = new Intent(Intent.ACTION_VIEW);
-            open.setDataAndType(contentUri, mimeFor(file.getName()));
-            open.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
-            getContext().startActivity(Intent.createChooser(open, "Open " + file.getName()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+            getContext().startActivity(createOpenFileChooser(getContext(), file, mimeFor(file.getName())));
             call.resolve();
         } catch (ActivityNotFoundException error) {
             call.reject("No installed app can open this file type.", error);
@@ -116,11 +110,8 @@ public class OfflineBridgePlugin extends Plugin {
             call.reject("The folder id is missing.");
             return;
         }
-        String uriValue = getPrefs().getString(id + ":uri", null);
         try {
-            MirrorTransaction.deleteTree(mirrorDirectory(id));
-            if (uriValue != null) releaseFolderGrant(Uri.parse(uriValue));
-            getPrefs().edit().remove(id + ":uri").remove(id + ":name").apply();
+            removeMirrorFromDevice(getContext(), getPrefs(), id);
             call.resolve();
         } catch (Exception error) {
             call.reject("The local mirror could not be removed. Try again.", error);
@@ -182,12 +173,33 @@ public class OfflineBridgePlugin extends Plugin {
         return new File(new File(getContext().getFilesDir(), "offline_bridge"), id);
     }
 
-    private void releaseFolderGrant(Uri uri) {
+    static void removeMirrorFromDevice(android.content.Context context, SharedPreferences preferences, String id) throws IOException {
+        String uriValue = preferences.getString(id + ":uri", null);
+        MirrorTransaction.deleteTree(new File(new File(context.getFilesDir(), "offline_bridge"), id));
+        if (uriValue != null) releaseFolderGrant(context, Uri.parse(uriValue));
+        preferences.edit().remove(id + ":uri").remove(id + ":name").apply();
+    }
+
+    private static void releaseFolderGrant(android.content.Context context, Uri uri) {
         try {
-            getContext().getContentResolver().releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            context.getContentResolver().releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
         } catch (SecurityException ignored) {
             // Android may already have revoked this grant in Settings. Removal still clears local state.
         }
+    }
+
+    static Intent createFolderPickerIntent() {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        return intent;
+    }
+
+    static Intent createOpenFileChooser(android.content.Context context, File file, String mimeType) {
+        Uri contentUri = FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", file);
+        Intent open = new Intent(Intent.ACTION_VIEW);
+        open.setDataAndType(contentUri, mimeType);
+        open.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+        return Intent.createChooser(open, "Open " + file.getName()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     }
 
     private SharedPreferences getPrefs() {

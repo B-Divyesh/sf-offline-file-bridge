@@ -35,10 +35,12 @@ Open `http://localhost:5173/` or go straight to `http://localhost:5173/demo`.
 
 ```sh
 npm test
+npm run test:unit
+npm run lint
 npm run build
 ```
 
-The exact production command is `npm run build`. It writes the deployable static site to `dist/`, with `dist/index.html` at the root. Tests build first, start the production preview, and run every claim in `.factory/claims.json` on desktop and mobile Chromium.
+The exact production command is `npm run build`. It writes the deployable static site to `dist/`, with `dist/index.html` at the root. `npm test` runs the browser claims on desktop and mobile Chromium. `npm run test:unit` runs the three native source regressions; together they run every command listed in `.factory/claims.json`.
 
 Run one claim with:
 
@@ -48,9 +50,9 @@ npm test -- --grep @claim:offline-reload
 
 ## Android project
 
-The Capacitor 6 project lives in `android/` with app id `in.sociobot.offline_file_bridge`. The custom `OfflineBridgePlugin` opens Android's folder picker, copies selected files into private app storage, and hands a chosen copy to Android's app chooser.
+The Capacitor 8 project lives in `android/` with app id `in.sociobot.offline_file_bridge`. The custom `OfflineBridgePlugin` opens Android's folder picker, copies selected files into private app storage, and hands a chosen copy to Android's app chooser.
 
-The worker image does not include a JDK or Android SDK. GitHub Actions builds the release artifacts with JDK 17:
+The worker image does not include a JDK or Android SDK. GitHub Actions builds the release artifacts with JDK 21:
 
 ```sh
 npm run build
@@ -60,6 +62,8 @@ cd android
 ```
 
 The workflow generates a temporary debug keystore, builds the APK and AAB, writes `SHA256SUMS`, and attaches all three files to release `v0.1.1`. A public store release must use the owner's upload key.
+
+The release workflow also starts an Android 35 emulator and runs `npm run test:android-device`. Those installed-APK tests cover the scoped picker intent and manifest permissions, failed-refresh preservation, private `FileProvider` chooser handoff, and local-copy/consent removal.
 
 ## Privacy and licenses
 

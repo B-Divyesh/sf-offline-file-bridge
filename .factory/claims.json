@@ -15,10 +15,10 @@
   },
   {
     "id": "local-only",
-    "claim": "Demo files stay on the device",
+    "claim": "Selected and demo files stay on the device",
     "where": "landing facts, privacy page",
     "test": "npm test -- --grep @claim:local-only",
-    "sandbox": "intercept the complete demo refresh and open flow; assert every request is same-origin"
+    "sandbox": "intercept demo refresh/open and browser-selected file import/open flows; assert every request is same-origin"
   },
   {
     "id": "freshness",
@@ -59,7 +59,7 @@
     "id": "native-refresh-safety",
     "claim": "A failed Android refresh keeps the previous ready local mirror",
     "where": "landing preview, app folder record, README",
-    "test": "npm run test:unit -- --grep @claim:native-refresh-safety",
+    "test": "npm run test:unit -- -t @claim:native-refresh-safety",
     "sandbox": "native transaction regression test; a staged replacement is discarded before commit and the completed mirror remains intact"
   },
   {
@@ -73,14 +73,14 @@
     "id": "consent-removal",
     "claim": "Removing an Android mirror deletes its local copy and releases its folder access",
     "where": "landing privacy section, privacy page, README",
-    "test": "npm run test:unit -- --grep @claim:consent-removal",
+    "test": "npm run test:unit -- -t @claim:consent-removal",
     "sandbox": "native plugin regression test; assert deletion, exact persisted SAF grant release, then preference removal"
   },
   {
     "id": "native-handoff",
     "claim": "Android opens ready private copies through the system app chooser",
     "where": "landing how it works, install walkthrough, README",
-    "test": "npm run test:unit -- --grep @claim:native-handoff",
+    "test": "npm run test:unit -- -t @claim:native-handoff",
     "sandbox": "native plugin/manifest regression test; assert a FileProvider URI, ACTION_VIEW chooser, and read grant"
   }
 ]

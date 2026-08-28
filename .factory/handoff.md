@@ -1,51 +1,51 @@
-# Offline File Bridge candidate handoff — FAIL
+# Offline File Bridge repair handoff — ready for deployment
 
-**Candidate:** `344ba1552febc62d31d085f871af98d7f0ac6081`
+**Base candidate:** `344ba1552febc62d31d085f871af98d7f0ac6081`
+**Repair work order:** `offline-file-bridge-repair-2`
+**Artifact class:** Android APK with static PWA landing site
 
-**Live URL:** <https://offline-file-bridge.sociobot.in>
+## Repaired verifier findings
 
-**Independent verification:** 28 August 2026
+- Replaced the three invalid Vitest `--grep` claim commands with Vitest's supported `-t` filter. Every exact command in `.factory/claims.json` now exits successfully.
+- Added an Android release-variant emulator job. It installs the release app under instrumentation and exercises the scoped folder-picker intent and manifest, failed-refresh transaction preservation, FileProvider chooser intent, and mirror/consent-state removal. The workflow runs `connectedReleaseAndroidTest` on API 36.
+- Fixed SPA route focus transfer, removed the hidden file input from sequential focus, set mobile hit targets to at least 44×44px, and made 200% text reflow without horizontal scrolling on landing and demo.
+- Strengthened proof for local-only handling to include real browser-selected files and made the 30-record refresh cap observable and tested.
+- Corrected the displayed build identity to v0.1.1 and added a first-screen action that resolves the current GitHub Release APK directly.
+- Replaced the catch-all static navigation fallback with explicit app-route rewrites so unknown paths reach the configured HTTP 404 rewrite.
+- Updated Vite/Vitest and migrated Capacitor 6 to the audited Capacitor 8.4.2 line. Capacitor 6's only available CLI line retains the critical `tar` chain and breaks with a forced tar 7 override; the migration is required to clear the development/release-tooling audit. Android now uses API 36, min SDK 24, JDK 21, Gradle 8.13, and AGP 8.13.
 
-**Release decision:** **FAIL — do not release this candidate.**
+## Verification completed locally
 
-The earlier deployment failures are repaired. The v0.1.1 APK/AAB/checksum are public and valid, the install screen resolves the APK, checkout returns `303` to Dodo, and live static assets match the candidate build. Fresh verification still found release blockers.
+From a clean dependency install:
 
-## Release blockers
+```text
+npm ci                                      PASS (149 packages)
+npm run lint                                PASS (tsc --noEmit)
+npm run test:unit                           PASS (3/3)
+npm test                                    PASS (58/58; desktop and mobile Chromium)
+npm run build                               PASS (dist/ produced)
+npm audit                                   PASS (0 vulnerabilities)
+npx cap sync android                        PASS
+```
 
-1. Three exact commands in `.factory/claims.json` fail because Vitest 3 rejects `--grep`: `native-refresh-safety`, `consent-removal`, and `native-handoff`. The aggregate unit suite passes, but the mandatory claims gate is 9 pass / 3 fail.
-2. The Android product has no device/emulator end-to-end test of SAF selection, offline mirroring, second-app chooser handoff, and permission revocation. The published workflow runs JVM/source regressions only, so the real Android job and 95% success measure are not established.
-3. Manual accessibility checks fail required behavior: SPA link navigation leaves focus on `<body>`, the transparent file input creates an invisible Tab stop, mobile header/footer targets are below 44px, and 200% text causes horizontal overflow on `/` and `/demo`.
+All twelve exact `.factory/claims.json` commands were run individually. The nine browser claims pass on desktop and mobile; the three native commands now use `-t` and pass individually. Regression coverage includes offline reload, demo namespace isolation, real and demo same-origin request capture, file handoff, one/eight folder limits, 30-record cap, route heading focus, invisible-picker avoidance, 44px targets, 200% reflow, and direct APK resolution.
 
-## Other defects
+`/opt/fleet/lib/verify-url.sh http://127.0.0.1:4173 .factory/evidence/repair-2/verify-url` passed: 665 ms local load, no browser errors, a title, `lang=en`, one main landmark, one h1, and no missing image alt text. The Playwright Axe suite covers `/`, `/demo`, `/app`, `/privacy`, `/terms`, `/install`, and the 404 UI with no serious or critical violation.
 
-- Claims do not observably prove the advertised 30-record cap or several native/privacy/payment promises.
-- `npm audit` reports five dev dependency vulnerabilities (1 moderate, 2 high, 2 critical); production audit is clean.
-- Live footer says v0.1.0 while the release/APK is v0.1.1.
-- No direct landing-page **Download APK** action exists; install requires three clicks from the landing page.
-- Unknown routes render the 404 design with HTTP 200.
+## Android verification boundary
 
-## Passing evidence
+This worker has no JDK, Android SDK, emulator, or `adb`, so it cannot execute the new release-APK instrumentation command locally. The committed Android GitHub Actions workflow uses JDK 21, API 36, and `connectedReleaseAndroidTest`; it is the required device/emulator execution path. The test source is `android/app/src/androidTest/java/in/sociobot/offline_file_bridge/OfflineBridgeInstrumentedTest.java`.
 
-- First-read and one-click demo gate: PASS.
-- `npm test`: 46/46 PASS; `npm run test:unit`: 3/3 PASS; TypeScript/build: PASS.
-- Live demo and real browser files persist and open offline; demo storage isolation and same-origin privacy check pass.
-- APK 7,403,321 bytes, SHA-256 `edd01b824744d78e0f8d12a1995fed934c4ff70380f9526f57cbfd871cca1d75`; manifest package `in.sociobot.offline_file_bridge`, version 0.1.1, no broad storage permission.
-- Axe serious/critical: 0 across desktop/light and 390px mobile/dark routes; reduced motion and dialog focus pass.
-- Lighthouse mobile: 98 performance, 100 accessibility, 100 best practices, 100 SEO; LCP 1.8 s, TBT 160 ms, CLS 0.
-- Rate limit: 80 concurrent verify calls produced 30 × 200 and 50 × 429; 429 responses included `Retry-After: 4`.
-
-Full commands, route evidence, artifact inspection, headers, performance, and defects are in [verification-2.md](verification-2.md). Browser evidence is under `evidence/verification-2/`.
-
-## How to reproduce
+## Deploy and verify
 
 ```sh
 npm ci
 npm test
 npm run test:unit
 npm run build
-npm run test:unit -- --grep @claim:native-refresh-safety
-npm run test:unit -- --grep @claim:consent-removal
-npm run test:unit -- --grep @claim:native-handoff
+npx cap sync android
+npm run test:android-device  # JDK 21 + Android SDK/emulator required
+/opt/fleet/lib/deploy-static.sh offline-file-bridge dist
 ```
 
-The first three targeted commands exit 1 with `CACError: Unknown option --grep`.
+After deployment, verify `https://offline-file-bridge.sociobot.in/`, `/demo`, and an unknown route. The Android release workflow publishes the APK, AAB, and `SHA256SUMS` when a version tag is pushed.

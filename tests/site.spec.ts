@@ -41,4 +41,49 @@ test("keyboard navigation reaches the primary action", async ({ page }) => {
     await page.keyboard.press("Tab");
   }
   await expect(page.getByRole("link", { name: /Try it with sample data/ })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("heading", { level: 1 })).toBeFocused();
+});
+
+test("the browser folder input is not a hidden keyboard stop", async ({ page }) => {
+  await page.goto("/app");
+  await expect(page.locator("#folder-input")).toHaveAttribute("tabindex", "-1");
+  await page.getByRole("button", { name: "Choose a folder" }).focus();
+  await page.keyboard.press("Tab");
+  await expect(page.locator("#folder-input")).not.toBeFocused();
+});
+
+test("mobile controls have 44px targets and 200% text reflows", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const route of ["/", "/demo"]) {
+    await page.goto(route);
+    const targets = await page.locator("a, button, input").evaluateAll((elements) => elements
+      .filter((element) => {
+        const style = getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+      })
+      .map((element) => {
+        const rect = element.getBoundingClientRect();
+        return { text: element.textContent?.trim() || element.getAttribute("aria-label"), width: rect.width, height: rect.height };
+      }));
+    expect(targets.filter((target) => target.width < 44 || target.height < 44)).toEqual([]);
+    await page.evaluate(() => { document.documentElement.style.fontSize = "200%"; });
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  }
+});
+
+test("landing exposes a direct latest-APK action", async ({ page }) => {
+  await page.route("https://api.github.com/repos/B-Divyesh/sf-offline-file-bridge/releases/latest", async (route) => {
+    await route.fulfill({ json: {
+      tag_name: "v0.1.1",
+      assets: [
+        { name: "offline-file-bridge-v0.1.1.apk", browser_download_url: "https://example.test/offline-file-bridge-v0.1.1.apk" },
+        { name: "SHA256SUMS", browser_download_url: "https://example.test/SHA256SUMS" }
+      ]
+    } });
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Download the latest APK" }).click();
+  await expect(page.getByRole("link", { name: "Download APK v0.1.1" })).toHaveAttribute("href", "https://example.test/offline-file-bridge-v0.1.1.apk");
 });

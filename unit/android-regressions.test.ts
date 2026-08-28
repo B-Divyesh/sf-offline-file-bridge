@@ -25,13 +25,13 @@ test("@claim:native-refresh-safety stages a complete copy before replacing the r
 
 test("@claim:consent-removal revokes the exact persisted SAF read grant after deleting a mirror", async () => {
   const source = await pluginSource();
-  const removal = source.slice(source.indexOf("public void removeFolder"), source.indexOf("private JSObject sync"));
-  expect(removal).toContain('String uriValue = getPrefs().getString(id + ":uri", null);');
-  expect(removal).toContain("MirrorTransaction.deleteTree(mirrorDirectory(id));");
-  expect(removal).toContain("releaseFolderGrant(Uri.parse(uriValue));");
-  expect(removal).toContain('getPrefs().edit().remove(id + ":uri").remove(id + ":name").apply();');
-  expect(removal.indexOf("deleteTree(mirrorDirectory(id))")).toBeLessThan(removal.indexOf("releaseFolderGrant(Uri.parse(uriValue))"));
-  expect(removal.indexOf("releaseFolderGrant(Uri.parse(uriValue))")).toBeLessThan(removal.indexOf("getPrefs().edit().remove"));
+  const removal = source.slice(source.indexOf("static void removeMirrorFromDevice"), source.indexOf("private static void releaseFolderGrant"));
+  expect(removal).toContain('String uriValue = preferences.getString(id + ":uri", null);');
+  expect(removal).toContain('MirrorTransaction.deleteTree(new File(new File(context.getFilesDir(), "offline_bridge"), id));');
+  expect(removal).toContain("releaseFolderGrant(context, Uri.parse(uriValue));");
+  expect(removal).toContain('preferences.edit().remove(id + ":uri").remove(id + ":name").apply();');
+  expect(removal.indexOf("MirrorTransaction.deleteTree")).toBeLessThan(removal.indexOf("releaseFolderGrant(context"));
+  expect(removal.indexOf("releaseFolderGrant(context")).toBeLessThan(removal.indexOf("preferences.edit().remove"));
   expect(source).toContain("releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)");
 });
 

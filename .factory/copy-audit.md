@@ -13,7 +13,8 @@ Audited 28 August 2026. Counts treat contractions and hyphenated terms as one wo
 | One folder is free. | 4 | Pass |
 | Files stay on your device. | 5 | Pass |
 | Works after the first visit. | 5 | Pass |
-| Install the Android app | 4 | Pass |
+| Download the latest APK | 4 | Pass |
+| Install steps | 2 | Pass |
 | Not on Google Play yet | 5 | Pass |
 | See what is ready before you leave | 8 | Pass |
 | Every mirror shows its last successful refresh. | 7 | Pass |

@@ -90,7 +90,7 @@ function footer(): string {
       <a href="/privacy" data-link>Privacy</a><a href="/terms" data-link>Terms</a>
       <a href="https://sociobot.in" rel="external">Built by Param Factory <span class="sr-only">(external site)</span></a>
     </nav>
-    <span>v0.1.0 · Generated artwork</span>
+    <span>v0.1.1 · Generated artwork</span>
   </footer>`;
 }
 
@@ -110,7 +110,8 @@ function landing(): string {
           <span class="action-note">A ready folder opens. Nothing is saved.</span>
         </div>
         <ul class="facts"><li>One folder is free.</li><li>Files stay on your device.</li><li>Works after the first visit.</li></ul>
-        <p><a href="/install" data-link>Install the Android app</a> · Not on Google Play yet</p>
+        <p><span data-release-action><button class="plain-button" data-action="check-release">Download the latest APK</button></span> · <a href="/install" data-link>Install steps</a> · Not on Google Play yet</p>
+        <p id="release-note" class="sr-only" role="status"></p>
       </div>
       <figure class="hero-art">
         <img src="/assets/bridge-notebook.webp" width="1200" height="800" alt="A paper folder crosses a small bridge into a phone-shaped tray." fetchpriority="high" decoding="async" />
@@ -168,7 +169,7 @@ function appPage(demo: boolean): string {
     <div class="storage-strip" aria-label="Bridge storage summary"><div class="storage-stat"><strong>${mirrors.length}</strong><span>folder ${mirrors.length === 1 ? "bridge" : "bridges"}</span></div><div class="storage-stat"><strong>${totalFiles}</strong><span>ready files</span></div><div class="storage-stat"><strong>${formatBytes(totalBytes)}</strong><span>mirrored · ${storage}</span></div></div>
     ${notice ? `<div class="notice ${noticeType}" role="status">${esc(notice)}</div>` : ""}
     <div class="app-toolbar"><button class="button" data-action="add-folder" ${loading ? "disabled" : ""}>${loading ? "Reading folder…" : "Choose a folder"}</button>${!demo && !window.showDirectoryPicker && !isNative ? `<span class="action-note">Your browser will ask for the folder files.</span>` : ""}</div>
-    <input class="visually-hidden-input" id="folder-input" type="file" multiple webkitdirectory aria-label="Choose folder files" />
+    <input class="visually-hidden-input" id="folder-input" type="file" multiple webkitdirectory tabindex="-1" aria-hidden="true" />
     ${loading ? loadingState() : mirrors.length ? `<section class="folder-stack" aria-label="Folder bridges">${mirrors.map(folderCard).join("")}</section>` : emptyState()}
     ${!demo ? `<section class="section" aria-label="Bridge Pro license">${pricing()}</section>` : ""}
   </main>`;
@@ -185,7 +186,7 @@ function emptyState(): string {
 
 function folderCard(mirror: Mirror): string {
   const bytes = mirror.files.reduce((sum, file) => sum + file.size, 0);
-  return `<article class="folder-card" data-mirror="${esc(mirror.id)}"><div class="folder-header"><div><h2>${esc(mirror.name)}</h2><p>${esc(mirror.source)} · ${mirror.files.length} files · ${formatBytes(bytes)}</p></div><span class="status">Ready · ${relativeTime(mirror.syncedAt)}</span></div><div class="sync-trace" aria-hidden="true"></div><ul class="file-list">${mirror.files.length ? mirror.files.map((file) => `<li class="file-row"><span class="file-name" title="${esc(file.path)}">${esc(file.name)}</span><span class="file-meta">${formatBytes(file.size)}</span><button class="plain-button" data-action="open-file" data-mirror-id="${esc(mirror.id)}" data-file-id="${esc(file.id)}">Share / open</button></li>`).join("") : `<li class="file-row"><span>No files were found. Add a file to the source, then refresh.</span></li>`}</ul><div class="folder-actions"><button class="button small secondary" data-action="refresh" data-id="${esc(mirror.id)}">Refresh local copy</button><button class="plain-button" data-action="remove" data-id="${esc(mirror.id)}">Remove mirror</button><span class="action-note">Last success stays visible if refresh fails.</span></div></article>`;
+  return `<article class="folder-card" data-mirror="${esc(mirror.id)}"><div class="folder-header"><div><h2>${esc(mirror.name)}</h2><p>${esc(mirror.source)} · ${mirror.files.length} files · ${formatBytes(bytes)}</p><p class="refresh-history">Refresh history: ${mirror.history.length} / 30 records</p></div><span class="status">Ready · ${relativeTime(mirror.syncedAt)}</span></div><div class="sync-trace" aria-hidden="true"></div><ul class="file-list">${mirror.files.length ? mirror.files.map((file) => `<li class="file-row"><span class="file-name" title="${esc(file.path)}">${esc(file.name)}</span><span class="file-meta">${formatBytes(file.size)}</span><button class="plain-button" data-action="open-file" data-mirror-id="${esc(mirror.id)}" data-file-id="${esc(file.id)}">Share / open</button></li>`).join("") : `<li class="file-row"><span>No files were found. Add a file to the source, then refresh.</span></li>`}</ul><div class="folder-actions"><button class="button small secondary" data-action="refresh" data-id="${esc(mirror.id)}">Refresh local copy</button><button class="plain-button" data-action="remove" data-id="${esc(mirror.id)}">Remove mirror</button><span class="action-note">Last success stays visible if refresh fails.</span></div></article>`;
 }
 
 function privacyPage(): string {
@@ -197,7 +198,7 @@ function termsPage(): string {
 }
 
 function installPage(): string {
-  return layout(`<main id="main" class="page install"><p class="eyebrow">Android v0.1.1</p><h1 tabindex="-1">Install the Android bridge</h1><p>The APK is not on Google Play yet. GitHub Releases publishes the signed test build and its checksum.</p><p id="release-action"><button class="button" data-action="check-release">Check latest APK</button></p><div id="release-note" class="notice" role="status">The PWA is ready now. Check GitHub when you want the APK.</div><h2>Install in three steps</h2><ol class="install-steps"><li>Download the APK from the latest release.</li><li>Open the download and allow installs from your browser when Android asks.</li><li>Open Offline File Bridge, then choose the folder Android may read.</li></ol><h2>What the package includes</h2><p>The release contains an APK for direct install and an AAB for store submission. The factory build uses a generated debug keystore. A store release needs the owner's upload key.</p><p>You can also <a href="/app" data-link>install the PWA from your browser</a>.</p><h2>Short walkthrough</h2><div class="walkthrough" aria-label="Three-screen app walkthrough"><div class="phone-frame"><b>1. Choose a folder</b><span>Android shows its folder picker. You approve one location.</span></div><div class="phone-frame"><b>2. Check the ready time</b><span>The file count, size, and last successful refresh remain visible.</span></div><div class="phone-frame"><b>3. Share or open</b><span>The Android chooser hands a private local copy to your selected app.</span></div></div></main>`, "/install");
+  return layout(`<main id="main" class="page install"><p class="eyebrow">Android v0.1.1</p><h1 tabindex="-1">Install the Android bridge</h1><p>The APK is not on Google Play yet. GitHub Releases publishes the signed test build and its checksum.</p><p data-release-action><button class="button" data-action="check-release">Check latest APK</button></p><div id="release-note" class="notice" role="status">The PWA is ready now. Check GitHub when you want the APK.</div><h2>Install in three steps</h2><ol class="install-steps"><li>Download the APK from the latest release.</li><li>Open the download and allow installs from your browser when Android asks.</li><li>Open Offline File Bridge, then choose the folder Android may read.</li></ol><h2>What the package includes</h2><p>The release contains an APK for direct install and an AAB for store submission. The factory build uses a generated debug keystore. A store release needs the owner's upload key.</p><p>You can also <a href="/app" data-link>install the PWA from your browser</a>.</p><h2>Short walkthrough</h2><div class="walkthrough" aria-label="Three-screen app walkthrough"><div class="phone-frame"><b>1. Choose a folder</b><span>Android shows its folder picker. You approve one location.</span></div><div class="phone-frame"><b>2. Check the ready time</b><span>The file count, size, and last successful refresh remain visible.</span></div><div class="phone-frame"><b>3. Share or open</b><span>The Android chooser hands a private local copy to your selected app.</span></div></div></main>`, "/install");
 }
 
 function notFoundPage(): string {
@@ -221,11 +222,11 @@ function routeTitle(path: string): string {
 
 async function navigate(path: string, push = true): Promise<void> {
   if (push) history.pushState({}, "", path);
-  await renderRoute();
+  await renderRoute(true);
   window.scrollTo(0, 0);
 }
 
-async function renderRoute(): Promise<void> {
+async function renderRoute(focusHeading = false): Promise<void> {
   const requestedPath = normalizePath(location.pathname);
   isDemo = requestedPath === "/demo" || new URLSearchParams(location.search).get("demo") === "1";
   const path = isDemo ? "/demo" : requestedPath;
@@ -250,7 +251,7 @@ async function renderRoute(): Promise<void> {
   const h1 = document.querySelector<HTMLHeadingElement>("h1");
   const announcer = document.querySelector<HTMLDivElement>("#route-announcer");
   if (announcer && h1) announcer.textContent = h1.textContent;
-  if (history.state?.routed && h1) h1.focus();
+  if (focusHeading && h1) h1.focus();
 }
 
 function normalizePath(path: string): string {
@@ -287,7 +288,6 @@ function bindEvents(): void {
   document.querySelectorAll<HTMLAnchorElement>("a[data-link]").forEach((link) => link.addEventListener("click", (event) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
-    history.replaceState({ ...history.state, routed: true }, "");
     void navigate(new URL(link.href).pathname);
   }));
   document.querySelectorAll<HTMLElement>("[data-action]").forEach((element) => element.addEventListener("click", handleAction));
@@ -512,7 +512,7 @@ function captureLicense(): void {
 }
 
 async function loadRelease(): Promise<void> {
-  const action = document.querySelector<HTMLParagraphElement>("#release-action"); const note = document.querySelector<HTMLDivElement>("#release-note");
+  const action = document.querySelector<HTMLElement>("[data-release-action]"); const note = document.querySelector<HTMLElement>("#release-note");
   if (!action || !note) return;
   try {
     const response = await fetch("https://api.github.com/repos/B-Divyesh/sf-offline-file-bridge/releases/latest", { headers: { Accept: "application/vnd.github+json" } });
@@ -525,7 +525,7 @@ async function loadRelease(): Promise<void> {
   } catch { action.innerHTML = `<a class="button secondary" href="https://github.com/B-Divyesh/sf-offline-file-bridge/releases">View GitHub Releases</a>`; note.textContent = "The first APK is being published. The PWA is ready to install now."; }
 }
 
-window.addEventListener("popstate", () => void renderRoute());
+window.addEventListener("popstate", () => void renderRoute(true));
 window.addEventListener("online", () => { online = true; void renderRoute(); });
 window.addEventListener("offline", () => { online = false; void renderRoute(); });
 
