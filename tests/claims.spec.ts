@@ -94,6 +94,12 @@ test("@claim:free-tier keeps one folder and lists the Pro price", async ({ page 
   await expect(page.getByText("Bridge Pro keeps up to eight folders. Remove one before adding another.")).toBeVisible();
 });
 
+test("@claim:checkout opens the registered hosted checkout", async ({ request }) => {
+  const response = await request.get("https://api.sociobot.in/api/v1/products/offline-file-bridge/checkout", { maxRedirects: 0 });
+  expect(response.status()).toBe(303);
+  expect(response.headers().location).toMatch(/^https:\/\/checkout\.dodopayments\.com\/session\//);
+});
+
 test("@claim:browser-persistence keeps selected files after reload", async ({ page }) => {
   await page.goto("/app");
   await page.locator("#folder-input").setInputFiles("tests/fixtures/bridge-folder");

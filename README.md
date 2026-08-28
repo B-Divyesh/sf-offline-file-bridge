@@ -59,7 +59,7 @@ cd android
 ./gradlew assembleRelease bundleRelease
 ```
 
-The workflow generates a temporary debug keystore, builds the APK and AAB, writes `SHA256SUMS`, and attaches all three files to release `v0.1.0`. A public store release must use the owner's upload key.
+The workflow generates a temporary debug keystore, builds the APK and AAB, writes `SHA256SUMS`, and attaches all three files to release `v0.1.1`. A public store release must use the owner's upload key.
 
 ## Privacy and licenses
 

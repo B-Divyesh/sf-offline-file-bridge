@@ -1,6 +1,6 @@
 {
   "name": "offline-file-bridge",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,7 +8,8 @@
     "build": "tsc --noEmit && vite build && node scripts/postbuild.mjs",
     "preview": "vite preview --host 0.0.0.0",
     "test": "npm run build && playwright test",
-    "test:unit": "vitest run"
+    "test:unit": "vitest run --config vitest.config.ts",
+    "test:android": "cd android && ./gradlew test"
   },
   "dependencies": {
     "@capacitor/core": "6.2.1"

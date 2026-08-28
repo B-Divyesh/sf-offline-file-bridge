@@ -45,14 +45,17 @@ public class OfflineBridgePlugin extends Plugin {
             return;
         }
         Uri uri = result.getData().getData();
+        boolean hadSavedGrant = uri.toString().equals(getPrefs().getString(Integer.toUnsignedString(uri.toString().hashCode(), 36) + ":uri", null));
         try {
             getContext().getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
             String id = Integer.toUnsignedString(uri.toString().hashCode(), 36);
             DocumentFile folder = DocumentFile.fromTreeUri(getContext(), uri);
             if (folder == null || !folder.isDirectory()) throw new IOException("Android could not open that folder.");
+            JSObject copied = sync(id, folder);
             getPrefs().edit().putString(id + ":uri", uri.toString()).putString(id + ":name", safeDisplayName(folder.getName())).apply();
-            call.resolve(sync(id, folder));
+            call.resolve(copied);
         } catch (Exception error) {
+            if (!hadSavedGrant) releaseFolderGrant(uri);
             call.reject("The folder could not be copied. Choose it again and allow access.", error);
         }
     }
@@ -113,17 +116,31 @@ public class OfflineBridgePlugin extends Plugin {
             call.reject("The folder id is missing.");
             return;
         }
-        deleteTree(mirrorDirectory(id));
-        getPrefs().edit().remove(id + ":uri").remove(id + ":name").apply();
-        call.resolve();
+        String uriValue = getPrefs().getString(id + ":uri", null);
+        try {
+            MirrorTransaction.deleteTree(mirrorDirectory(id));
+            if (uriValue != null) releaseFolderGrant(Uri.parse(uriValue));
+            getPrefs().edit().remove(id + ":uri").remove(id + ":name").apply();
+            call.resolve();
+        } catch (Exception error) {
+            call.reject("The local mirror could not be removed. Try again.", error);
+        }
     }
 
     private JSObject sync(String id, DocumentFile source) throws IOException {
         File destination = mirrorDirectory(id);
-        deleteTree(destination);
-        if (!destination.mkdirs() && !destination.isDirectory()) throw new IOException("Local storage could not be prepared.");
+        File staging = MirrorTransaction.createStagingDirectory(destination);
         JSArray files = new JSArray();
-        copyChildren(source, destination, "", files);
+        try {
+            copyChildren(source, staging, "", files);
+            MirrorTransaction.replaceCompletedMirror(destination, staging);
+        } catch (IOException error) {
+            MirrorTransaction.deleteTree(staging);
+            throw error;
+        } catch (RuntimeException error) {
+            try { MirrorTransaction.deleteTree(staging); } catch (IOException ignored) { }
+            throw error;
+        }
         JSObject result = new JSObject();
         result.put("id", id);
         result.put("name", safeDisplayName(source.getName()));
@@ -141,11 +158,13 @@ public class OfflineBridgePlugin extends Plugin {
                 if (!output.mkdirs() && !output.isDirectory()) throw new IOException("A local folder could not be created.");
                 copyChildren(child, output, relative, files);
             } else if (child.isFile()) {
-                try (InputStream input = getContext().getContentResolver().openInputStream(child.getUri()); FileOutputStream stream = new FileOutputStream(output)) {
-                    if (input == null) continue;
+                try (InputStream input = getContext().getContentResolver().openInputStream(child.getUri())) {
+                    if (input == null) throw new IOException("A source file could not be read.");
+                    try (FileOutputStream stream = new FileOutputStream(output)) {
                     byte[] buffer = new byte[32768];
                     int count;
                     while ((count = input.read(buffer)) != -1) stream.write(buffer, 0, count);
+                    }
                 }
                 JSObject file = new JSObject();
                 file.put("id", relative);
@@ -161,6 +180,14 @@ public class OfflineBridgePlugin extends Plugin {
 
     private File mirrorDirectory(String id) {
         return new File(new File(getContext().getFilesDir(), "offline_bridge"), id);
+    }
+
+    private void releaseFolderGrant(Uri uri) {
+        try {
+            getContext().getContentResolver().releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } catch (SecurityException ignored) {
+            // Android may already have revoked this grant in Settings. Removal still clears local state.
+        }
     }
 
     private SharedPreferences getPrefs() {
@@ -183,10 +210,4 @@ public class OfflineBridgePlugin extends Plugin {
         return mime == null ? "application/octet-stream" : mime;
     }
 
-    private void deleteTree(File file) {
-        if (!file.exists()) return;
-        File[] children = file.listFiles();
-        if (children != null) for (File child : children) deleteTree(child);
-        file.delete();
-    }
 }

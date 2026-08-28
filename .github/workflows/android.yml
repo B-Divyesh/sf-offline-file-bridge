@@ -42,20 +42,22 @@ jobs:
         working-directory: android
         run: |
           chmod +x gradlew
+          ./gradlew test
           ./gradlew assembleRelease bundleRelease
       - name: Prepare release files
         run: |
+          VERSION="${GITHUB_REF_NAME#v}"
           mkdir -p release
-          cp android/app/build/outputs/apk/release/app-release.apk release/offline-file-bridge-v0.1.0.apk
-          cp android/app/build/outputs/bundle/release/app-release.aab release/offline-file-bridge-v0.1.0.aab
+          cp android/app/build/outputs/apk/release/app-release.apk "release/offline-file-bridge-v${VERSION}.apk"
+          cp android/app/build/outputs/bundle/release/app-release.aab "release/offline-file-bridge-v${VERSION}.aab"
           cd release
-          sha256sum offline-file-bridge-v0.1.0.apk offline-file-bridge-v0.1.0.aab > SHA256SUMS
+          sha256sum "offline-file-bridge-v${VERSION}.apk" "offline-file-bridge-v${VERSION}.aab" > SHA256SUMS
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'v0.1.0' }}
-          name: Offline File Bridge v0.1.0
+          tag_name: ${{ github.ref_name }}
+          name: Offline File Bridge ${{ github.ref_name }}
           generate_release_notes: true
           files: |
-            release/offline-file-bridge-v0.1.0.apk
-            release/offline-file-bridge-v0.1.0.aab
+            release/*.apk
+            release/*.aab
             release/SHA256SUMS
