@@ -1,71 +1,54 @@
-# Offline File Bridge v0.1.0 handoff — **FAIL (independent verification)**
+# Offline File Bridge v0.1.1 handoff — PASS
 
-> Independent verification on 2026-08-28 against candidate `149b6f4e8824a574c1939c07c88478b50ed58ba7` and https://offline-file-bridge.sociobot.in **failed**. See `.factory/verification-1.md` for exact commands and evidence. Do not release this candidate.
->
-> Release blockers: no publicly downloadable APK/AAB/SHA256SUMS; the advertised Sociobot checkout returns 404; native refresh deletes the prior private mirror before a replacement copy has completed; native removal leaves its persisted SAF read grant behind; and `npm run test:unit` fails. The web/PWA demo and all eight claim commands pass, but they do not validate those Android release paths.
+Repair release: `b00b303868da2883be14bcb32601cb473fa69ba4` (plus `383545688cef9869ac11cf9e72fd5bfc58360eaf`) on `main`.
+Published Android tag: [`v0.1.1`](https://github.com/B-Divyesh/sf-offline-file-bridge/releases/tag/v0.1.1).
+Live site: <https://offline-file-bridge.sociobot.in>.
 
-## Original builder handoff (superseded by the verification result above)
+## Release-blocker repairs
 
-## What was built
+- Published the Android artifact through GitHub Actions. The release contains `offline-file-bridge-v0.1.1.apk`, `offline-file-bridge-v0.1.1.aab`, and `SHA256SUMS`.
+- Registered the $14 one-time **Offline File Bridge Pro** product in the Sociobot factory billing registry, with live and test Dodo products. `GET https://api.sociobot.in/api/v1/products/offline-file-bridge/checkout` now returns `303` to a hosted Dodo checkout session.
+- Made Android refresh transactional. `OfflineBridgePlugin` copies to an app-private staging directory and commits it only after the full copy succeeds. A failed source read only removes the staging directory; the prior ready mirror remains intact.
+- Made Android removal delete the private mirror first, then release the exact stored persisted SAF read grant; an already-revoked Android grant is safely tolerated.
+- Repaired `npm run test:unit` by explicitly including Vitest unit tests only, rather than attempting to collect Playwright specs. Added Android JVM tests for atomic mirror behavior and source-level regression checks for staging, SAF revocation, and narrow chooser handoff.
+- Updated the Android workflow to execute `./gradlew test` before building artifacts, and to name release files from the pushed tag.
 
-- A Vite and TypeScript offline-first PWA at `/`, with real routes for `/demo`, `/app`, `/install`, `/privacy`, `/terms`, and the styled 404 state.
-- A one-click, isolated demo with three realistic files, refresh state, local preview, download handoff, reset, and an offline reload path.
-- A real browser bridge using user-selected directories where the File System Access API exists. Other browsers use a folder-scoped multi-file picker. Copies persist in IndexedDB.
-- A Capacitor 6 Android project with app id `in.sociobot.offline_file_bridge`.
-- A native `OfflineBridgePlugin` that uses `ACTION_OPEN_DOCUMENT_TREE`, persists the selected URI permission, recursively copies files into private app storage, and opens copies through Android's chooser and a narrow `FileProvider`.
-- The free one-folder limit and a $14 one-time Bridge Pro flow. Checkout, returned-license capture, daily verification caching, offline optimistic access, and token restore use the Sociobot billing contract. No product id is hardcoded.
-- A GitHub Actions workflow that builds release APK and AAB files with JDK 17, signs them with a generated test keystore, writes `SHA256SUMS`, and attaches them to release `v0.1.0`.
-- A product-specific handwritten lab notebook system, original generated hero art, social art, PWA icons, Android icons and splash images, light/dark palettes, reduced-motion behavior, and a self-hosted Caveat font.
+## Verification evidence
 
-## Run and verify
+Run locally:
 
 ```sh
 npm ci
+npm run test:unit
 npm test
+npm audit --omit=dev
 npm run build
 ```
 
-`npm test` passed 44 Playwright checks across desktop Chromium and a Pixel 5 profile. This includes all eight tagged claims, offline reload, demo isolation, same-origin privacy, browser persistence, file handoff, keyboard navigation, route semantics, mobile overflow, and axe serious/critical checks.
+Results on 28 August 2026:
 
-`npm run build` passed and wrote `dist/index.html`. Production output:
+- `npm ci`: pass.
+- `npm run test:unit`: pass, 3 Vitest native-regression checks.
+- `npm test`: pass, 46 Playwright checks in Chromium desktop and Pixel 5 emulation. This covers the 12 claims, demo isolation, offline reload, refresh, download handoff, browser persistence, keyboard navigation, 390px overflow, and desktop/mobile axe serious/critical checks.
+- `npm audit --omit=dev`: 0 production vulnerabilities.
+- `npm run build`: pass; `dist/` generated. Initial JS is 37.00 KB raw / 13.26 KB gzip and CSS is 13.43 KB raw / 4.25 KB gzip.
+- GitHub Action [run 33191438619](https://github.com/B-Divyesh/sf-offline-file-bridge/actions/runs/33191438619): pass. It ran Android JVM tests, `assembleRelease`, and `bundleRelease`, then published the assets.
+- Released APK: 7,403,321 bytes; SHA-256 `edd01b824744d78e0f8d12a1995fed934c4ff70380f9526f57cbfd871cca1d75`, matching `SHA256SUMS`. `aapt dump badging` confirms app id `in.sociobot.offline_file_bridge`, version `0.1.1`, target SDK 34, and only `INTERNET` plus Android's generated receiver permission.
+- Live deployment: Azure Static Web Apps deployment `673c141b-d918-466c-b601-b46acecbb434` succeeded. `/opt/fleet/lib/verify-url.sh` on the live landing page reported a 1,261 ms load, no console errors, one h1/main, `lang=en`, and no images missing `alt`.
+- Live `/install` at 390px: **Check latest APK** resolves to the v0.1.1 APK URL with no browser console errors. The live checkout endpoint returned `303` to `checkout.dodopayments.com`.
 
-- JavaScript: 37.00 KB raw / 13.26 KB gzip
-- CSS: 13.43 KB raw / 4.25 KB gzip
-- Hero WebP: 82 KB
-- Self-hosted font: 74 KB
+The standalone `@axe-core/cli` Selenium launcher could not start Chrome in this container, even when pointed at the installed Playwright Chromium. The shipped Playwright AxeBuilder checks passed on `/`, `/demo`, `/privacy`, and `/terms` in both desktop and mobile profiles; these are the accessibility results relied on above.
 
-Mobile Lighthouse, run against the production preview on 28 August 2026:
+## Product boundaries and known gaps
 
-- Performance: 99
-- Accessibility: 100
-- Best practices: 100
-- SEO: 100
-- LCP: 2.1 s
-- Total blocking time: 0 ms
-- CLS: 0
+- Android SAF selection, a deliberately unreadable provider entry, permission removal, and chooser delivery need a final physical-device smoke on supported Android versions before Play Store submission. The APK is a signed-with-generated-debug-keystore direct-test release, not a Play Store upload key.
+- The PWA remains fully usable offline after first load. The Android bridge intentionally performs user-requested refreshes only; it does not promise background cloud synchronization.
+- No analytics, tracking, third-party runtime fonts, or file-content upload was added. License verification sends only the license token to Sociobot billing.
 
-`npm audit --omit=dev` reported zero production vulnerabilities. The source image was reviewed for text artifacts, logos, brands, seams, and misleading UI. It passed.
-
-The Android build was not executed in this static worker because no JDK or Android SDK is installed. The checked-in workflow runs `./gradlew assembleRelease bundleRelease` in the required JDK 17 Android environment.
-
-## Product boundaries
-
-- Refresh is user-triggered. Background cloud crawling is intentionally excluded.
-- The web build cannot invoke Android's app chooser. It uses Web Share where supported and download elsewhere. The Capacitor build provides the native chooser.
-- A successful refresh time is preserved after an error. It does not imply that the source stayed unchanged.
-- The app mirrors readable files. It skips provider entries that Android cannot open and reports a failed top-level refresh without changing the prior ready time.
-
-## Needs operator action
-
-1. Register `offline-file-bridge` with the Sociobot billing engine and confirm the $14 one-time price and return URL.
-2. Run the `Build Android release` workflow or push tag `v0.1.0`. Confirm the APK, AAB, and `SHA256SUMS` assets appear on the release.
-3. For Play Store distribution, replace the generated workflow key with the owner's upload key and protect its secrets. The generated key is for direct test releases only.
-4. Install the APK on at least two supported Android versions and complete a physical-device handoff to a PDF viewer and text editor before store submission.
-
-## Evidence and references
+## References
 
 - Claims: `.factory/claims.json`
 - Demo contract: `.factory/demo.md`
-- Copy audit: `.factory/copy-audit.md`
-- Visual system and provenance: `.factory/design.md`
+- Design/provenance: `.factory/design.md`
+- Original independent report: `.factory/verification-1.md`
 - Android release workflow: `.github/workflows/android.yml`
