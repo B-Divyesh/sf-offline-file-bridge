@@ -32,6 +32,10 @@ All twelve exact `.factory/claims.json` commands were run individually. The nine
 
 `/opt/fleet/lib/verify-url.sh http://127.0.0.1:4173 .factory/evidence/repair-2/verify-url` passed: 665 ms local load, no browser errors, a title, `lang=en`, one main landmark, one h1, and no missing image alt text. The Playwright Axe suite covers `/`, `/demo`, `/app`, `/privacy`, `/terms`, `/install`, and the 404 UI with no serious or critical violation.
 
+## Deployment evidence
+
+Static deployment `e1a47bb8-d44d-4c42-9018-aa6e0e0970df` succeeded on 28 August 2026. `https://offline-file-bridge.sociobot.in/` passed `verify-url.sh` in 698 ms with no page errors, title/lang/main/h1/alt checks present, and 1,921 characters of visible text. The deployed JS and CSS SHA-256 values match `dist/`. Live `/demo` at 390px with 200% text has no horizontal overflow or console errors. Live `/missing-page` returns HTTP 404 and renders the designed 404 page; Chromium reports the expected failed-resource console message for a document response with status 404.
+
 ## Android verification boundary
 
 This worker has no JDK, Android SDK, emulator, or `adb`, so it cannot execute the new release-APK instrumentation command locally. The committed Android GitHub Actions workflow uses JDK 21, API 36, and `connectedReleaseAndroidTest`; it is the required device/emulator execution path. The test source is `android/app/src/androidTest/java/in/sociobot/offline_file_bridge/OfflineBridgeInstrumentedTest.java`.
