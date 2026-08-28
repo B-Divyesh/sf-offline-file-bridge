@@ -1,0 +1,51 @@
+[
+  {
+    "id": "offline-reload",
+    "claim": "Works after the first visit, and ready demo files still open offline",
+    "where": "landing facts, demo network state, README",
+    "test": "npm test -- --grep @claim:offline-reload",
+    "sandbox": "fresh browser context; visit /demo online, switch the context offline, reload, and open a ready sample file"
+  },
+  {
+    "id": "demo-sandbox",
+    "claim": "Demo sample data is isolated from real data",
+    "where": "demo banner, privacy page",
+    "test": "npm test -- --grep @claim:demo-sandbox",
+    "sandbox": "fresh browser context; assert demo-prefixed localStorage and no real IndexedDB database"
+  },
+  {
+    "id": "local-only",
+    "claim": "Demo files stay on the device",
+    "where": "landing facts, privacy page",
+    "test": "npm test -- --grep @claim:local-only",
+    "sandbox": "intercept the complete demo refresh and open flow; assert every request is same-origin"
+  },
+  {
+    "id": "freshness",
+    "claim": "Each ready folder shows its last successful refresh",
+    "where": "landing preview, app folder record, terms",
+    "test": "npm test -- --grep @claim:freshness",
+    "sandbox": "demo data; refresh the folder and assert the visible ready time changes to just now"
+  },
+  {
+    "id": "file-handoff",
+    "claim": "A ready sample file can be opened and saved for another local app",
+    "where": "demo file action, how it works",
+    "test": "npm test -- --grep @claim:file-handoff",
+    "sandbox": "demo data; open a ready Markdown file and assert its downloaded filename"
+  },
+  {
+    "id": "scoped-folder-access",
+    "claim": "Android uses the system folder picker without broad storage permission",
+    "where": "landing how it works, privacy page",
+    "test": "npm test -- --grep @claim:scoped-folder-access",
+    "sandbox": "read the shipped Android manifest and native plugin; assert SAF use and absence of broad storage permissions"
+  },
+  {
+    "id": "free-tier",
+    "claim": "One folder is free, and Bridge Pro costs $14 once",
+    "where": "landing facts, pricing, terms",
+    "test": "npm test -- --grep @claim:free-tier",
+    "sandbox": "fresh landing page; assert the free limit, exact price, and Sociobot checkout URL"
+  }
+]

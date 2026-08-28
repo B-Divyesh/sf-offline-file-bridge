@@ -196,7 +196,7 @@ function termsPage(): string {
 }
 
 function installPage(): string {
-  return layout(`<main id="main" class="page install"><p class="eyebrow">Android v0.1.0</p><h1 tabindex="-1">Install the Android bridge</h1><p>The APK is not on Google Play yet. GitHub Releases publishes the signed test build and its checksum.</p><p id="release-action"><button class="button" disabled>Checking latest release…</button></p><div id="release-note" class="notice" role="status">Release details are loading.</div><h2>Install in three steps</h2><ol class="install-steps"><li>Download the APK from the latest release.</li><li>Open the download and allow installs from your browser when Android asks.</li><li>Open Offline File Bridge, then choose the folder Android may read.</li></ol><h2>What the package includes</h2><p>The release contains an APK for direct install and an AAB for store submission. The factory build uses a generated debug keystore. A store release needs the owner's upload key.</p><p>You can also <a href="/app" data-link>install the PWA from your browser</a>.</p><h2>Short walkthrough</h2><div class="walkthrough" aria-label="Three-screen app walkthrough"><div class="phone-frame"><b>1. Choose a folder</b><span>Android shows its folder picker. You approve one location.</span></div><div class="phone-frame"><b>2. Check the ready time</b><span>The file count, size, and last successful refresh remain visible.</span></div><div class="phone-frame"><b>3. Share or open</b><span>The Android chooser hands a private local copy to your selected app.</span></div></div></main>`, "/install");
+  return layout(`<main id="main" class="page install"><p class="eyebrow">Android v0.1.0</p><h1 tabindex="-1">Install the Android bridge</h1><p>The APK is not on Google Play yet. GitHub Releases publishes the signed test build and its checksum.</p><p id="release-action"><button class="button" data-action="check-release">Check latest APK</button></p><div id="release-note" class="notice" role="status">The PWA is ready now. Check GitHub when you want the APK.</div><h2>Install in three steps</h2><ol class="install-steps"><li>Download the APK from the latest release.</li><li>Open the download and allow installs from your browser when Android asks.</li><li>Open Offline File Bridge, then choose the folder Android may read.</li></ol><h2>What the package includes</h2><p>The release contains an APK for direct install and an AAB for store submission. The factory build uses a generated debug keystore. A store release needs the owner's upload key.</p><p>You can also <a href="/app" data-link>install the PWA from your browser</a>.</p><h2>Short walkthrough</h2><div class="walkthrough" aria-label="Three-screen app walkthrough"><div class="phone-frame"><b>1. Choose a folder</b><span>Android shows its folder picker. You approve one location.</span></div><div class="phone-frame"><b>2. Check the ready time</b><span>The file count, size, and last successful refresh remain visible.</span></div><div class="phone-frame"><b>3. Share or open</b><span>The Android chooser hands a private local copy to your selected app.</span></div></div></main>`, "/install");
 }
 
 function notFoundPage(): string {
@@ -225,8 +225,9 @@ async function navigate(path: string, push = true): Promise<void> {
 }
 
 async function renderRoute(): Promise<void> {
-  const path = normalizePath(location.pathname);
-  isDemo = path === "/demo" || new URLSearchParams(location.search).get("demo") === "1";
+  const requestedPath = normalizePath(location.pathname);
+  isDemo = requestedPath === "/demo" || new URLSearchParams(location.search).get("demo") === "1";
+  const path = isDemo ? "/demo" : requestedPath;
   if (isDemo) {
     const saved = localStorage.getItem("demo:offline-file-bridge");
     mirrors = saved ? reviveDemo(JSON.parse(saved) as Mirror[]) : demoSeed();
@@ -245,7 +246,6 @@ async function renderRoute(): Promise<void> {
   else if (path === "/install") root.innerHTML = installPage();
   else root.innerHTML = notFoundPage();
   bindEvents();
-  if (path === "/install") void loadRelease();
   const h1 = document.querySelector<HTMLHeadingElement>("h1");
   const announcer = document.querySelector<HTMLDivElement>("#route-announcer");
   if (announcer && h1) announcer.textContent = h1.textContent;
@@ -303,11 +303,13 @@ async function handleAction(event: Event): Promise<void> {
   if (action === "refresh") await refreshMirror(target.dataset.id!);
   if (action === "remove") await deleteMirror(target.dataset.id!);
   if (action === "open-file") await openFile(target.dataset.mirrorId!, target.dataset.fileId!, target);
+  if (action === "check-release") await loadRelease();
 }
 
 async function addFolder(): Promise<void> {
-  if (!isPro() && mirrors.length >= 1 && !isDemo) {
-    setNotice("The free version keeps one folder. Remove it first or add a Bridge Pro license.", "error");
+  const limit = isPro() ? 8 : 1;
+  if (mirrors.length >= limit && !isDemo) {
+    setNotice(isPro() ? "Bridge Pro keeps up to eight folders. Remove one before adding another." : "The free version keeps one folder. Remove it first or add a Bridge Pro license.", "error");
     document.querySelector("[data-license-form]")?.scrollIntoView({ behavior: "smooth" });
     return;
   }
@@ -383,12 +385,12 @@ function nativeResultToMirror(result: NativeFolderResult, existing?: Mirror): Mi
 }
 
 async function refreshMirror(id: string): Promise<void> {
-  const mirror = mirrors.find((item) => item.id === id);
-  if (!mirror) return;
+  if (!mirrors.some((item) => item.id === id)) return;
   loading = true; await renderRoute();
+  const mirror = mirrors.find((item) => item.id === id)!;
   try {
     if (isDemo) {
-      mirror.syncedAt = Date.now(); mirror.history.push({ at: Date.now(), count: mirror.files.length, bytes: mirror.files.reduce((sum, file) => sum + file.size, 0), result: "ready" }); saveDemo();
+      mirror.syncedAt = Date.now(); mirror.history = [...mirror.history, { at: Date.now(), count: mirror.files.length, bytes: mirror.files.reduce((sum, file) => sum + file.size, 0), result: "ready" as const }].slice(-30); saveDemo();
     } else if (mirror.native) {
       const updated = nativeResultToMirror(await NativeBridge.syncFolder({ id }), mirror);
       mirrors = mirrors.map((item) => item.id === id ? updated : item); await saveMirror(updated);
@@ -396,7 +398,7 @@ async function refreshMirror(id: string): Promise<void> {
       const permission = await mirror.handle.queryPermission({ mode: "read" });
       const allowed = permission === "granted" || await mirror.handle.requestPermission({ mode: "read" }) === "granted";
       if (!allowed) throw new Error("Folder access was not granted. Choose the folder again.");
-      mirror.files = await readDirectory(mirror.handle); mirror.syncedAt = Date.now(); mirror.history.push({ at: mirror.syncedAt, count: mirror.files.length, bytes: mirror.files.reduce((sum, file) => sum + file.size, 0), result: "ready" }); await saveMirror(mirror);
+      mirror.files = await readDirectory(mirror.handle); mirror.syncedAt = Date.now(); mirror.history = [...mirror.history, { at: mirror.syncedAt, count: mirror.files.length, bytes: mirror.files.reduce((sum, file) => sum + file.size, 0), result: "ready" as const }].slice(-30); await saveMirror(mirror);
     } else throw new Error("This browser cannot reopen the folder. Remove this mirror, then choose the folder again.");
     setNotice(`${mirror.name} is ready. The refresh time was updated.`, "success");
   } catch (error) { setNotice(readError(error, "Refresh failed. Reconnect the source, then try again."), "error"); }
@@ -519,6 +521,7 @@ window.addEventListener("online", () => { online = true; void renderRoute(); });
 window.addEventListener("offline", () => { online = false; void renderRoute(); });
 
 async function start(): Promise<void> {
+  if (isNative && normalizePath(location.pathname) === "/") history.replaceState({}, "", "/app");
   await captureLicense();
   await renderRoute();
   if ("serviceWorker" in navigator && !isNative) {

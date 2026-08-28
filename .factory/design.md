@@ -25,7 +25,7 @@ All text and controls must meet WCAG AA. State always includes a word or symbol,
 
 ## Type
 
-- Display and annotations: `"Segoe Print", "Bradley Hand", cursive`. It supplies the handwritten character without a network font.
+- Display and annotations: `Caveat` variable Latin subset, self-hosted as a 74 KB WOFF2. It supplies the quick handwritten character without a runtime font request.
 - Interface and long text: `ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`.
 - File sizes and timestamps: `ui-monospace, "SFMono-Regular", Consolas, monospace` with tabular figures.
 
@@ -70,6 +70,8 @@ The signature motion is a single “ink trace” that moves from source to mirro
 - Negative list: no people, hands, logos, brands, readable text, letters, watermark, screens with UI, photorealistic devices, gradients, neon, glossy 3D, impossible folder geometry
 
 Generated with the factory image model (`factory-image`) on 2026-08-28. The result is original to this product. The prompt and generation metadata are stored beside the source image in `assets/src/`.
+
+The Caveat font is by Pablo Impallari and is distributed under the SIL Open Font License 1.1. The Latin subset was fetched at build time from the Google Fonts repository and is self-hosted; no runtime Google request is made.
 
 ## Why this fits
 

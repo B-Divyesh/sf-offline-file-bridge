@@ -1,8 +1,12 @@
-const CACHE = "offline-file-bridge-v1";
-const APP_SHELL = ["/", "/app", "/demo", "/privacy", "/terms", "/install", "/manifest.webmanifest", "/favicon.svg", "/assets/bridge-notebook.webp", "/assets/icon-192.png"];
+const CACHE = "offline-file-bridge-v2";
+const APP_SHELL = ["/", "/app", "/demo", "/privacy", "/terms", "/install", "/manifest.webmanifest", "/favicon.svg", "/assets/bridge-notebook.webp", "/assets/caveat-latin.woff2", "/assets/icon-192.png"];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil(caches.open(CACHE).then((cache) => Promise.all(APP_SHELL.map(async (url) => {
+    const response = await fetch(new Request(url, { cache: "reload" }));
+    if (!response.ok) throw new Error(`Could not cache ${url}`);
+    await cache.put(url, response);
+  }))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (event) => {
@@ -17,10 +21,10 @@ self.addEventListener("fetch", (event) => {
       const copy = response.clone();
       caches.open(CACHE).then((cache) => cache.put(request, copy));
       return response;
-    }).catch(async () => (await caches.match(request)) || (await caches.match("/"))));
+    }).catch(async () => (await caches.match(request, { ignoreVary: true })) || (await caches.match("/", { ignoreVary: true }))));
     return;
   }
-  event.respondWith(caches.match(request).then((cached) => cached || fetch(request).then((response) => {
+  event.respondWith(caches.match(request, { ignoreVary: true }).then((cached) => cached || fetch(request).then((response) => {
     if (response.ok) caches.open(CACHE).then((cache) => cache.put(request, response.clone()));
     return response;
   })));
