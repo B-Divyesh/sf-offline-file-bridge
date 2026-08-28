@@ -1,0 +1,61 @@
+name: Build Android release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    env:
+      ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android/factory-test.keystore
+      ANDROID_KEYSTORE_PASSWORD: android
+      ANDROID_KEY_ALIAS: factory-test
+      ANDROID_KEY_PASSWORD: android
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - name: Install web dependencies
+        run: npm ci
+      - name: Build and sync the PWA
+        run: npm run build && npx cap sync android
+      - name: Create the test signing key
+        run: >-
+          keytool -genkeypair -v -keystore "$ANDROID_KEYSTORE_PATH"
+          -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "$ANDROID_KEY_ALIAS"
+          -keypass "$ANDROID_KEY_PASSWORD" -keyalg RSA -keysize 2048
+          -validity 10000 -dname "CN=Param Factory Test, O=Sociobot, C=IN"
+      - name: Build the APK and app bundle
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease bundleRelease
+      - name: Prepare release files
+        run: |
+          mkdir -p release
+          cp android/app/build/outputs/apk/release/app-release.apk release/offline-file-bridge-v0.1.0.apk
+          cp android/app/build/outputs/bundle/release/app-release.aab release/offline-file-bridge-v0.1.0.aab
+          cd release
+          sha256sum offline-file-bridge-v0.1.0.apk offline-file-bridge-v0.1.0.aab > SHA256SUMS
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'v0.1.0' }}
+          name: Offline File Bridge v0.1.0
+          generate_release_notes: true
+          files: |
+            release/offline-file-bridge-v0.1.0.apk
+            release/offline-file-bridge-v0.1.0.aab
+            release/SHA256SUMS

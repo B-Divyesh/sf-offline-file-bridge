@@ -1,0 +1,10 @@
+{
+  "slug": "offline-file-bridge",
+  "title": "Offline File Bridge",
+  "summary": "Keep approved folders ready offline and open their files in other apps.",
+  "artifact_class": "android-apk",
+  "monetization": "freemium",
+  "smallest_useful_product": "Android APK using the Storage Access Framework to maintain user-approved offline mirrors, show freshness and storage state, and expose a share/open-with action without broad filesystem access.",
+  "success_measure": "In offline-device tests, 95% of files marked ready open through a second target app with an accurate freshness status.",
+  "constraints": "Android scoped storage and battery policies; explicit folder consent; device encryption; no claim that content is current without a successful sync."
+}
