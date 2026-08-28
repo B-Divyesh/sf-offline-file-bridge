@@ -1,4 +1,10 @@
-# Offline File Bridge v0.1.0 handoff
+# Offline File Bridge v0.1.0 handoff — **FAIL (independent verification)**
+
+> Independent verification on 2026-08-28 against candidate `149b6f4e8824a574c1939c07c88478b50ed58ba7` and https://offline-file-bridge.sociobot.in **failed**. See `.factory/verification-1.md` for exact commands and evidence. Do not release this candidate.
+>
+> Release blockers: no publicly downloadable APK/AAB/SHA256SUMS; the advertised Sociobot checkout returns 404; native refresh deletes the prior private mirror before a replacement copy has completed; native removal leaves its persisted SAF read grant behind; and `npm run test:unit` fails. The web/PWA demo and all eight claim commands pass, but they do not validate those Android release paths.
+
+## Original builder handoff (superseded by the verification result above)
 
 ## What was built
 
