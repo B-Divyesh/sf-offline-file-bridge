@@ -1,172 +1,186 @@
-# Independent verification 2 — FAIL
+# Independent product verification 2 — FAIL
 
 **Candidate:** `344ba1552febc62d31d085f871af98d7f0ac6081` (`main`)
 
-**Verified:** 2026-08-28
+**Verified:** 28 August 2026
 
 **Live URL:** <https://offline-file-bridge.sociobot.in>
 
 **Artifact class:** Android APK
 
-## Verdict
+**Verdict:** **FAIL — do not release this candidate.**
 
-**FAIL — do not release this candidate.** Three mandatory claim commands exit before running their tests. Manual accessibility checks also found broken 200% reflow, an invisible keyboard focus stop, and undersized mobile targets. The live web/PWA, billing rate limiting, and published Android artifacts otherwise tested well.
+This was a fresh verification. The earlier deployment-only failures are repaired: a valid APK/AAB/checksum release exists, the install screen resolves it, and the live checkout redirects to Dodo. The candidate still fails the mandatory claims gate and has unclosed native and accessibility acceptance gaps.
 
-## Mandatory first-read result
+## Mandatory first gates
 
-**PASS.** A cold 1440×900 load says:
+### First-read test — PASS
 
-- What it does: **“Keep approved folders ready offline.”**
-- Who it is for: **“For Android users who need cloud files in another app when the network disappears.”**
-- What to do first: **“Try it with sample data,”** followed by “A ready folder opens. Nothing is saved.”
+A cold 1440×900 load says:
 
-One click opened `/demo` with a populated **Field notes** mirror, three ready files, a freshness time, storage totals, and **Share / open** actions. The persistent banner says **“Demo — sample data, nothing is saved”** and provides **Reset demo** and **Start for real**. No console or page error occurred. Screenshots were captured at `/tmp/offline-file-bridge-cold-desktop.png` and `/tmp/offline-file-bridge-demo-click.png`.
+- What it does: “Keep approved folders ready offline.”
+- Who it is for: “For Android users who need cloud files in another app when the network disappears.”
+- What to click: “Try it with sample data,” next to “A ready folder opens. Nothing is saved.”
 
-## Required claim checks
+One click opened `/demo` with a populated three-file **Field notes** mirror. The persistent “Demo — sample data, nothing is saved” banner, **Reset demo**, and **Start for real** were visible. Evidence: `evidence/verification-2/live-first-read-desktop.png` and `evidence/verification-2/live-demo-first-click-desktop.png`.
 
-`.factory/claims.json` exists and contains 12 entries. The untouched checkout initially had no dependencies, so the first literal command probe exited 127 on missing `tsc`/`vitest`; `npm ci` then installed the lockfile. The table below records the acceptance runs after installation. Full command output is at `/tmp/offline-file-bridge-claims.log` and the full-suite HTML output is at `playwright-report/index.html` in this workspace.
+### Claims gate — FAIL
 
-| Claim | Exact command | Result | Evidence |
-| --- | --- | --- | --- |
-| `offline-reload` | `npm test -- --grep @claim:offline-reload` | PASS | 2/2, desktop and mobile |
-| `demo-sandbox` | `npm test -- --grep @claim:demo-sandbox` | PASS | 2/2, desktop and mobile |
-| `local-only` | `npm test -- --grep @claim:local-only` | PASS | 2/2, desktop and mobile |
-| `freshness` | `npm test -- --grep @claim:freshness` | PASS | 2/2, desktop and mobile |
-| `file-handoff` | `npm test -- --grep @claim:file-handoff` | PASS | 2/2, desktop and mobile |
-| `scoped-folder-access` | `npm test -- --grep @claim:scoped-folder-access` | PASS | 2/2, desktop and mobile |
-| `free-tier` | `npm test -- --grep @claim:free-tier` | PASS | 2/2, desktop and mobile |
-| `browser-persistence` | `npm test -- --grep @claim:browser-persistence` | PASS | 2/2, desktop and mobile |
-| `native-refresh-safety` | `npm run test:unit -- --grep @claim:native-refresh-safety` | **FAIL** | Vitest 3.0.5: `CACError: Unknown option --grep`; no test ran |
-| `checkout` | `npm test -- --grep @claim:checkout` | PASS | 2/2, desktop and mobile; endpoint returned 303 |
-| `consent-removal` | `npm run test:unit -- --grep @claim:consent-removal` | **FAIL** | Vitest 3.0.5: `CACError: Unknown option --grep`; no test ran |
-| `native-handoff` | `npm run test:unit -- --grep @claim:native-handoff` | **FAIL** | Vitest 3.0.5: `CACError: Unknown option --grep`; no test ran |
+`.factory/claims.json` exists and contains 12 entries, each with one matching `@claim:<id>` tag. Every listed command was run individually, in manifest order, after `npm ci` from candidate commit `344ba15`.
 
-The same three native assertions do pass when the unfiltered unit suite runs, but the claims contract requires every exact command in `claims.json` to run successfully. The supported Vitest name filter is `-t`/`--testNamePattern`, not `--grep`.
+| Claim | Exact manifest command | Result |
+| --- | --- | --- |
+| `offline-reload` | `npm test -- --grep @claim:offline-reload` | PASS — 2/2 desktop/mobile |
+| `demo-sandbox` | `npm test -- --grep @claim:demo-sandbox` | PASS — 2/2 |
+| `local-only` | `npm test -- --grep @claim:local-only` | PASS — 2/2 |
+| `freshness` | `npm test -- --grep @claim:freshness` | PASS — 2/2 |
+| `file-handoff` | `npm test -- --grep @claim:file-handoff` | PASS — 2/2 |
+| `scoped-folder-access` | `npm test -- --grep @claim:scoped-folder-access` | PASS — 2/2 |
+| `free-tier` | `npm test -- --grep @claim:free-tier` | PASS — 2/2 |
+| `browser-persistence` | `npm test -- --grep @claim:browser-persistence` | PASS — 2/2 |
+| `native-refresh-safety` | `npm run test:unit -- --grep @claim:native-refresh-safety` | **FAIL**, exit 1 |
+| `checkout` | `npm test -- --grep @claim:checkout` | PASS — 2/2 |
+| `consent-removal` | `npm run test:unit -- --grep @claim:consent-removal` | **FAIL**, exit 1 |
+| `native-handoff` | `npm run test:unit -- --grep @claim:native-handoff` | **FAIL**, exit 1 |
 
-There is also a claim-scope mismatch: `local-only` is worded and exercised only for demo files, while the landing page says **“Files stay on your device”** and `/privacy` says all folder names and files are not sent. Fresh manual browser interception found no unexpected request, but the broad published privacy promise is not represented by an equally broad claim test.
+All three failures are deterministic. Vitest 3.0.5 rejects the listed option before collecting tests:
 
-## Clean install, tests, and production build
+```text
+CACError: Unknown option `--grep`
+Node.js v22.23.2
+```
 
-- `npm ci`: PASS; 150 packages installed from the lockfile.
-- `npm run test:unit`: PASS, 3/3 Vitest tests.
-- `npm test`: PASS, 46/46 Playwright tests across desktop Chromium and Pixel 5 emulation.
-- `npx tsc --noEmit`: PASS.
-- No lint script exists.
-- `npm run build`: PASS; `dist/` produced.
-- `npm run test:android`: not runnable in this worker because Java/JDK and Android SDK are absent. The repository's Android GitHub Action ran the JVM tests successfully instead.
-- `npm audit --omit=dev`: PASS, zero production vulnerabilities.
-- Full `npm audit`: **FAIL**, five development-tool findings: 1 moderate, 2 high, and 2 critical. Direct affected packages include Vite 6.1.0 and Vitest 3.0.5; Capacitor CLI brings the vulnerable `tar` tree.
+The aggregate `npm run test:unit` passes the three tests, but that does not satisfy the contract that each exact claims-manifest command must pass. The correct Vitest filter is `-t`/`--testNamePattern`, not Playwright's `--grep`. README's statement that `npm test` runs every claim is also inaccurate: `npm test` runs the nine Playwright claim tests, while the three native claim tests are only in the separate unit command.
 
-Production sizes are within budget:
+## Local clean-checkout gates
 
-- JS: 37,048 B raw / 13.26 KB gzip.
-- CSS: 13,441 B raw / 4.25 KB gzip.
-- Font: 74,932 B.
-- Hero WebP: 83,164 B.
-- Lighthouse initial transfer: 179,458 B, with no third-party bytes.
+| Gate | Result |
+| --- | --- |
+| `npm ci` | PASS; 150 packages installed from lockfile |
+| `npm test` | PASS; 46/46 Playwright tests across desktop Chromium and Pixel 5 emulation |
+| `npm run test:unit` | PASS; 3/3 Vitest source-regression tests |
+| `npx tsc --noEmit` | PASS |
+| `npm run build` | PASS; `dist/` produced |
+| Lint | No lint command/config exists |
+| `npm audit --omit=dev` | PASS; 0 production vulnerabilities |
+| `npm audit` | **FAIL**; 5 development dependency findings: 1 moderate, 2 high, 2 critical |
+| `npm run test:android` | Could not run locally: this verifier image has no Java/JDK (`JAVA_HOME` unset) |
+
+The tagged GitHub Android workflow is independently visible as successful: [run 33191438619](https://github.com/B-Divyesh/sf-offline-file-bridge/actions/runs/33191438619), head `b00b303868da2883be14bcb32601cb473fa69ba4`. Its Android test/build step passed. Candidate `344ba15` differs from that tag only in `.factory/handoff.md`, so product and Android sources are identical.
 
 ## End-to-end product exercise
 
-Fresh live-browser checks passed the following:
+### Web/PWA path — PASS
 
-- Demo refresh changes `Ready · synced 12 min ago` to `Ready · synced just now`.
-- The Markdown sample opens in a modal, downloads as `handoff-notes.md`, closes with Escape, and restores focus.
-- Reset demo restores the seed. Start for real deletes `demo:offline-file-bridge` and opens `/app`.
-- A representative two-file browser folder imports, survives reload in IndexedDB, and keeps both file names.
-- A second free-tier folder is rejected with a specific recovery message.
-- Canceling mirror removal preserves the record; confirming removes it and explains that the source was unchanged.
-- After reload, a browser fallback mirror that cannot reopen its source reports exactly how to recover while keeping its existing ready copy.
-- An invalid license gets a 200 verification response and the visible “not active” recovery message.
-- `/install` resolves **Check latest APK** to the v0.1.1 APK without console errors.
-- All rendered links returned 200, an intentional checkout 303, or `mailto:`. The unknown-route UI is usable, though its HTTP status is incorrectly 200 (see findings).
+- Demo refresh changes the visible freshness to “synced just now” in the exact claim test.
+- Opening `handoff-notes.md` moves focus into the dialog; Escape closes it and restores focus; saving downloads the correct filename.
+- Demo storage contained only `demo:offline-file-bridge`; no real IndexedDB database appeared.
+- A real browser folder with `route.csv` and `offline-note.txt` persisted across reload.
+- The real folder reloaded offline and downloaded `offline-note.txt`; the status said “Offline — ready files still open.”
+- The free second-folder attempt showed the limit and recovery action.
+- A fallback-browser refresh that cannot reopen its source preserved the ready files and explained that the mirror must be removed and chosen again.
+- Remove cancellation retained the mirror; confirmation removed it and restored the empty state.
+- An empty license submission made no request and exposed the browser's required-field message. An invalid token made one Sociobot request and showed “This license is no longer active. Buy a new license or restore another.”
 
-## Privacy, network, and response policy
+### Android artifact — package PASS, real job unverified
 
-- Cold landing and demo refresh/open produced same-origin requests only.
-- Real browser folder import/reload produced same-origin requests only.
-- The only runtime external fetches found in source and observed where used are GitHub public release metadata and Sociobot license verification. There are no analytics, trackers, CDN scripts, or CDN fonts.
-- Demo data uses only `demo:offline-file-bridge`; the real IndexedDB was absent in demo mode. Leaving demo removed the demo key.
-- Secret-pattern scan found no committed key or private key.
-- Live headers include HSTS, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, a restrictive CSP, and a camera/microphone/geolocation Permissions Policy.
-- Hashed JS/CSS return `cache-control: public, max-age=31536000, immutable`; `sw.js` returns `no-cache`; HTML revalidates after 30 seconds.
-- Billing checkout returned 303 to `checkout.dodopayments.com`.
-- A fresh burst of 100 invalid-license verification requests returned **30×200 and 70×429**. A sampled 429 included `Retry-After: 4` and `x-ratelimit-after: 4`. Concurrency ordering made the first array position nondeterministic, but the observed burst capacity was 30.
-- Sign-in is not part of this product, so Entra authority validation is not applicable.
+The latest release API returned v0.1.1 with:
 
-## PWA and offline behavior
+- APK: 7,403,321 bytes; SHA-256 `edd01b824744d78e0f8d12a1995fed934c4ff70380f9526f57cbfd871cca1d75`
+- AAB: 7,250,771 bytes; SHA-256 `59d654a1e8791ffad67b3a179e420e77b3d5bf08c6138864056a2a188b32ff7f`
+- `SHA256SUMS`: both downloaded files validated.
 
-- Live `/demo` registered and controlled the page with `/sw.js`.
-- After the browser was switched offline, `/demo` reloaded, showed **“Offline — ready files still open,”** retained the sample, and opened `ridge-route.pdf`.
-- The service worker uses a versioned cache, removes older caches, calls `skipWaiting()` and `clients.claim()`, and the app contains an `updatefound` notice path.
-- A forced local service-worker replacement did not activate within the verification window, so the visible update-toast path was not independently demonstrated. This is recorded as a verification gap, not the reason for the FAIL verdict.
+The APK unzips cleanly. Its manifest reports package `in.sociobot.offline_file_bridge`, version `0.1.1`, min/target SDK 22/34, only `INTERNET` plus Android's generated non-exported receiver permission, a non-exported `FileProvider`, and no broad storage permission. Its certificate is the documented `CN=Param Factory Test, O=Sociobot, C=IN` test certificate. The embedded `index-Ctd228YQ.js` exactly matches the local production build.
 
-## Accessibility, mobile, console, and performance
+However, the repository and release workflow have no device/emulator instrumentation covering the actual Storage Access Framework selection, persisted grant, offline private mirror, chooser handoff to a second app, or revoke-on-remove path. The four native claim checks are source-text/JVM regressions, not an observable installed-APK flow. Therefore the Android smallest useful product and the brief's 95% second-app success measure remain unverified. This verifier environment has no Java, Android emulator, or attached device, so static/package checks cannot close that acceptance requirement.
 
-- `/opt/fleet/lib/verify-url.sh` against live: PASS in 703 ms; one h1, one main landmark, `lang=en`, title present, no missing alt, no unlabeled button, no console errors. Evidence: `/tmp/offline-file-bridge-verify-url/`.
-- Live `/`, `/demo`, `/app`, `/privacy`, `/terms`, `/install`, and the not-found screen each had one h1/main, route-correct title, and no console/page errors.
-- Axe on desktop/mobile and light/dark landing/demo found **0 serious or critical violations**; the repository's eight route/profile axe tests also passed.
-- Keyboard focus rings measured 3px with a 3px offset. Demo actions, file actions, Escape close, and dialog focus restoration worked by keyboard.
-- Reduced motion set transition/animation duration to `0.01ms`; no looping motion remains.
-- At normal 390×844 sizing, landing and demo had no horizontal overflow.
-- **Manual 200% text resize failed:** the 390px demo grew to 537px scroll width and all three **Share / open** controls moved outside the viewport.
-- **Keyboard focus failed on the hidden picker:** Tab enters the 1×1 `#folder-input`, creating an invisible focus stop between **Choose a folder** and the file actions.
-- **Touch targets failed the 44px baseline:** at 390px, header links measured 40px high and footer links 22px high; the Demo link was also only 42px wide.
-- Lighthouse mobile: Performance 97, Accessibility 100, Best Practices 100, SEO 100; LCP 1.654 s, FCP 1.267 s, CLS 0, TBT 185 ms. Evidence: `/tmp/offline-file-bridge-lighthouse.json`.
+## Live deployment identity
 
-## Deployment and Android artifact identity
+The live deployment matches this candidate's product output byte-for-byte:
 
-- The live HTML, JS, and CSS are byte-for-byte identical to this candidate's production build:
-  - HTML SHA-256 `2e6c05c88293ac2066f80e08da041ac43bd6ec1ef609fd100b7c1bfca5ddd802`
-  - JS SHA-256 `534b839e910cd337d11cfe07a3a58581b651ffd69e043247184dfb2e7d016743`
-  - CSS SHA-256 `4988af789e37f64666e64d7f3a9ca8e6ff9d57b387fa762074484dc18beccb5a`
-- Git tag `v0.1.1` resolves to `b00b303868da2883be14bcb32601cb473fa69ba4`. The only product-tree difference from that tag to candidate `344ba155...` is `.factory/handoff.md`, so the release contains the candidate product code.
-- GitHub Action run `33191438619` completed successfully for the tag and ran Android JVM tests before the release builds.
-- Published APK: 7,403,321 B, SHA-256 `edd01b824744d78e0f8d12a1995fed934c4ff70380f9526f57cbfd871cca1d75`.
-- Published AAB: 7,250,771 B, SHA-256 `59d654a1e8791ffad67b3a179e420e77b3d5bf08c6138864056a2a188b32ff7f`.
-- Both hashes match `SHA256SUMS` and GitHub's asset digests; both ZIP containers pass integrity checks.
-- The APK embeds the same candidate HTML/JS/CSS hashes. Its Capacitor metadata names `in.sociobot.offline_file_bridge`; source declares version 0.1.1 and only `INTERNET`, with a non-exported narrow `FileProvider`.
-- The APK certificate is the documented self-signed test certificate, `CN=Param Factory Test, O=Sociobot, C=IN`, valid 2026-08-28 through 2054-01-13.
-- No emulator, `adb`, JDK, or Android SDK is installed in this worker. Physical-device SAF selection, unreadable-provider recovery, permission revocation, and chooser delivery remain unexecuted here.
+| File | Local/live SHA-256 comparison |
+| --- | --- |
+| `index.html` | MATCH |
+| `assets/index-Ctd228YQ.js` | MATCH |
+| `assets/index-eALpEu6Q.css` | MATCH |
+| `sw.js` | MATCH |
+| `manifest.webmanifest` | MATCH |
+
+The released APK embeds that same JS hash. This is not a deployment mismatch.
+
+The live footer nevertheless says **v0.1.0** while package.json, Android manifest, install page, release, and APK say **v0.1.1**. The UI therefore does not provide an accurate build identity.
+
+## Accessibility and responsive QA
+
+Passing evidence:
+
+- Desktop/light and 390×844 mobile/dark checks on `/`, `/demo`, `/app`, `/privacy`, `/terms`, `/install`, and `/missing-page` found one `<h1>`, one `<main>`, `lang=en`, route titles, no console/page errors, and no default-size horizontal overflow.
+- Axe found 0 serious/critical violations on every route in both profiles.
+- `/opt/fleet/lib/verify-url.sh` passed: 681 ms load, no errors, title/lang/main present, no missing image alt, no unlabeled buttons. Evidence is under `evidence/verification-2/verify-url/`.
+- The first Tab focuses the skip link with a visible 3px accent outline and 3px offset. The primary demo action is keyboard reachable.
+- The file dialog focuses **Close file**, traps focus natively, closes with Escape, and returns focus to its opener.
+- Reduced-motion emulation matched the media query and reduced animation/transition duration to `0.01ms`.
+
+Manual failures not reported by Axe:
+
+1. Client-side navigation does not focus the new `<h1>`. Activating **Try it with sample data** leaves `document.activeElement` on `<body>`. `navigate()` pushes `{}` and `renderRoute()` only focuses the heading when `history.state.routed` is true, so forward link navigation misses the required focus change.
+2. Keyboard Tab enters the transparent 1×1 `#folder-input` between **Choose a folder** and the next visible action. The designed focus outline is therefore invisible for one focus stop.
+3. At 390px, header links are 40px high, the wordmark is 42px high, and footer links are about 22.3px high. These miss the required 44×44px touch target.
+4. A 200% text-size simulation caused horizontal overflow: 575px content width on `/` and 537px on `/demo` in a 390px viewport. `/privacy` reflowed at 390px. Screenshots: `evidence/verification-2/text-200-home.png` and `text-200-demo.png`.
+
+## Privacy, network, security, and rate limiting
+
+- The complete demo refresh/open/download flow made only same-origin requests and produced no console errors.
+- Lighthouse observed zero third-party runtime requests. Fonts are self-hosted. No analytics/tracker request was observed.
+- A repository secret-pattern scan found no API key, private key, or client secret.
+- The only intentional external runtime calls are GitHub public release metadata after **Check latest APK**, Sociobot license/checkout, and explicit external navigation.
+- Live security policy includes HSTS, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, camera/microphone/geolocation denial, and a restrictive CSP. No CSP violations appeared.
+- Hashed CSS/JS respond with `public, max-age=31536000, immutable`; `sw.js` responds with `no-cache`; HTML is revalidated with a 30-second max age.
+- The service worker was activated and controlled `/demo`; `registration.update()` completed with no waiting/installing worker. Cache `offline-file-bridge-v2` contained the versioned JS/CSS and application routes. Offline reload and file open passed.
+- An 80-request concurrent burst against the license verify endpoint completed in 657 ms: **30 × 200, 50 × 429**. Every sampled 429 included `Retry-After: 4`. The observed burst capacity was 30 requests.
+- Checkout returned `303` to `https://checkout.dodopayments.com/session/...`.
+- The product has no sign-in flow, so Entra tenant verification is not applicable.
+
+## Performance and budgets
+
+Production build output:
+
+- JS: 37.00 KB raw / 13.26 KB gzip (budget ≤200 KB)
+- CSS: 13.43 KB raw / 4.25 KB gzip (budget ≤50 KB)
+- Font: 74,932 bytes (budget ≤120 KB)
+- Hero WebP: 83,164 bytes (budget ≤300 KB)
+
+Fresh mobile Lighthouse on the live landing page:
+
+- Performance 98; Accessibility 100; Best Practices 100; SEO 100
+- FCP 1.0 s; LCP 1.8 s; TBT 160 ms; CLS 0; Speed Index 1.1 s
+- 8 requests / 196,040 transferred bytes; 0 third-party requests
+- Representative open-file interaction event duration: 16 ms
+
+All stated performance budgets passed.
 
 ## Defects by severity
 
-### Critical — three required claim commands cannot run
+### Critical / release-blocking
 
-The exact commands at `.factory/claims.json` lines 62, 76, and 83 use Playwright's `--grep` flag with Vitest. Each exits 1 with `CACError: Unknown option --grep` before running a test. The acceptance contract says any failing claim command blocks release.
+1. **Three required claims-manifest commands fail.** Vitest rejects `--grep`, producing a 9-pass/3-fail claims gate. The acceptance contract explicitly makes any failed claim command release-blocking.
 
-### High — 200% text resize loses mobile controls
+### High
 
-At 390px with the root text size set to 200%, document width becomes 537px and all three file handoff controls are outside the viewport. This fails the explicit “text resizes to 200% without loss” accessibility requirement and impairs the core file-opening job.
+2. **The Android job-to-be-done lacks device-level end-to-end evidence.** No test installs the APK and proves SAF consent, offline mirror refresh, second-app chooser handoff, or revoke-on-remove. Source substring checks cannot establish the brief's real Android outcome or 95% success measure.
+3. **Accessibility acceptance fails outside Axe.** Route changes lose heading focus, the hidden file input creates an invisible Tab stop, mobile touch targets are below 44px, and 200% text creates horizontal overflow on the core landing/demo screens.
 
-### High — broad privacy copy is not covered by the listed privacy claim
+### Medium
 
-The manifest promises only that **demo** files stay on device, and its interception test runs only `/demo`. The landing and privacy pages make the broader promise for user-selected files and folder names. Although fresh manual interception found no leak, the published claim and mandatory automated claim are not equivalent.
+4. **Claim proof is incomplete even beyond the broken commands.** The free-tier test asserts the “30 refresh records” sentence but never creates 31 records or verifies the cap. Native handoff/consent tests inspect source strings instead of exercising an installed package. User-facing claims that source folders are unchanged, refunds revoke licenses, and real file content is never sent do not each have an observable claims-manifest test.
+5. **Development dependency audit fails.** Five dev-tool vulnerabilities include critical advisories in the Capacitor CLI `tar` chain and Vitest. Production dependencies audit clean, so runtime exposure is not shown, but clean install/CI tooling remains affected.
+6. **Build identity and artifact entry are inconsistent.** The live footer says v0.1.0 while the artifact is v0.1.1. The landing page also has no direct **Download APK** action; reaching the binary requires opening Install, clicking **Check latest APK**, then clicking **Download APK**, contrary to the mobile artifact contract.
+7. **Unknown routes return HTTP 200.** `/missing-page` renders the designed not-found UI but responds `200`, so the deployment does not provide a real HTTP 404 route.
 
-### Medium — keyboard focus lands on an invisible file input
+## Required fixes before another verification
 
-`#folder-input` is 1×1, transparent, and pointer-disabled, but remains in sequential keyboard navigation. It receives the designed focus outline where users cannot see it. Remove it from tab order and keep the visible **Choose a folder** control as the operable trigger.
-
-### Medium — mobile touch targets are below 44px
-
-The mobile rule explicitly reduces header links to 40px high. Footer links measured 22px high; the Demo link measured 42×40px. This violates the product's 44×44px target baseline.
-
-### Medium — development/build dependencies have known high and critical vulnerabilities
-
-Full `npm audit` reports vulnerable Vite, Vitest, and the `tar` dependency reached through Capacitor CLI. Production dependencies audit clean, but the affected packages execute in development, test, and release workflows.
-
-### Low — displayed build version is stale
-
-Every footer renders `v0.1.0`, while the package, install page, APK/AAB, and release are v0.1.1. This weakens build identity and contradicts the handoff.
-
-### Low — unknown routes are soft 404s
-
-`/missing-page` renders the designed not-found screen but returns HTTP 200. The page is usable, but crawlers and clients cannot distinguish it from a valid route.
-
-## Required next actions
-
-1. Replace `--grep` with Vitest's supported name filter in all three native claim commands and rerun every exact entry.
-2. Make the demo reflow at 200% without horizontal scrolling or off-screen file actions.
-3. Remove the hidden input from sequential focus and bring every mobile target to at least 44×44px.
-4. Expand the automated privacy claim to cover real browser import/open and the native network surface, or narrow the public copy.
-5. Upgrade vulnerable build/test dependencies, correct the footer version, and return a true 404 for unknown routes.
-6. Run the published APK's SAF, failed-refresh, removal/revocation, and chooser flows on physical Android before store distribution.
+1. Change the three Vitest claim commands to a supported name filter and run every exact manifest command from a clean checkout.
+2. Add device/emulator instrumentation that installs the release APK and proves the actual SAF, failed-refresh preservation, chooser, and permission-revocation flows, including an offline second-app handoff sample.
+3. Focus the destination heading on every SPA route transition; make every touch target at least 44px; verify reflow at 200% text.
+4. Strengthen claim tests so each advertised behavior is observed, especially 30-record retention and privacy/native promises.
+5. Update dev dependencies, correct the footer version, expose a direct landing-page APK action, and return 404 for unknown routes.

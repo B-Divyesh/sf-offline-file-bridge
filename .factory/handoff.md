@@ -1,41 +1,51 @@
-# Offline File Bridge v0.1.1 verification handoff — FAIL
+# Offline File Bridge candidate handoff — FAIL
 
-Candidate `344ba1552febc62d31d085f871af98d7f0ac6081` was independently tested on 2026-08-28 against <https://offline-file-bridge.sociobot.in>.
+**Candidate:** `344ba1552febc62d31d085f871af98d7f0ac6081`
 
-## Release decision
+**Live URL:** <https://offline-file-bridge.sociobot.in>
 
-**FAIL — do not release this candidate.** Three mandatory claim commands fail before running because `.factory/claims.json` passes unsupported `--grep` arguments to Vitest. Manual accessibility QA also found broken 200% mobile reflow, an invisible keyboard focus stop, and sub-44px mobile targets.
+**Independent verification:** 28 August 2026
 
-Full evidence and defect details are in [`.factory/verification-2.md`](verification-2.md).
+**Release decision:** **FAIL — do not release this candidate.**
 
-## What was verified
+The earlier deployment failures are repaired. The v0.1.1 APK/AAB/checksum are public and valid, the install screen resolves the APK, checkout returns `303` to Dodo, and live static assets match the candidate build. Fresh verification still found release blockers.
 
-- Required first-read and one-click sample demo: PASS.
-- Installed from lockfile with `npm ci`.
-- Every exact command in `.factory/claims.json`: 9 PASS, 3 FAIL.
-- `npm run test:unit`: 3/3 PASS.
-- `npm test`: 46/46 PASS across desktop and mobile Chromium.
-- `npx tsc --noEmit`: PASS.
-- `npm run build`: PASS; `dist/` produced.
-- `npm audit --omit=dev`: zero production findings. Full audit: 5 development-tool findings, including 2 critical.
-- Live normal, limit, invalid-license, removal/recovery, privacy, offline, keyboard, reduced-motion, and 390px flows exercised.
-- Live security headers, cache policy, request destinations, console/page errors, and all rendered links checked.
-- Rate limit: a 100-request verification burst yielded 30×200 and 70×429; 429 responses included `Retry-After: 4`.
-- Lighthouse mobile: 97 Performance, 100 Accessibility, 100 Best Practices, 100 SEO; LCP 1.654 s, CLS 0.
-- Live HTML/JS/CSS hashes match the candidate production build exactly.
-- Published v0.1.1 APK/AAB downloaded, ZIP-tested, and matched both `SHA256SUMS` and GitHub digests. The APK embeds the candidate web assets.
+## Release blockers
 
-## Release blockers and defects
+1. Three exact commands in `.factory/claims.json` fail because Vitest 3 rejects `--grep`: `native-refresh-safety`, `consent-removal`, and `native-handoff`. The aggregate unit suite passes, but the mandatory claims gate is 9 pass / 3 fail.
+2. The Android product has no device/emulator end-to-end test of SAF selection, offline mirroring, second-app chooser handoff, and permission revocation. The published workflow runs JVM/source regressions only, so the real Android job and 95% success measure are not established.
+3. Manual accessibility checks fail required behavior: SPA link navigation leaves focus on `<body>`, the transparent file input creates an invisible Tab stop, mobile header/footer targets are below 44px, and 200% text causes horizontal overflow on `/` and `/demo`.
 
-1. **Critical:** native claim commands at claims lines 62, 76, and 83 use unsupported Vitest `--grep`; all exit 1 without tests.
-2. **High:** at 200% text size on a 390px viewport, content expands to 537px and **Share / open** controls leave the viewport.
-3. **High:** the broad “Files stay on your device” privacy promise is represented only by a demo-scoped claim/test.
-4. **Medium:** keyboard Tab reaches the transparent 1×1 folder input, producing an invisible focus stop.
-5. **Medium:** mobile header and footer links measure below the required 44×44px target.
-6. **Medium:** full `npm audit` reports vulnerable Vite, Vitest, and Capacitor CLI's `tar` dependency tree.
-7. **Low:** the footer says v0.1.0 while this build and release are v0.1.1.
-8. **Low:** unknown routes render the 404 design with HTTP 200.
+## Other defects
 
-## Environment limits / next verification
+- Claims do not observably prove the advertised 30-record cap or several native/privacy/payment promises.
+- `npm audit` reports five dev dependency vulnerabilities (1 moderate, 2 high, 2 critical); production audit is clean.
+- Live footer says v0.1.0 while the release/APK is v0.1.1.
+- No direct landing-page **Download APK** action exists; install requires three clicks from the landing page.
+- Unknown routes render the 404 design with HTTP 200.
 
-This worker has no Java, Android SDK, emulator, or `adb`, so `npm run test:android` and physical-device flows could not run locally. GitHub Action run `33191438619` passed Android JVM tests and produced the checked artifacts. After repairs, rerun every claim command and then exercise SAF selection, an unreadable provider, failed-refresh preservation, consent removal, and chooser handoff on a physical Android device.
+## Passing evidence
+
+- First-read and one-click demo gate: PASS.
+- `npm test`: 46/46 PASS; `npm run test:unit`: 3/3 PASS; TypeScript/build: PASS.
+- Live demo and real browser files persist and open offline; demo storage isolation and same-origin privacy check pass.
+- APK 7,403,321 bytes, SHA-256 `edd01b824744d78e0f8d12a1995fed934c4ff70380f9526f57cbfd871cca1d75`; manifest package `in.sociobot.offline_file_bridge`, version 0.1.1, no broad storage permission.
+- Axe serious/critical: 0 across desktop/light and 390px mobile/dark routes; reduced motion and dialog focus pass.
+- Lighthouse mobile: 98 performance, 100 accessibility, 100 best practices, 100 SEO; LCP 1.8 s, TBT 160 ms, CLS 0.
+- Rate limit: 80 concurrent verify calls produced 30 × 200 and 50 × 429; 429 responses included `Retry-After: 4`.
+
+Full commands, route evidence, artifact inspection, headers, performance, and defects are in [verification-2.md](verification-2.md). Browser evidence is under `evidence/verification-2/`.
+
+## How to reproduce
+
+```sh
+npm ci
+npm test
+npm run test:unit
+npm run build
+npm run test:unit -- --grep @claim:native-refresh-safety
+npm run test:unit -- --grep @claim:consent-removal
+npm run test:unit -- --grep @claim:native-handoff
+```
+
+The first three targeted commands exit 1 with `CACError: Unknown option --grep`.
