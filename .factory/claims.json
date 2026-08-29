@@ -1,5 +1,12 @@
 [
   {
+    "id": "billing-legal",
+    "claim": "Sociobot/Dodo Payments is the merchant of record, and refunded Bridge Pro purchases revoke their licenses",
+    "where": "terms",
+    "test": "npm test -- --grep @claim:billing-legal",
+    "sandbox": "fresh terms page; assert the merchant-of-record and automatic refund-revocation disclosures"
+  },
+  {
     "id": "apk-payload-match",
     "claim": "The Android download is offered only when its published release record has this site's exact commit and verified payload fingerprint",
     "where": "landing APK download status, install page",

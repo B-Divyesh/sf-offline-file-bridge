@@ -164,7 +164,7 @@ test("whitespace-only license input has a visible recovery message and a persist
   expect(verificationRequests).toBe(0);
 });
 
-test("terms identify Sociobot/Dodo Payments and refund revocation", async ({ page }) => {
+test("@claim:billing-legal terms identify Sociobot/Dodo Payments and refund revocation", async ({ page }) => {
   await page.goto("/terms");
   await expect(page.getByText("Sociobot/Dodo Payments is the merchant of record for Bridge Pro purchases.")).toBeVisible();
   await expect(page.getByText("A refunded purchase revokes its license automatically.")).toBeVisible();
