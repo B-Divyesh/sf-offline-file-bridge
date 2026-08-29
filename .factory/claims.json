@@ -36,7 +36,7 @@
   },
   {
     "id": "freshness",
-    "claim": "Each ready folder mirror shows its last successful refresh",
+    "claim": "Each ready folder mirror shows its last successful refresh, file count, and storage size",
     "where": "landing preview, app folder record, terms",
     "test": "npm test -- --grep @claim:freshness",
     "sandbox": "demo data; refresh the folder and assert the visible ready time changes to just now"

@@ -1,29 +1,35 @@
-# Polish round 1
+# Polish round 1 — completed
 
-Candidate product code: `a5f10872f8fd6a1054621ecdfb93a255c55ee634`.
+- **Released candidate reviewed:** `5888fa3ee5647c18f6c4716a3dfa4507bb70128a`
+- **Repair commit:** `02f2a795d77c1404ed3783bc994fb7b585c8fae4`
+- **Live deployment:** `e2470841-1f66-4333-b929-b9ae35a5806d`
+- **Live URL:** <https://offline-file-bridge.sociobot.in/>
+
+Every finding in [review-1.md](review-1.md) is resolved in the shipped product. The last repair makes browser QA repeatable: `npm test` first terminates only a stale Vite preview whose process cwd is this repository and whose command is this product's port-4173 preview; Playwright then owns and closes its own server. A deliberately stranded product-local preview was removed by this command, the targeted claim passed, and port 4173 was closed afterward.
 
 | Finding | Change made | Evidence |
 | --- | --- | --- |
-| F-1-1 | Reset now restores the seed, rerenders immediately, announces “Sample data was reset,” and returns focus to Reset demo. | `@claim:demo-reset`; [live reset screenshot](verification-artifacts/polish-1-live-demo-reset-desktop.png); cold live check at `https://offline-file-bridge.sociobot.in/?demo=1` passed. |
-| F-1-2 | Added the `demo-ready-sample` claim and one-click fresh-context test for banner, Field notes, three files, readiness, and isolated storage. | `@claim:demo-ready-sample`; [live mobile demo](verification-artifacts/polish-1-live-demo-mobile-390.png). |
-| F-1-3 | Qualified failed-refresh copy as Android-only, matching the transactional Android regression claim. | `@claim:native-refresh-safety`; live landing copy checked. |
-| F-1-4 | Removed untestable multi-device, free-export, and refund promises from pricing and terms; retained only tested price, capacity, and checkout statements. | `@claim:free-tier`, `@claim:checkout`; live landing checked. |
-| F-1-5 | Rewrote the README browser statement to the tested reload-persistence behavior. | `@claim:browser-persistence`; README reviewed in clean clone. |
-| F-1-6 | Removed untestable release-publication and emulator-process promises from the README. | README reviewed in clean clone; live install route still loads with its route title. |
-| F-1-7 | Added `license-verification-privacy`; its fixture test records the exact Sociobot verification request and no other foreign request. | `@claim:license-verification-privacy`; live privacy route checked. |
-| F-1-8 | Deleted the information-free hero mood line. | Cold live first-screen check. |
-| F-1-9 | Renamed the workflow heading to “How to keep a folder ready offline.” | Cold live first-screen check and accessibility route test. |
-| F-1-10 | Deleted the notebook-lore labels “field check 04” and “advanced field kit.” | Cold live landing check. |
-| F-1-11 | Standardized visible object terminology on “folder mirror,” including navigation, counts, limits, controls, and pricing. | `.factory/copy-audit.md`; live demo screenshot. |
-| F-1-12 | Replaced “Open bridge” with “Open folders” and each ambiguous handoff control with its file-specific “Preview …” result. | `@claim:file-handoff`, `@claim:local-only`; live demo screenshot. |
-| F-1-13 | Replaced the metaphorical 404 heading with “Page not found.” | `tests/site.spec.ts` canonical/404 test; cold `https://offline-file-bridge.sociobot.in/missing-page` check. |
-| F-1-14 | Unknown routes now remove the canonical link; known routes restore the route-specific canonical and metadata. | `tests/site.spec.ts` known/unknown canonical test; cold live missing-route check. |
-
-Additional cumulative polish: secondary mobile labels now render at least 16px. `mobile secondary labels keep the 16px reading baseline` passes on desktop Chromium and Pixel 5 emulation.
+| F-1-1 | Reset reseeds, rerenders, announces “Sample data was reset,” and restores Reset-demo focus. | `@claim:demo-reset`; live reset check; [mobile screenshot](verification-artifacts/polish-1-retry/live-demo-reset-mobile-390.png). |
+| F-1-2 | The landing action opens `/demo` directly with the isolated Field notes mirror and three ready files. | `@claim:demo-ready-sample`; live demo check; [mobile screenshot](verification-artifacts/polish-1-retry/live-demo-reset-mobile-390.png). |
+| F-1-3 | Failed-refresh wording is explicitly Android-only and is backed by the transactional native regression. | `@claim:native-refresh-safety`; live landing check. |
+| F-1-4 | Removed the untestable multi-device, free-export, and refund promises; price, limits, and hosted checkout remain tested. | `@claim:free-tier`, `@claim:checkout`; live landing check. |
+| F-1-5 | README now states the tested supported-browser reload behavior, not unsupported API selection behavior. | `@claim:browser-persistence`; clean-clone README check. |
+| F-1-6 | Removed public-release and emulator-process promises that were not independently observable from the visitor README. | clean-clone README check; live `/install` returned 200. |
+| F-1-7 | Added a fixture-token test that records the sole Sociobot verification request. | `@claim:license-verification-privacy`; live `/privacy` returned 200. |
+| F-1-8 | Removed the information-free hero mood line. | cold live landing check; [first screen](verification-artifacts/polish-1-retry/live-home-mobile-390.png). |
+| F-1-9 | Renamed the workflow section “How to keep a folder ready offline.” | full browser accessibility suite; cold live landing check. |
+| F-1-10 | Removed the decorative “field check 04” and “advanced field kit” labels. | cold live landing check; copy audit. |
+| F-1-11 | Standardized the visible product term as “folder mirror.” | `copy-audit.md`; full browser suite; live demo check. |
+| F-1-12 | Replaced ambiguous bridge and handoff controls with “Open folders” and file-specific Preview labels. | `@claim:file-handoff`, `@claim:local-only`; live demo check. |
+| F-1-13 | The designed 404 heading is “Page not found.” | route/title test; live [`/missing-page`](https://offline-file-bridge.sociobot.in/missing-page) check; [screenshot](verification-artifacts/polish-1-retry/live-404-mobile-390.png). |
+| F-1-14 | Unknown URLs remove their canonical element, while known routes set route-specific canonical metadata. | `known routes have their own canonical URL and an unknown URL has none`; live `/missing-page` check. |
 
 ## Verification
 
-- Fresh clean clone: all 15 exact commands in `.factory/claims.json` passed, followed by `npm test` (72/72), `npm run test:unit` (7/7), `npm run lint`, `npm run build`, and `git diff --check`.
-- Live deployment: factory static deployment `5731cf8c-2aed-47f2-9ee1-1c4ab437af30` succeeded. The public host serves `index-Bt21ISq4.js` and `index-CVR1-fnr.css`.
-- `/opt/fleet/lib/verify-url.sh` passed against the live URL: title, `lang`, one H1, main landmark, image alt coverage, and console errors all clean. Local axe coverage passes 16/16 routes/projects.
-- Lighthouse evidence: [polish-1-lighthouse.json](verification-artifacts/polish-1-lighthouse.json) reports Performance 99, Accessibility 100, Best Practices 100, SEO 100; LCP 1.95 s and CLS 0.
+- Fresh clone at repair commit: `npm ci` succeeded with 0 vulnerabilities; all **15** exact commands in `claims.json` passed separately.
+- Fresh clone aggregate: `npm test` **72/72**, `npm run test:unit` **7/7**, `npm run lint`, `npm run build`, `npm audit --omit=dev`, and `git diff --check` passed. This includes desktop and Pixel 5 tests, offline reload, privacy request interception, demo isolation/reset, keyboard/focus, 200% reflow, route titles/metadata/canonical handling, and Playwright Axe checks for every route.
+- Live cold check: `verify-url.sh` passed with 818 ms load, no console errors, correct title/lang/H1/main/alt coverage; evidence is in [live-url](verification-artifacts/polish-1-retry/live-url/verify.json). The direct live mobile test passed demo isolation/reset, no horizontal overflow, zero serious/critical Axe findings on `/demo` and `/missing-page`, and captured the screenshots above.
+- Live routes: `/`, `/demo`, `/app`, `/privacy`, `/terms`, and `/install` returned 200; `/missing-page` returned 404. CSP, `nosniff`, referrer policy, permissions policy, and HSTS are present.
+- Bundle output: 38.32 KB JavaScript (13.53 KB gzip) and 14.18 KB CSS (4.38 KB gzip). Browser tests leave no listener on `127.0.0.1:4173`.
+
+The worker has no Java or Android SDK, so local Gradle/device execution is unavailable. The Android project and release workflow are unchanged; its GitHub Actions workflow remains the mandated APK/AAB build path.

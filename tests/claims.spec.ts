@@ -66,10 +66,11 @@ test("@claim:local-only sends no selected or demo file data off-device", async (
 
 test("@claim:freshness shows the last successful refresh", async ({ page }) => {
   await page.goto("/demo");
+  const mirror = page.locator("article").filter({ has: page.getByRole("heading", { level: 2, name: "Field notes" }) });
+  await expect(mirror).toContainText("3 files");
+  await expect(mirror).toContainText("280.0 KB");
   await page.getByRole("button", { name: "Refresh local copy" }).click();
-  await expect(page.getByText("Ready · synced just now")).toBeVisible();
-  await expect(page.getByText("3", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("280.0 KB", { exact: true }).first()).toBeVisible();
+  await expect(mirror.getByText("Ready · synced just now")).toBeVisible();
   await expect(page.getByText("Field notes was removed.")).toHaveCount(0);
 });
 

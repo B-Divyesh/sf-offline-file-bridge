@@ -52,4 +52,4 @@ Audited 29 August 2026. Counts treat contractions and hyphenated words as one wo
 | The paid license | Bridge Pro |
 | Inspecting a local sample before saving it | preview |
 
-Catalog description: “Keep approved folders ready offline and open their files in other apps.” (11 words, 69 characters.)
+Catalog description: “Keep approved folders ready offline, then open their files in other apps.” (12 words, 75 characters.)

@@ -40,7 +40,7 @@ npm run lint
 npm run build
 ```
 
-The exact production command is `npm run build`. It writes the deployable static site to `dist/`, with `dist/index.html` at the root. `npm test` runs the browser claims on desktop and mobile Chromium. `npm run test:unit` runs the three native source regressions; together they run every command listed in `.factory/claims.json`.
+The exact production command is `npm run build`. It writes the deployable static site to `dist/`, with `dist/index.html` at the root. `npm test` runs the browser claims on desktop and mobile Chromium. It removes only a stale preview process from this repository before Playwright starts and closes its own server. `npm run test:unit` runs the three native source regressions; together they run every command listed in `.factory/claims.json`.
 
 Run one claim with:
 
