@@ -1,65 +1,55 @@
 # Landing page copy audit
 
-Audited 28 August 2026. Counts treat contractions and hyphenated terms as one word. Interface labels without sentence punctuation are included because they carry meaning. No line exceeds 22 words. No line uses a banned marketing word.
+Audited 29 August 2026. Counts treat contractions and hyphenated words as one word. No landing sentence exceeds 22 words or uses a banned marketing word.
 
 | Copy | Words | Result |
 | --- | ---: | --- |
-| A clear path out of app storage | 7 | Pass |
 | Keep approved folders ready offline | 5 | Pass |
 | For Android users who need cloud files in another app when the network disappears. | 14 | Pass |
 | Try it with sample data | 6 | Pass |
-| A ready folder opens. | 4 | Pass |
-| Nothing is saved. | 3 | Pass |
-| One folder is free. | 4 | Pass |
-| Files stay on your device. | 5 | Pass |
-| Works after the first visit. | 5 | Pass |
-| Download the latest APK | 4 | Pass |
-| APK v0.1.2 is being published | 5 | Pass |
-| A matching APK is not ready yet. | 7 | Pass |
-| The PWA is ready to install now. | 7 | Pass |
-| Install steps | 2 | Pass |
-| Not on Google Play yet | 5 | Pass |
+| A ready folder opens. | 4 | `demo-ready-sample` |
+| Nothing is saved. | 3 | `demo-sandbox` |
+| One folder is free. | 4 | `free-tier` |
+| Files stay on your device. | 5 | `local-only` |
+| Works after the first visit. | 5 | `offline-reload` |
+| Download the latest APK | 4 | Action label |
+| Install steps | 2 | Action label |
+| Not on Google Play yet | 5 | Current distribution status |
+| folder → local copy → your app | 6 | Diagram caption |
 | See what is ready before you leave | 8 | Pass |
-| Every mirror shows its last successful refresh. | 7 | Pass |
-| A failed refresh never changes that date. | 7 | Pass |
-| Open the working sample | 4 | Pass |
-| Move a folder across the boundary | 7 | Pass |
-| Choose a folder | 3 | Pass |
-| Android asks which folder this app may read. | 8 | Pass |
-| No broad storage permission is requested. | 6 | Pass |
-| Refresh its local copy | 4 | Pass |
-| The bridge records a successful time, file count, and storage size. | 11 | Pass |
-| Open a ready file | 4 | Pass |
-| Pick the local app that should receive the file, even while offline. | 12 | Pass |
+| Every folder mirror shows its last successful refresh. | 8 | `freshness` |
+| A failed Android refresh keeps that date. | 8 | `native-refresh-safety` |
+| Open the working sample | 4 | Action label |
+| How to keep a folder ready offline | 7 | Pass |
+| Android asks which folder this app may read. | 8 | `scoped-folder-access` |
+| No broad storage permission is requested. | 6 | `scoped-folder-access` |
+| The folder mirror records its successful refresh time, file count, and storage size. | 13 | `freshness` |
+| Pick the local app that should receive the file, even while offline. | 12 | `native-handoff`, `file-handoff` |
 | Your folder stays under your control | 6 | Pass |
-| You approve each source folder. | 5 | Pass |
-| Mirrored files stay in app storage. | 6 | Pass |
-| You can remove a mirror at any time. | 8 | Pass |
+| You approve each source folder. | 5 | `scoped-folder-access` |
+| Folder mirror files stay in app storage. | 7 | `local-only` |
+| On Android, you can remove a folder mirror at any time. | 11 | `consent-removal` |
 | What it does not do | 5 | Pass |
-| It does not replace your storage service. | 7 | Pass |
-| It does not crawl unapproved folders. | 6 | Pass |
-| It does not call stale files current. | 7 | Pass |
-| Keep more folder bridges | 4 | Pass |
-| Bridge Pro adds up to eight folders and keeps 30 refresh records per folder. | 14 | Pass |
-| The free version keeps one folder. | 6 | Pass |
-| One-time license for your devices | 5 | Pass |
-| Core file export stays free | 5 | Pass |
-| Sociobot handles checkout and refunds | 5 | Pass |
-| Buy Bridge Pro | 3 | Pass |
-| Verify license | 2 | Pass |
-| Bridge Pro is active on this device. | 7 | Pass |
-| This license is no longer active. | 6 | Pass |
-| Buy a new license or restore another. | 7 | Pass |
+| It does not replace your storage service. | 7 | Scope statement |
+| It does not crawl unapproved folders. | 6 | `scoped-folder-access` |
+| After a failed Android refresh, it keeps the last ready time. | 11 | `native-refresh-safety` |
+| Keep more folder mirrors | 4 | Pass |
+| Bridge Pro adds up to eight folder mirrors and keeps 30 refresh records per folder. | 15 | `free-tier` |
+| The free version keeps one folder mirror. | 7 | `free-tier` |
+| Buy Bridge Pro | 3 | `checkout` |
+| Verify license | 2 | `license-verification-privacy` |
+| Keep approved folders ready offline. | 5 | Product summary |
+| Built by Param Factory | 4 | Attribution |
 
 ## Terminology
 
 | Concept | One term |
 | --- | --- |
-| A user-approved offline copy of a folder | mirror |
+| A user-approved offline copy of a folder | folder mirror |
 | The saved offline items | files |
-| Copy source changes into the mirror | refresh |
+| Copy source changes into the folder mirror | refresh |
 | A completed copy with a recorded time | ready |
 | The paid license | Bridge Pro |
-| Giving a ready file to another app | share / open |
+| Inspecting a local sample before saving it | preview |
 
 Catalog description: “Keep approved folders ready offline and open their files in other apps.” (11 words, 69 characters.)

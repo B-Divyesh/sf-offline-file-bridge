@@ -2,7 +2,7 @@
 
 Keep an approved folder ready offline, see when it last refreshed, and open its files in another Android app.
 
-Offline File Bridge is for Android users of self-hosted or privacy-first storage. It handles the gap between a provider's offline cache and the local viewer or editor that needs a file.
+Offline File Bridge is for Android users who need a cloud file in another local app. It copies files from an approved folder into a folder mirror.
 
 Live site: <https://offline-file-bridge.sociobot.in>
 
@@ -11,14 +11,14 @@ One-click demo: <https://offline-file-bridge.sociobot.in/demo>
 ## What v1 includes
 
 - An Android Storage Access Framework picker with persisted, folder-scoped read access
-- Private local mirrors in app storage
+- Folder mirrors stored on the device
 - Visible file counts, storage sizes, and last successful refresh times
 - Android open-with handoff through a narrow `FileProvider`
-- A browser/PWA path backed by IndexedDB and the File System Access API
+- In supported browsers, selected folder files stay available after reload
 - A separate, resettable sample-data sandbox
-- A free one-folder tier and a $14 Bridge Pro license for up to eight folders
+- A free one-folder-mirror tier and a $14 Bridge Pro license for up to eight folder mirrors
 
-The product does not replace a cloud provider, crawl unapproved folders, or claim a file is current after a failed refresh.
+The product does not replace a cloud provider or crawl unapproved folders.
 
 ## Run locally
 
@@ -50,9 +50,11 @@ npm test -- --grep @claim:offline-reload
 
 ## Android project
 
-The Capacitor 8 project lives in `android/` with app id `in.sociobot.offline_file_bridge`. The custom `OfflineBridgePlugin` opens Android's folder picker, copies selected files into private app storage, and hands a chosen copy to Android's app chooser.
+The Capacitor 8 project lives in `android/` with app id `in.sociobot.offline_file_bridge`.
 
-The worker image does not include a JDK or Android SDK. GitHub Actions builds the release artifacts with JDK 21:
+The custom `OfflineBridgePlugin` opens Android's folder picker. It copies selected files into private app storage. It hands a chosen copy to Android's app chooser.
+
+GitHub Actions builds Android release artifacts with JDK 21:
 
 ```sh
 npm run build
@@ -61,13 +63,11 @@ cd android
 ./gradlew assembleRelease bundleRelease
 ```
 
-The workflow generates a temporary debug keystore and publishes release `v0.1.2`. It compares every built web file inside the APK with `dist/`, records the source commit in `BUILD-PROVENANCE.json`, and checksums the APK, AAB, and provenance file. A public store release must use the owner's upload key.
-
-The release workflow also starts an Android 36 emulator and runs the release-variant installed-APK tests. They cover the scoped picker intent and manifest permissions, failed-refresh preservation, private `FileProvider` chooser handoff, and local-copy/consent removal.
+For a public store release, use the owner's upload key.
 
 ## Privacy and licenses
 
-Real browser mirrors use the `offline-file-bridge-real` IndexedDB database. Demo state uses only the `demo:offline-file-bridge` localStorage key. The app sends no file contents to a server. License verification sends the pasted token to the Sociobot billing API.
+Real browser mirrors use the `offline-file-bridge-real` IndexedDB database. Demo state uses only the `demo:offline-file-bridge` localStorage key. The app sends no file contents to a server. License verification sends a token only to the Sociobot billing API.
 
 See [Privacy](https://offline-file-bridge.sociobot.in/privacy), [Terms](https://offline-file-bridge.sociobot.in/terms), and [demo details](.factory/demo.md).
 

@@ -14,6 +14,20 @@
     "sandbox": "fresh browser context; assert demo-prefixed localStorage and no real IndexedDB database"
   },
   {
+    "id": "demo-ready-sample",
+    "claim": "Trying the sample opens a ready folder mirror with three realistic files",
+    "where": "landing action note, demo",
+    "test": "npm test -- --grep @claim:demo-ready-sample",
+    "sandbox": "fresh browser context; click the landing action and assert the demo banner, Field notes, three sample files, ready state, and no real IndexedDB database"
+  },
+  {
+    "id": "demo-reset",
+    "claim": "Reset demo restores the displayed seeded sample state",
+    "where": "demo banner",
+    "test": "npm test -- --grep @claim:demo-reset",
+    "sandbox": "fresh demo; refresh, reset without reload, and assert the seeded ready time and reset notice are visible"
+  },
+  {
     "id": "local-only",
     "claim": "Selected and demo files stay on the device",
     "where": "landing facts, privacy page",
@@ -22,7 +36,7 @@
   },
   {
     "id": "freshness",
-    "claim": "Each ready folder shows its last successful refresh",
+    "claim": "Each ready folder mirror shows its last successful refresh",
     "where": "landing preview, app folder record, terms",
     "test": "npm test -- --grep @claim:freshness",
     "sandbox": "demo data; refresh the folder and assert the visible ready time changes to just now"
@@ -43,14 +57,14 @@
   },
   {
     "id": "free-tier",
-    "claim": "One folder is free; Bridge Pro costs $14 once and keeps up to eight folders with 30 refresh records each",
+    "claim": "One folder mirror is free; Bridge Pro costs $14 once and keeps up to eight folder mirrors with 30 refresh records each",
     "where": "landing facts, pricing, terms",
     "test": "npm test -- --grep @claim:free-tier",
     "sandbox": "fresh landing page; assert the free limit, Pro capacity, exact price, and Sociobot checkout URL"
   },
   {
     "id": "browser-persistence",
-    "claim": "Browser-selected files persist across reloads",
+    "claim": "In supported browsers, selected folder files stay available after reload",
     "where": "README browser/PWA feature list, app",
     "test": "npm test -- --grep @claim:browser-persistence",
     "sandbox": "fresh browser context; select two in-memory files through the folder input, reload /app, and assert both remain"
@@ -61,6 +75,13 @@
     "where": "landing preview, app folder record, README",
     "test": "npm run test:unit -- -t @claim:native-refresh-safety",
     "sandbox": "native transaction regression test; a staged replacement is discarded before commit and the completed mirror remains intact"
+  },
+  {
+    "id": "license-verification-privacy",
+    "claim": "License verification sends a token only to the Sociobot billing API",
+    "where": "privacy page",
+    "test": "npm test -- --grep @claim:license-verification-privacy",
+    "sandbox": "fresh landing page; enter a fixture token with the verify endpoint intercepted and assert its sole cross-origin request is the documented Sociobot endpoint"
   },
   {
     "id": "checkout",

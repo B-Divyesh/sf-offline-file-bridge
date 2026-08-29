@@ -19,6 +19,7 @@ const LICENSE_KEY = `sb_license:${PRODUCT}`;
 const VERDICT_KEY = `${LICENSE_KEY}:verdict`;
 const RELEASE_TAG = `v${__APP_VERSION__}`;
 const RELEASE_API = "https://api.github.com/repos/B-Divyesh/sf-offline-file-bridge";
+const SITE_URL = "https://offline-file-bridge.sociobot.in";
 const isNative = Capacitor.isNativePlatform();
 let mirrors: Mirror[] = [];
 let isDemo = false;
@@ -78,7 +79,7 @@ function header(path: string): string {
     </a>
     <nav class="site-nav" aria-label="Main navigation">
       <a href="/demo" data-link${current("/demo")}>Demo</a>
-      <a href="/app" data-link${current("/app")}>Open bridge</a>
+      <a href="/app" data-link${current("/app")}>Open folders</a>
       <a href="/install" data-link${current("/install")}>Install</a>
       <a href="/privacy" data-link${current("/privacy")}>Privacy</a>
     </nav>
@@ -104,7 +105,6 @@ function landing(): string {
   return layout(`<main id="main" class="page">
     <section class="hero" aria-labelledby="hero-title">
       <div>
-        <p class="eyebrow">A clear path out of app storage</p>
         <h1 id="hero-title" tabindex="-1">Keep approved folders ready offline</h1>
         <p class="lede">For Android users who need cloud files in another app when the network disappears.</p>
         <div class="hero-actions">
@@ -124,24 +124,24 @@ function landing(): string {
     <section class="section" aria-labelledby="preview-title">
       <h2 class="ruled-heading" id="preview-title">See what is ready before you leave</h2>
       <div class="preview-shell">
-        <div class="preview-note"><p class="annotation">field check 04</p><p>Every mirror shows its last successful refresh. A failed refresh never changes that date.</p><a href="/demo" data-link>Open the working sample →</a></div>
+        <div class="preview-note"><p>Every folder mirror shows its last successful refresh. A failed Android refresh keeps that date.</p><a href="/demo" data-link>Open the working sample →</a></div>
         <div class="preview-panel">${previewFolder()}</div>
       </div>
     </section>
 
     <section class="section" aria-labelledby="how-title">
-      <h2 class="ruled-heading" id="how-title">Move a folder across the boundary</h2>
+      <h2 class="ruled-heading" id="how-title">How to keep a folder ready offline</h2>
       <ol class="step-list">
         <li><h3>Choose a folder</h3><p>Android asks which folder this app may read. No broad storage permission is requested.</p></li>
-        <li><h3>Refresh its local copy</h3><p>The bridge records a successful time, file count, and storage size.</p></li>
+        <li><h3>Refresh its local copy</h3><p>The folder mirror records its successful refresh time, file count, and storage size.</p></li>
         <li><h3>Open a ready file</h3><p>Pick the local app that should receive the file, even while offline.</p></li>
       </ol>
     </section>
 
     <section class="section" aria-labelledby="limits-title">
       <div class="split-note">
-        <div><h2 id="limits-title">Your folder stays under your control</h2><ul class="check-list"><li>You approve each source folder.</li><li>Mirrored files stay in app storage.</li><li>You can remove a mirror at any time.</li></ul></div>
-        <div><h3>What it does not do</h3><ul class="cross-list"><li>It does not replace your storage service.</li><li>It does not crawl unapproved folders.</li><li>It does not call stale files current.</li></ul><p><a href="/privacy" data-link>Read the privacy note</a></p></div>
+        <div><h2 id="limits-title">Your folder stays under your control</h2><ul class="check-list"><li>You approve each source folder.</li><li>Folder mirror files stay in app storage.</li><li>On Android, you can remove a folder mirror at any time.</li></ul></div>
+        <div><h3>What it does not do</h3><ul class="cross-list"><li>It does not replace your storage service.</li><li>It does not crawl unapproved folders.</li><li>After a failed Android refresh, it keeps the last ready time.</li></ul><p><a href="/privacy" data-link>Read the privacy note</a></p></div>
       </div>
     </section>
 
@@ -156,7 +156,7 @@ function previewFolder(): string {
 function pricing(): string {
   const active = isPro();
   const revoked = license && license.checkedAt > 0 && !license.valid ? `<p class="notice">This license is no longer active. Buy a new license or restore another.</p>` : "";
-  return `<div class="price-note"><div><p class="annotation">advanced field kit</p><div class="price">$14<small>one-time purchase</small></div></div><div><h2 id="pro-title">Keep more folder bridges</h2><p>Bridge Pro adds up to eight folders and keeps 30 refresh records per folder. The free version keeps one folder.</p><ul class="check-list"><li>One-time license for your devices</li><li>Core file export stays free</li><li>Sociobot handles checkout and refunds</li></ul>${revoked}${active ? `<p class="notice success">Bridge Pro is active on this device.</p>` : `<p><a class="button" href="${CHECKOUT}">Buy Bridge Pro <span class="sr-only">at the external secure checkout</span></a></p><form class="license-form" data-license-form><label class="sr-only" for="license-token">License token</label><input id="license-token" name="license" autocomplete="off" placeholder="Paste your license token" required><button class="button small secondary" type="submit">Verify license</button></form>`}</div></div>`;
+  return `<div class="price-note"><div><div class="price">$14<small>one-time purchase</small></div></div><div><h2 id="pro-title">Keep more folder mirrors</h2><p>Bridge Pro adds up to eight folder mirrors and keeps 30 refresh records per folder. The free version keeps one folder mirror.</p>${revoked}${active ? `<p class="notice success">Bridge Pro is active on this device.</p>` : `<p><a class="button" href="${CHECKOUT}">Buy Bridge Pro <span class="sr-only">at the external secure checkout</span></a></p><form class="license-form" data-license-form><label class="sr-only" for="license-token">License token</label><input id="license-token" name="license" autocomplete="off" placeholder="Paste your license token" required><button class="button small secondary" type="submit">Verify license</button></form>`}</div></div>`;
 }
 
 function demoPage(): string { return appPage(true); }
@@ -168,11 +168,11 @@ function appPage(demo: boolean): string {
   const content = `<main id="main" class="page app-page">
     <div class="app-head"><div><p class="eyebrow">${demo ? "Sample field log" : "Your local field log"}</p><h1 tabindex="-1">Open your offline folders</h1></div><span class="network-state ${online ? "" : "offline"}" role="status">${online ? "Online" : "Offline — ready files still open"}</span></div>
     <p class="lede">Choose a folder, refresh its local copy, then hand a ready file to another app.</p>
-    <div class="storage-strip" aria-label="Bridge storage summary"><div class="storage-stat"><strong>${mirrors.length}</strong><span>folder ${mirrors.length === 1 ? "bridge" : "bridges"}</span></div><div class="storage-stat"><strong>${totalFiles}</strong><span>ready files</span></div><div class="storage-stat"><strong>${formatBytes(totalBytes)}</strong><span>mirrored · ${storage}</span></div></div>
+    <div class="storage-strip" aria-label="Folder mirror storage summary"><div class="storage-stat"><strong>${mirrors.length}</strong><span>folder ${mirrors.length === 1 ? "mirror" : "mirrors"}</span></div><div class="storage-stat"><strong>${totalFiles}</strong><span>ready files</span></div><div class="storage-stat"><strong>${formatBytes(totalBytes)}</strong><span>mirrored · ${storage}</span></div></div>
     ${notice ? `<div class="notice ${noticeType}" role="status">${esc(notice)}</div>` : ""}
     <div class="app-toolbar"><button class="button" data-action="add-folder" ${loading ? "disabled" : ""}>${loading ? "Reading folder…" : "Choose a folder"}</button>${!demo && !window.showDirectoryPicker && !isNative ? `<span class="action-note">Your browser will ask for the folder files.</span>` : ""}</div>
     <input class="visually-hidden-input" id="folder-input" type="file" multiple webkitdirectory tabindex="-1" aria-hidden="true" />
-    ${loading ? loadingState() : mirrors.length ? `<section class="folder-stack" aria-label="Folder bridges">${mirrors.map(folderCard).join("")}</section>` : emptyState()}
+    ${loading ? loadingState() : mirrors.length ? `<section class="folder-stack" aria-label="Folder mirrors">${mirrors.map(folderCard).join("")}</section>` : emptyState()}
     ${!demo ? `<section class="section" aria-label="Bridge Pro license">${pricing()}</section>` : ""}
   </main>`;
   return layout(content, demo ? "/demo" : "/app", demo);
@@ -183,20 +183,20 @@ function loadingState(): string {
 }
 
 function emptyState(): string {
-  return `<section class="empty-note"><div><div class="empty-mark" aria-hidden="true">↝</div><h2>No folder bridges yet</h2><p>Your approved folders will appear here with file counts and refresh times.</p><button class="button secondary" data-action="add-folder">Choose your first folder</button></div></section>`;
+  return `<section class="empty-note"><div><div class="empty-mark" aria-hidden="true">↝</div><h2>No folder mirrors yet</h2><p>Your approved folders will appear here with file counts and refresh times.</p><button class="button secondary" data-action="add-folder">Choose your first folder</button></div></section>`;
 }
 
 function folderCard(mirror: Mirror): string {
   const bytes = mirror.files.reduce((sum, file) => sum + file.size, 0);
-  return `<article class="folder-card" data-mirror="${esc(mirror.id)}"><div class="folder-header"><div><h2>${esc(mirror.name)}</h2><p>${esc(mirror.source)} · ${mirror.files.length} files · ${formatBytes(bytes)}</p><p class="refresh-history">Refresh history: ${mirror.history.length} / 30 records</p></div><span class="status">Ready · ${relativeTime(mirror.syncedAt)}</span></div><div class="sync-trace" aria-hidden="true"></div><ul class="file-list">${mirror.files.length ? mirror.files.map((file) => `<li class="file-row"><span class="file-name" title="${esc(file.path)}">${esc(file.name)}</span><span class="file-meta">${formatBytes(file.size)}</span><button class="plain-button" data-action="open-file" data-mirror-id="${esc(mirror.id)}" data-file-id="${esc(file.id)}">Share / open</button></li>`).join("") : `<li class="file-row"><span>No files were found. Add a file to the source, then refresh.</span></li>`}</ul><div class="folder-actions"><button class="button small secondary" data-action="refresh" data-id="${esc(mirror.id)}">Refresh local copy</button><button class="plain-button" data-action="remove" data-id="${esc(mirror.id)}">Remove mirror</button><span class="action-note">Last success stays visible if refresh fails.</span></div></article>`;
+  return `<article class="folder-card" data-mirror="${esc(mirror.id)}"><div class="folder-header"><div><h2>${esc(mirror.name)}</h2><p>${esc(mirror.source)} · ${mirror.files.length} files · ${formatBytes(bytes)}</p><p class="refresh-history">Refresh history: ${mirror.history.length} / 30 records</p></div><span class="status">Ready · ${relativeTime(mirror.syncedAt)}</span></div><div class="sync-trace" aria-hidden="true"></div><ul class="file-list">${mirror.files.length ? mirror.files.map((file) => `<li class="file-row"><span class="file-name" title="${esc(file.path)}">${esc(file.name)}</span><span class="file-meta">${formatBytes(file.size)}</span><button class="plain-button" data-action="open-file" data-mirror-id="${esc(mirror.id)}" data-file-id="${esc(file.id)}">Preview ${esc(file.name)}</button></li>`).join("") : `<li class="file-row"><span>No files were found. Add a file to the source, then refresh.</span></li>`}</ul><div class="folder-actions"><button class="button small secondary" data-action="refresh" data-id="${esc(mirror.id)}">Refresh local copy</button><button class="plain-button" data-action="remove" data-id="${esc(mirror.id)}">Remove folder mirror</button><span class="action-note">Last success stays visible if refresh fails.</span></div></article>`;
 }
 
 function privacyPage(): string {
-  return layout(`<main id="main" class="page legal"><p class="eyebrow">Plain privacy note</p><h1 tabindex="-1">Your files stay on your device</h1><p>Offline File Bridge stores approved file copies and refresh records in local app storage. The website stores real data in your browser database. Demo data uses a separate <code>demo:</code> namespace.</p><h2>What leaves the device</h2><p>Your folder names and files are not sent to us. License verification sends only your license token to the Sociobot billing API. The install page asks GitHub for public release details.</p><h2>Permissions</h2><p>Android asks you to choose a folder. The app keeps access to that folder until you remove the mirror or revoke access in Android settings.</p><h2>Deletion</h2><p>Remove a mirror to delete its local copy. Clearing this site's storage also removes browser copies. Uninstalling the Android app removes its private copies.</p><h2>Contact</h2><p>Questions can be sent to <a href="mailto:privacy@sociobot.in">privacy@sociobot.in</a>.</p><p>Effective: 28 August 2026.</p></main>`, "/privacy");
+  return layout(`<main id="main" class="page legal"><p class="eyebrow">Plain privacy note</p><h1 tabindex="-1">Your files stay on your device</h1><p>Offline File Bridge stores approved file copies and refresh records in local app storage. The website stores real data in your browser database. Demo data uses a separate <code>demo:</code> namespace.</p><h2>What leaves the device</h2><p>Your folder names and files are not sent to us. License verification sends a token only to the Sociobot billing API. The install page asks GitHub for public release details.</p><h2>Permissions</h2><p>Android asks you to choose a folder. The app keeps access to that folder until you remove the folder mirror or revoke access in Android settings.</p><h2>Deletion</h2><p>Remove a folder mirror to delete its local copy. Clearing this site's storage also removes browser copies. Uninstalling the Android app removes its private copies.</p><h2>Contact</h2><p>Questions can be sent to <a href="mailto:privacy@sociobot.in">privacy@sociobot.in</a>.</p><p>Effective: 28 August 2026.</p></main>`, "/privacy");
 }
 
 function termsPage(): string {
-  return layout(`<main id="main" class="page legal"><p class="eyebrow">Use terms</p><h1 tabindex="-1">Use the bridge with files you control</h1><p>Offline File Bridge is provided under the MIT License. You remain responsible for the folders and local apps you choose.</p><h2>Freshness</h2><p>A ready time records the last successful refresh. It does not promise that the source stayed unchanged afterward.</p><h2>Bridge Pro</h2><p>Bridge Pro costs $14 once. It adds up to eight folder bridges and 30 refresh records per folder. Sociobot and Dodo handle payment, licenses, and refunds as merchant of record. A refund revokes the license.</p><h2>No warranty</h2><p>The software is provided “as is,” without warranty. Keep another copy of important files. This tool is not a backup service.</p><h2>Contact</h2><p>Questions can be sent to <a href="mailto:support@sociobot.in">support@sociobot.in</a>.</p><p>Effective: 28 August 2026.</p></main>`, "/terms");
+  return layout(`<main id="main" class="page legal"><p class="eyebrow">Use terms</p><h1 tabindex="-1">Use the bridge with files you control</h1><p>Offline File Bridge is provided under the MIT License. You remain responsible for the folders and local apps you choose.</p><h2>Freshness</h2><p>A ready time records the last successful refresh. It does not promise that the source stayed unchanged afterward.</p><h2>Bridge Pro</h2><p>Bridge Pro costs $14 once. It adds up to eight folder mirrors and 30 refresh records per folder.</p><h2>No warranty</h2><p>The software is provided “as is,” without warranty. Keep another copy of important files. This tool is not a backup service.</p><h2>Contact</h2><p>Questions can be sent to <a href="mailto:support@sociobot.in">support@sociobot.in</a>.</p><p>Effective: 28 August 2026.</p></main>`, "/terms");
 }
 
 function installPage(): string {
@@ -204,7 +204,7 @@ function installPage(): string {
 }
 
 function notFoundPage(): string {
-  return layout(`<main id="main" class="page not-found"><p class="eyebrow">page not found · field note 404</p><h1 tabindex="-1">This path ends at the page edge</h1><p>The address may be old or incomplete.</p><p><a class="button" href="/" data-link>Return to the bridge</a></p></main>`, "/404");
+  return layout(`<main id="main" class="page not-found"><p class="eyebrow">404</p><h1 tabindex="-1">Page not found</h1><p>The address may be old or incomplete.</p><p><a class="button" href="/" data-link>Return home</a></p></main>`, "/404");
 }
 
 function isPro(): boolean { return Boolean(license?.valid); }
@@ -213,7 +213,7 @@ function routeTitle(path: string): string {
   const titles: Record<string, string> = {
     "/": "Offline File Bridge — keep folders ready offline",
     "/demo": "Demo — Offline File Bridge",
-    "/app": "Open bridge — Offline File Bridge",
+    "/app": "Folder mirrors — Offline File Bridge",
     "/privacy": "Privacy — Offline File Bridge",
     "/terms": "Terms — Offline File Bridge",
     "/install": "Install — Offline File Bridge",
@@ -232,6 +232,7 @@ async function renderRoute(focusHeading = false): Promise<void> {
   const requestedPath = normalizePath(location.pathname);
   isDemo = requestedPath === "/demo" || new URLSearchParams(location.search).get("demo") === "1";
   const path = isDemo ? "/demo" : requestedPath;
+  const isKnownPage = ["/", "/demo", "/app", "/privacy", "/terms", "/install", "/404"].includes(path);
   if (isDemo) {
     const saved = localStorage.getItem("demo:offline-file-bridge");
     mirrors = saved ? reviveDemo(JSON.parse(saved) as Mirror[]) : demoSeed();
@@ -241,7 +242,8 @@ async function renderRoute(focusHeading = false): Promise<void> {
   }
   await refreshStorageEstimate();
   document.title = routeTitle(path);
-  updateCanonical(path);
+  updateCanonical(path, isKnownPage);
+  updateMetadata(path, isKnownPage);
   if (path === "/") root.innerHTML = landing();
   else if (path === "/demo") root.innerHTML = demoPage();
   else if (path === "/app") root.innerHTML = appPage(false);
@@ -261,9 +263,35 @@ function normalizePath(path: string): string {
   return path;
 }
 
-function updateCanonical(path: string): void {
-  const link = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-  if (link) link.href = `https://offline-file-bridge.sociobot.in${path === "/404" ? "/404" : path}`;
+function updateCanonical(path: string, isKnownPage: boolean): void {
+  const existing = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+  if (!isKnownPage || path === "/404") {
+    existing?.remove();
+    return;
+  }
+  const link = existing || document.head.appendChild(document.createElement("link"));
+  link.rel = "canonical";
+  link.href = `${SITE_URL}${path}`;
+}
+
+function updateMetadata(path: string, isKnownPage: boolean): void {
+  const descriptions: Record<string, string> = {
+    "/": "Keep an approved folder ready offline, check its freshness, and open files in other Android apps.",
+    "/demo": "Try a ready sample folder mirror. Demo data is separate from your real files.",
+    "/app": "Choose approved folders, refresh local copies, and preview ready files.",
+    "/privacy": "Read how Offline File Bridge stores folder mirrors and handles license checks.",
+    "/terms": "Read the terms for Offline File Bridge and its one-time Bridge Pro license.",
+    "/install": "Download the Android APK or install the Offline File Bridge PWA.",
+    "/404": "The requested Offline File Bridge page could not be found."
+  };
+  const description = descriptions[isKnownPage ? path : "/404"];
+  document.querySelector<HTMLMetaElement>('meta[name="description"]')?.setAttribute("content", description);
+  document.querySelector<HTMLMetaElement>('meta[property="og:title"]')?.setAttribute("content", document.title);
+  document.querySelector<HTMLMetaElement>('meta[property="og:description"]')?.setAttribute("content", description);
+  document.querySelector<HTMLMetaElement>('meta[name="twitter:title"]')?.setAttribute("content", document.title);
+  document.querySelector<HTMLMetaElement>('meta[name="twitter:description"]')?.setAttribute("content", description);
+  const ogUrl = document.querySelector<HTMLMetaElement>('meta[property="og:url"]');
+  if (ogUrl) ogUrl.content = `${SITE_URL}${isKnownPage ? path : "/404"}`;
 }
 
 function reviveDemo(items: Mirror[]): Mirror[] {
@@ -301,7 +329,14 @@ async function handleAction(event: Event): Promise<void> {
   const target = event.currentTarget as HTMLElement;
   const action = target.dataset.action;
   if (action === "add-folder") await addFolder();
-  if (action === "reset-demo") { localStorage.removeItem("demo:offline-file-bridge"); mirrors = demoSeed(); saveDemo(); setNotice("Sample data was reset.", "success"); }
+  if (action === "reset-demo") {
+    localStorage.removeItem("demo:offline-file-bridge");
+    mirrors = demoSeed();
+    saveDemo();
+    notice = "Sample data was reset.";
+    noticeType = "success";
+    await renderRoute();
+  }
   if (action === "leave-demo") localStorage.removeItem("demo:offline-file-bridge");
   if (action === "refresh") await refreshMirror(target.dataset.id!);
   if (action === "remove") await deleteMirror(target.dataset.id!);
@@ -312,7 +347,7 @@ async function handleAction(event: Event): Promise<void> {
 async function addFolder(): Promise<void> {
   const limit = isPro() ? 8 : 1;
   if (mirrors.length >= limit && !isDemo) {
-    setNotice(isPro() ? "Bridge Pro keeps up to eight folders. Remove one before adding another." : "The free version keeps one folder. Remove it first or add a Bridge Pro license.", "error");
+    setNotice(isPro() ? "Bridge Pro keeps up to eight folder mirrors. Remove one before adding another." : "The free version keeps one folder mirror. Remove it first or add a Bridge Pro license.", "error");
     document.querySelector("[data-license-form]")?.scrollIntoView({ behavior: "smooth" });
     return;
   }

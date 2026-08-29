@@ -2,6 +2,15 @@ import { expect, test } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 
 const routes = ["/", "/demo", "/app", "/privacy", "/terms", "/install", "/missing-page"];
+const titles: Record<string, string> = {
+  "/": "Offline File Bridge — keep folders ready offline",
+  "/demo": "Demo — Offline File Bridge",
+  "/app": "Folder mirrors — Offline File Bridge",
+  "/privacy": "Privacy — Offline File Bridge",
+  "/terms": "Terms — Offline File Bridge",
+  "/install": "Install — Offline File Bridge",
+  "/missing-page": "Page not found — Offline File Bridge"
+};
 
 for (const route of routes) {
   test(`${route} has one named page heading and landmarks`, async ({ page }) => {
@@ -12,7 +21,9 @@ for (const route of routes) {
     await expect(page.locator("main")).toHaveCount(1);
     await expect(page.locator("h1")).toHaveCount(1);
     await expect(page.locator("h1")).not.toBeEmpty();
-    await expect(page).toHaveTitle(/Offline File Bridge/);
+    await expect(page).toHaveTitle(titles[route]);
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /.+/);
+    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute("content", titles[route]);
     await expect(page.locator("img:not([alt])")).toHaveCount(0);
     expect(errors).toEqual([]);
   });
@@ -24,6 +35,14 @@ test("mobile landing has no horizontal overflow", async ({ page }) => {
   const sizes = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, client: document.documentElement.clientWidth }));
   expect(sizes.scroll).toBeLessThanOrEqual(sizes.client);
   await expect(page.getByRole("link", { name: /Try it with sample data/ })).toBeVisible();
+});
+
+test("known routes have their own canonical URL and an unknown URL has none", async ({ page }) => {
+  await page.goto("/privacy");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://offline-file-bridge.sociobot.in/privacy");
+  await page.goto("/missing-page");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Page not found");
+  await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
 });
 
 test("demo query opens the isolated sample", async ({ page }) => {
@@ -71,6 +90,19 @@ test("mobile controls have 44px targets and 200% text reflows", async ({ page })
     expect(targets.filter((target) => target.width < 44 || target.height < 44)).toEqual([]);
     await page.evaluate(() => { document.documentElement.style.fontSize = "200%"; });
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  }
+});
+
+test("mobile secondary labels keep the 16px reading baseline", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const route of ["/", "/demo"]) {
+    await page.goto(route);
+    const sizes = await page.locator(".site-nav a, .action-note, .site-footer, .folder-header p, .file-meta, .status").evaluateAll((elements) => elements.map((element) => ({
+      text: element.textContent?.trim(),
+      size: Number.parseFloat(getComputedStyle(element).fontSize)
+    })));
+    expect(sizes).not.toEqual([]);
+    expect(sizes.filter((item) => item.size < 16)).toEqual([]);
   }
 });
 
