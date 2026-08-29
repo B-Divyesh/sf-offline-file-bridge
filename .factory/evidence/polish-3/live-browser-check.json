@@ -1,0 +1,116 @@
+{
+  "build": {
+    "product": "offline-file-bridge",
+    "version": "0.1.9",
+    "commit": "85e25facf1ababf7d6ad0bc4f0a9f0be9f77b9a0",
+    "payloadFileCount": 17,
+    "payloadTreeSha256": "b51748856622c5b68c610fd78047c4a475dd434ef370df52b6c41777da358263"
+  },
+  "routes": [
+    {
+      "path": "/",
+      "status": 200,
+      "title": "Offline File Bridge — keep folders ready offline",
+      "h1": [
+        "Keep approved folders ready offline"
+      ],
+      "main": 1,
+      "canonical": 1,
+      "severeAxe": [],
+      "errors": []
+    },
+    {
+      "path": "/demo",
+      "status": 200,
+      "title": "Demo — Offline File Bridge",
+      "h1": [
+        "Open your offline folders"
+      ],
+      "main": 1,
+      "canonical": 1,
+      "severeAxe": [],
+      "errors": []
+    },
+    {
+      "path": "/app",
+      "status": 200,
+      "title": "Folder mirrors — Offline File Bridge",
+      "h1": [
+        "Open your offline folders"
+      ],
+      "main": 1,
+      "canonical": 1,
+      "severeAxe": [],
+      "errors": []
+    },
+    {
+      "path": "/privacy",
+      "status": 200,
+      "title": "Privacy — Offline File Bridge",
+      "h1": [
+        "Your files stay on your device"
+      ],
+      "main": 1,
+      "canonical": 1,
+      "severeAxe": [],
+      "errors": []
+    },
+    {
+      "path": "/terms",
+      "status": 200,
+      "title": "Terms — Offline File Bridge",
+      "h1": [
+        "Terms for Offline File Bridge"
+      ],
+      "main": 1,
+      "canonical": 1,
+      "severeAxe": [],
+      "errors": []
+    },
+    {
+      "path": "/install",
+      "status": 200,
+      "title": "Install — Offline File Bridge",
+      "h1": [
+        "Install Offline File Bridge"
+      ],
+      "main": 1,
+      "canonical": 1,
+      "severeAxe": [],
+      "errors": []
+    },
+    {
+      "path": "/missing-page",
+      "status": 404,
+      "title": "Page not found — Offline File Bridge",
+      "h1": [
+        "Page not found"
+      ],
+      "main": 1,
+      "canonical": 0,
+      "severeAxe": [],
+      "errors": []
+    }
+  ],
+  "demo": {
+    "oneClick": {
+      "banner": 1,
+      "folder": 1,
+      "resetNotice": 1,
+      "seededStatus": 1,
+      "realDb": false,
+      "foreignRequests": []
+    },
+    "query": {
+      "url": "https://offline-file-bridge.sociobot.in/?demo=1",
+      "banner": 1,
+      "notice": 1,
+      "key": true
+    }
+  },
+  "apk": {
+    "href": "https://github.com/B-Divyesh/sf-offline-file-bridge/releases/download/v0.1.9/offline-file-bridge-v0.1.9.apk",
+    "releaseNote": "This Android release records this site's exact commit and verified payload fingerprint. Download SHA256SUMS.",
+    "errors": []
+  }
+}

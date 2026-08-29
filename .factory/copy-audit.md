@@ -55,4 +55,4 @@ banned marketing word, or makes an unlisted claim.
 | The paid license | Bridge Pro |
 | Inspecting a local sample before saving it | preview |
 
-Catalog description: “Keep approved folders ready offline and open their files in another Android app.” (13 words, 79 characters.)
+Catalog description: “Keep approved folders ready offline and open their files in another Android app.” (13 words, 80 characters.)

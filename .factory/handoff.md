@@ -1,38 +1,42 @@
-# Adversarial review 3 handoff — FAIL
+# Polish round 3 handoff — PASS
 
-- **Reviewed candidate:** `03b92280012a638b912a3a54751b0227c980ca54`
-- **Live URL:** <https://offline-file-bridge.sociobot.in/>
-- **Report:** [review-3.md](review-3.md)
-- **Decision:** **FAIL** — 6 blocking and 5 minor findings.
+- **Repair commit:** `85e25facf1ababf7d6ad0bc4f0a9f0be9f77b9a0`
+- **Pushed branch:** `main`
+- **Android release:** [`v0.1.9`](https://github.com/B-Divyesh/sf-offline-file-bridge/releases/tag/v0.1.9)
+- **Deployment:** <https://offline-file-bridge.sociobot.in/>
+- **Live identity:** commit `85e25facf1ababf7d6ad0bc4f0a9f0be9f77b9a0`; payload SHA-256 `b51748856622c5b68c610fd78047c4a475dd434ef370df52b6c41777da358263`.
 
-## What was done
+## Done
 
-Reviewed the live product cold at 390 × 844 and 1440 × 1000, exercised the
-one-click demo and offline path, tested demo isolation with real-storage
-sentinels, crawled routes and links, checked metadata/routing/focus/404,
-inspected all earlier reviews and polish reports, audited landing and README
-copy, and compared every claim with its implementation test. No product code
-was changed.
+Closed every finding from adversarial reviews 1–3. The repair standardizes
+**folder mirror**, gives the APK availability control an honest first-click
+label, removes unsupported refund/revocation and release-process promises,
+rewrites the README and Terms heading in plain language, and preserves the
+notebook visual identity.
+
+The demo remains isolated under `demo:offline-file-bridge`. It works from
+`/demo` and `/?demo=1`, has its persistent banner, visibly resets to the seed,
+and never opens real browser storage while active.
+
+The claims contract now has 16 claims. Four Android claims run named
+instrumentation methods against an installed release APK through
+`npm run test:android-claim -- <claim-id>`; they are no longer source-token
+checks. The release workflow invokes each exact command on its Android 35
+emulator before publishing artifacts.
 
 ## Verification
 
-A clean clone was created at
-`/tmp/offline-file-bridge-review3.h51D1x/clean`.
+- Clean clone `/tmp/offline-file-bridge-clean.1RArmV`: `npm ci` (0 vulnerabilities), `npm run lint`, `npm run test:unit` (**8/8**), `npm run build`, every browser claim command separately, and `npm test` (**74/74**) passed.
+- GitHub Actions [run 33258293074](https://github.com/B-Divyesh/sf-offline-file-bridge/actions/runs/33258293074): all four exact Android claim commands passed on an installed release APK; APK/AAB, provenance, and SHA256SUMS published.
+- Local `npm run test:release-artifact`: PASS against public `v0.1.9`; embedded web payload and published provenance match `dist/`.
+- Local `npm audit --omit=dev`: PASS; `git diff --check`: PASS.
+- Production `verify-url.sh`: PASS for `/`, `/demo`, `/privacy`, `/terms`, and `/install`; no console errors. Evidence: `.factory/evidence/polish-3/*/verify.json`.
+- Production browser/Axe check: zero serious or critical violations across all real routes plus the designed 404; deep links, route titles, h1/main, canonical handling, first click, direct demo reset, and verified APK link passed. Evidence: [live-browser-check.json](evidence/polish-3/live-browser-check.json).
+- Production offline demo reload and ready-file preview: PASS. Evidence: [live-offline-check.json](evidence/polish-3/live-offline-check.json).
+- Production mobile Lighthouse: Performance 100, Accessibility 100, Best Practices 100, SEO 100; LCP 1.7 s and CLS 0. Evidence: [lighthouse-live.json](evidence/polish-3/lighthouse-live.json).
 
-- `npm ci`: PASS, 148 packages, zero vulnerabilities.
-- All 17 literal commands in `.factory/claims.json`: exit 0.
-- `npm test`: PASS, 76/76.
-- `npm run test:unit`: PASS, 8/8.
-- `npm run lint`: PASS.
-- `npm run build`: PASS; `dist/` produced.
-- `npm audit --omit=dev`: PASS.
-- Live `verify-url.sh`: PASS; no console errors.
-- Live Axe: zero serious or critical findings on all checked routes.
+See [polish-3.md](polish-3.md) for the finding-by-finding repair map.
 
-## What remains
+## Known gaps
 
-Five passing claim commands do not exercise their promised billing or Android
-outcome; they only assert page/source text. The earlier terminology defect is
-also only partly repaired. Minor issues remain in the APK action label,
-screen-reader checkout copy, two README feature bullets, and the Terms h1.
-Exact quotes and fixes are in `review-3.md`.
+None.
