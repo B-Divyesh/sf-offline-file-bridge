@@ -43,8 +43,21 @@ and its repeatable evidence. Local visual records are in
 - `npm run lint`, `npm run test:unit`, `npm test`, and `npm run build` run
   locally from the pinned lockfile.
 - All claim commands run separately from a clean clone; the Android and public
-  APK checks run once release `v0.1.11` has published its candidate-bound
-  evidence.
+  APK checks passed after release `v0.1.11` published its candidate-bound
+  evidence. The clean-clone run had 16 unit tests and 80 browser tests pass.
 - Cold route checks cover `/`, `/demo`, `/app`, `/privacy`, `/terms`,
-  `/install`, and a designed 404. Axe scans cover both color schemes, keyboard
-  route focus, 44 px targets, 200% reflow, and reduced motion.
+  `/install`, and a designed 404. Axe scans passed with zero serious or
+  critical issues across both color schemes; the live Lighthouse audit scored
+  100/100/100/100 (performance/accessibility/best practices/SEO).
+
+## Final release evidence
+
+- Candidate commit: `303a4bf5045199e954805b89c7bb8af80d03f442`; tag:
+  [`v0.1.11`](https://github.com/B-Divyesh/sf-offline-file-bridge/releases/tag/v0.1.11).
+- Android workflow:
+  [33268257935](https://github.com/B-Divyesh/sf-offline-file-bridge/actions/runs/33268257935),
+  successful with installed-APK instrumentation and Gradle unit tests.
+- Static deployment: `c2265d87-47e1-4bf7-aac7-489461dcae80`; live identity
+  matches the candidate commit and payload fingerprint.
+- Final cold live check: one-click demo, `?demo=1`, reset, isolation, offline
+  reload, privacy wording, metadata, titles, APK provenance, and 404 all pass.

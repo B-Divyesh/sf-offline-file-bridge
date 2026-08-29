@@ -27,9 +27,11 @@ npm test
 npm run build
 ```
 
-Every entry in `.factory/claims.json` is an exact command. The four Android
-commands require the public `v0.1.11` release evidence after the tag workflow
-finishes:
+Every entry in `.factory/claims.json` is an exact command. All 18 commands
+were run from a clean clone at candidate commit
+`303a4bf5045199e954805b89c7bb8af80d03f442`: 14 browser/PWA claims and the
+four public Android claims below. The complete browser suite passed 80 tests;
+the unit suite passed 16 tests.
 
 ```sh
 npm run test:android-claim -- scoped-folder-access
@@ -47,14 +49,25 @@ The demo entry points are `/demo` and `/?demo=1`. They use only the
 
 - Local visual records: `evidence/polish-4/home-desktop.png`,
   `demo-mobile.png`, `privacy-desktop.png`, and `404-mobile.png`.
-- The release and matching APK are checked at
-  <https://github.com/B-Divyesh/sf-offline-file-bridge/releases/tag/v0.1.11>.
-- Production re-check targets: <https://offline-file-bridge.sociobot.in/>,
-  <https://offline-file-bridge.sociobot.in/demo>,
-  <https://offline-file-bridge.sociobot.in/privacy>, and
-  <https://offline-file-bridge.sociobot.in/missing-page>.
+- GitHub Actions run
+  [33268257935](https://github.com/B-Divyesh/sf-offline-file-bridge/actions/runs/33268257935)
+  passed on 2026-08-29. It ran Android 35 installed-APK instrumentation,
+  Gradle unit tests, release APK/AAB build, claim evidence, and provenance.
+- The published
+  [v0.1.11 release](https://github.com/B-Divyesh/sf-offline-file-bridge/releases/tag/v0.1.11)
+  contains the 7,586,621-byte APK, AAB, SHA256SUMS, BUILD-PROVENANCE.json, and
+  ANDROID-CLAIMS.json. `npm run test:release-artifact` passed its matching
+  payload fingerprint `d33abd40cfde0d12649205d256a8a7b101f49f5d50f10ecd6e68ea7b2445e863`.
+- Static deployment `c2265d87-47e1-4bf7-aac7-489461dcae80` is live at
+  <https://offline-file-bridge.sociobot.in/>. Its `build-identity.json`
+  reports v0.1.11 and commit `303a4bf5045199e954805b89c7bb8af80d03f442`.
+- Cold production checks passed for `/`, `/demo`, `/app`, `/privacy`, `/terms`,
+  `/install`, `?demo=1`, offline demo reload, the v0.1.11 APK link, and the
+  real 404. `verify-url.sh` found no console errors on the five 200 routes.
+  Axe found zero serious or critical issues across all seven routes in light
+  and dark modes. Lighthouse measured 100 performance, 100 accessibility, 100
+  best practices, 100 SEO; LCP was 1.7 s and CLS was 0.
 
 ## Known gaps
 
-None. The Android claim commands are deliberately candidate-bound and must be
-run only after the tagged release is published.
+None.
