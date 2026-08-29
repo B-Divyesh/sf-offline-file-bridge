@@ -1,29 +1,33 @@
-# Offline File Bridge — independent verification 4 handoff
+# Offline File Bridge — polish round 1 handoff
 
 - **Result:** PASS
-- **Candidate:** `5888fa3ee5647c18f6c4716a3dfa4507bb70128a`
+- **Product code deployed:** `a5f10872f8fd6a1054621ecdfb93a255c55ee634`
 - **Live URL:** <https://offline-file-bridge.sociobot.in/>
-- **Verified:** 29 August 2026 UTC
+- **Deployment:** Azure Static Web Apps deployment `5731cf8c-2aed-47f2-9ee1-1c4ab437af30`, production, 29 August 2026 UTC
 
-The previously reported release mismatch is closed. A fresh candidate build, every publicly served deployable file, and all 18 web files embedded in the public `v0.1.2` APK match byte-for-byte. The APK/AAB/provenance checksums pass, the live download action resolves the matching package, and public Android release CI completed successfully.
+This round closes every finding in [review-1.md](review-1.md). Demo Reset now visibly restores the seed without a reload; one-click demo readiness and reset behavior have dedicated claims; all remaining claims have one exact tagged test; first-screen and product copy use plain, consistent “folder mirror” terms; 404/canonical handling is correct; and mobile secondary labels meet the 16px baseline. The notebook visual system remains intact.
 
-All 12 `.factory/claims.json` commands pass. Full local gates pass: `npm ci` (0 vulnerabilities), `npm run lint`, `npm run test:unit` (7/7), `npm test` (62/62), and `npm run build`. Live desktop and 390 px flows pass demo, real import/persistence/handoff, error recovery, privacy, keyboard, reduced-motion, dark-mode axe, PWA offline/update, headers, caching, and release-download checks. Fresh Lighthouse scores are 100 performance, 100 accessibility, 100 best practices, and 100 SEO; LCP is 1.81 s and CLS is 0.
+## How to run and verify
 
-The Sociobot license endpoint allowed 30 requests in a fresh burst, then returned 429 for the next five; every 429 included `Retry-After: 4`.
+```sh
+npm ci
+npm test
+npm run test:unit
+npm run lint
+npm run build
+```
 
-No release-blocking or material defect was found. One non-blocking P3 remains: several secondary mobile labels render at 12.48–14.72 px, below the design baseline, although contrast, zoom/reflow, target size, and axe checks pass. The verifier image has no Java/Android SDK, so local Gradle/emulator execution was unavailable. The public tagged GitHub Actions run passed installed-release Android 36 instrumentation and packaging; the downloaded APK was independently inspected and matched to the candidate output. A physical-device smoke and owner-key signing remain operator steps before store distribution.
+The one-click demo is `/demo` or `/?demo=1`. It stores only `demo:offline-file-bridge`; use **Reset demo** to restore the visible seed, or **Start for real** to discard it and open `/app`.
 
-Full evidence and commands: [.factory/verification-4.md](verification-4.md). Screenshots and URL verifier output: `.factory/verification-artifacts/`.
+From a fresh clone of `a5f1087`, all 15 commands listed in `.factory/claims.json` passed. The same clean clone then passed `npm test` **72/72**, `npm run test:unit` **7/7**, `npm run lint`, `npm run build`, and `git diff --check`. The production bundle is 38.32 KB JavaScript (13.53 KB gzip) and 14.18 KB CSS (4.38 KB gzip).
 
----
+Post-deploy checks passed:
 
-# Review 1 handoff — 29 August 2026
+- `verify-url.sh https://offline-file-bridge.sociobot.in .factory/verification-artifacts/live-url-polish-1` — 200, no console errors, title/lang/main/H1/alt checks pass.
+- Local axe suite — **16/16** desktop and Pixel 5 route checks pass, including reduced motion.
+- Cold live demo reset, 404/canonical, privacy, mobile 390px reflow, and same-origin demo requests pass. Evidence is in [polish-1.md](polish-1.md).
+- Lighthouse: Performance **99**, Accessibility **100**, Best Practices **100**, SEO **100**; LCP **1.95 s**, CLS **0**.
 
-- **Result:** FAIL
-- **Scope:** Read-only adversarial first-read review of the live product and supplied repository. No product code changed.
+## Known gaps
 
-I opened the live product in fresh 390 px and desktop contexts; exercised demo refresh, open/save, reset, isolation, request logging, and offline behaviour; read the brief, source, claims, README, design, and earlier records; and checked routes, metadata, headers, 404, and links.
-
-`npm ci` completed with 0 vulnerabilities. Every exact claims command passed, as did `npm test` (62/62), `npm run test:unit` (7/7), `npm run lint`, and `npm run build`.
-
-The authoritative report is [review-1.md](review-1.md). Blocking work remains: **F-1-1** (Reset does not update displayed demo state), plus **F-1-2–F-1-7** (visitor promises with no exact listed claim/test or a broader scope than their test). Minor copy, terminology, button-label, 404-heading, and 404-canonical findings are **F-1-8–F-1-14**.
+None for the reviewed web/PWA product. Android release packaging remains GitHub Actions work by design; a physical-device smoke and owner-key signing are still required before a Play Store release.
