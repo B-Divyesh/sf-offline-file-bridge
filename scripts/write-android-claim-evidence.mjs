@@ -16,8 +16,10 @@ const claims = {};
 
 for (const claim of Object.keys(ANDROID_CLAIM_METHODS)) {
   const result = JSON.parse(await readFile(resolve(resultDirectory, `${claim}.json`), "utf8"));
-  const checked = createLocalClaimResult(claim, result.junitXml, result.executedAt);
+  const checked = createLocalClaimResult(claim, result.junitXml, result.executedAt, result.releaseApkSha256);
   invariant(result.junitSha256 === checked.junitSha256, `Stored JUnit digest is invalid for ${claim}.`);
+  invariant(result.releaseApkSha256 === provenance.apkSha256,
+    `Installed release APK digest does not match the publishable APK for ${claim}.`);
   claims[claim] = checked;
 }
 

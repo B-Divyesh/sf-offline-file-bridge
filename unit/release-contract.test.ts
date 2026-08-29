@@ -4,6 +4,8 @@ import { describe, expect, test } from "vitest";
 import { buildMetadata } from "../scripts/build-metadata.mjs";
 import { verifyReleaseCandidate, verifySourceVersion, verifyTagCommit } from "../scripts/release-contract.mjs";
 
+const releaseTag = `v${buildMetadata.version}`;
+
 describe("Android release identity contract", () => {
   test("a candidate build identifies HEAD instead of an older version tag", () => {
     const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
@@ -13,14 +15,14 @@ describe("Android release identity contract", () => {
   });
 
   test("accepts only the source version's unique release tag", async () => {
-    await expect(verifySourceVersion("v0.1.11")).resolves.toEqual({ version: "0.1.11", versionCode: 11 });
-    await expect(verifySourceVersion("v0.1.10")).rejects.toThrow("does not match package version v0.1.11");
+    await expect(verifySourceVersion(releaseTag)).resolves.toEqual({ version: buildMetadata.version, versionCode: 12 });
+    await expect(verifySourceVersion("v0.1.11")).rejects.toThrow(`does not match package version ${releaseTag}`);
   });
 
   test("@regression:release-tag cannot reuse an older candidate commit", async () => {
     const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
-    await expect(verifyReleaseCandidate("v0.1.11", head, () => head)).resolves.toEqual({ version: "0.1.11", versionCode: 11, commit: head });
-    expect(() => verifyTagCommit("v0.1.11", head, () => "e8debdc51c78ef81bb09a1f2c9b0c32b0eb0b951")).toThrow("not candidate");
+    await expect(verifyReleaseCandidate(releaseTag, head, () => head)).resolves.toEqual({ version: buildMetadata.version, versionCode: 12, commit: head });
+    expect(() => verifyTagCommit(releaseTag, head, () => "e8debdc51c78ef81bb09a1f2c9b0c32b0eb0b951")).toThrow("not candidate");
   });
 
   test("the release job verifies the packaged web payload before publishing", async () => {
@@ -28,6 +30,15 @@ describe("Android release identity contract", () => {
     expect(workflow).toContain('git rev-parse "${GITHUB_REF_NAME}^{commit}"');
     expect(workflow).toContain('release-contract.mjs candidate "$GITHUB_REF_NAME" "$RELEASE_COMMIT"');
     expect(workflow).toContain('BUILD_COMMIT="$RELEASE_COMMIT" npm run build');
+    expect(workflow.indexOf("Build the signed APK and app bundle to be tested")).toBeLessThan(
+      workflow.indexOf("Run installed-APK Android instrumentation")
+    );
+    expect(workflow.indexOf("Run installed-APK Android instrumentation")).toBeLessThan(
+      workflow.indexOf("Run Android unit tests without rebuilding the tested release")
+    );
+    const workflowAfterInstrumentation = workflow.slice(workflow.indexOf("Run Android unit tests without rebuilding the tested release"));
+    expect(workflowAfterInstrumentation).not.toContain("assembleRelease");
+    expect(workflowAfterInstrumentation).not.toContain("bundleRelease");
     expect(workflow).toContain('sh scripts/wait-for-android.sh &&');
     for (const claim of ["scoped-folder-access", "native-refresh-safety", "consent-removal", "native-handoff"]) {
       expect(workflow).toContain(`npm run test:android-claim -- ${claim}`);

@@ -17,7 +17,7 @@ function junit(method: string, result = ""): string {
 function releaseEvidence() {
   const claims = Object.fromEntries(Object.entries(ANDROID_CLAIM_METHODS).map(([claim, method]) => [
     claim,
-    createLocalClaimResult(claim, junit(method), "2026-08-29T16:00:00.000Z")
+    createLocalClaimResult(claim, junit(method), "2026-08-29T16:00:00.000Z", "b".repeat(64))
   ]));
   return {
     schema: 1,
@@ -61,5 +61,12 @@ describe("portable installed-APK claim evidence", () => {
       .toThrow("different APK digest");
     expect(() => verifyAndroidClaimEvidence(releaseEvidence(), "consent-removal", { ...expected, commit: "e".repeat(40) }))
       .toThrow("commit does not match");
+  });
+
+  test("rejects JUnit evidence recorded for a different signed release APK", () => {
+    const evidence = releaseEvidence();
+    evidence.claims["native-handoff"].releaseApkSha256 = "d".repeat(64);
+    expect(() => verifyAndroidClaimEvidence(evidence, "native-handoff", expected))
+      .toThrow("was not run against this release APK digest");
   });
 });

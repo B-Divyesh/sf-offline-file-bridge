@@ -1,35 +1,79 @@
-# Verification 11 handoff — FAIL
+# Repair 8 handoff — Android artifact binding
 
-Candidate `152ae420b0f17bce2a42a8ba156928df6c865d09` is **not releasable**.
-The deployed static site at <https://offline-file-bridge.sociobot.in> matches
-the candidate, but its Android artifact does not: `v0.1.11` resolves to
-`303a4bf5045199e954805b89c7bb8af80d03f442`. All four required Android claims
-and `npm run test:release-artifact` fail, and the live install page correctly
-withholds an unverified APK.
+## What changed
 
-See `.factory/verification-11.md` for exact claim, quality-gate, privacy,
-accessibility, demo, offline-PWA, rate-limit, bundle, and artifact evidence.
+Verification 11 correctly blocked the prior candidate: the PWA built from
+`152ae420…`, while the latest public APK tag (`v0.1.11`) pointed at
+`303a4bf…`. The browser correctly withheld that APK, but the Android artifact
+class still had no candidate-bound installable release or native-claim
+evidence.
 
-## Passed
+This repair creates the next immutable release as `v0.1.12` / Android
+`versionCode 12`. The Android release workflow now:
 
-- `npm ci`, `npm run lint`, `npm run test:unit` (16 tests), `npm test` (80
-  Playwright tests), and `npm run build`.
-- All 14 browser/PWA claims in `.factory/claims.json`.
-- First-read copy, one-click isolated demo, offline reload, local-only request
-  logging, keyboard/focus, 390 px mobile, and axe serious/critical scans.
+1. builds the signed APK and AAB before emulator testing;
+2. runs each of the four native claims against that installed release APK;
+3. records the SHA-256 of that tested APK with every JUnit claim result; and
+4. refuses to publish `ANDROID-CLAIMS.json` unless each recorded digest equals
+   the APK copied to the GitHub Release.
 
-## Required next step
+The portable verifier now rejects otherwise-passing JUnit evidence if it came
+from any other signed APK. This closes the provenance gap rather than treating
+a tag or a source-only test as release evidence.
 
-Publish a candidate-bound Android release identifying
-`152ae420b0f17bce2a42a8ba156928df6c865d09`, then rerun:
+## Local evidence
+
+Run from a clean dependency install on 29 August 2026 UTC:
+
+- `npm ci` — 148 packages installed; `npm audit` reported 0 vulnerabilities.
+- `npm run lint` — passed.
+- `npm run test:unit` — 17 tests passed. This includes the regression that
+  rejects an Android JUnit result whose APK SHA-256 differs from the published
+  release APK, plus workflow ordering checks.
+- `npm test` — 80 Playwright tests passed. It covers all declared browser/PWA
+  claims, desktop and 390 px layouts, keyboard focus, 200% text reflow,
+  reduced motion, axe serious/critical checks, privacy request logging,
+  service-worker offline reload, demo reset, and checkout/response policy.
+- `npm run build` — passed and produced `dist/`. Initial assets are 39.20 KB
+  JavaScript (13.71 KB gzip), 14.43 KB CSS (4.45 KB gzip), and a 74,932-byte
+  self-hosted font.
+- The original failure was reproduced before the version bump:
+  `npm run test:android-claim -- scoped-folder-access` rejected `v0.1.11`
+  because it resolves to `303a4bf…`, not the candidate.
+
+This worker has no local Java/Android SDK, so it cannot run Gradle or an
+emulator. The repository’s Android 35 GitHub Actions job is the required
+package and installed-APK execution environment.
+
+## Release and deployment verification
+
+The repair commit is released only by pushing its matching `v0.1.12` tag.
+That tag runs `.github/workflows/android.yml`, which publishes:
+
+- `offline-file-bridge-v0.1.12.apk` and `.aab`;
+- `BUILD-PROVENANCE.json` binding the tag, commit, APK digest, and embedded
+  PWA payload fingerprint; and
+- `ANDROID-CLAIMS.json` binding all four Android 35 installed-release JUnit
+  results to that exact APK digest.
+
+After the tag workflow succeeds, verify the public release from a clean
+checkout with:
 
 ```sh
+npm run test:release-artifact
 npm run test:android-claim -- scoped-folder-access
 npm run test:android-claim -- native-refresh-safety
 npm run test:android-claim -- consent-removal
 npm run test:android-claim -- native-handoff
-npm run test:release-artifact
 ```
 
-`npm run test:android` could not run here because Java is absent; it cannot
-substitute for the required public installed-release evidence.
+The static site is deployed from the same repair commit. Its install screen
+uses the released provenance and will offer the download only when that
+commit and payload fingerprint match.
+
+## Known gaps and next steps
+
+There are no known product-code gaps. A physical-device smoke test is still
+advisable before Play Store distribution with the owner’s upload key. The
+published release uses the documented workflow-generated test key and is for
+direct APK distribution, not Play Store submission.

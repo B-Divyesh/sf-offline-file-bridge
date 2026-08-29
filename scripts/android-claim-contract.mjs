@@ -40,8 +40,11 @@ export function parsePassingJUnit(xml, claim) {
   return { tests: 1, failures: 0, errors: 0, skipped: 0, testClass: ANDROID_TEST_CLASS, method };
 }
 
-export function createLocalClaimResult(claim, junitXml, executedAt = new Date().toISOString()) {
+export function createLocalClaimResult(claim, junitXml, executedAt = new Date().toISOString(), releaseApkSha256) {
   const parsed = parsePassingJUnit(junitXml, claim);
+  if (releaseApkSha256 !== undefined) {
+    invariant(/^[0-9a-f]{64}$/.test(releaseApkSha256), "Installed release APK digest is invalid.");
+  }
   return {
     claim,
     status: "passed",
@@ -49,7 +52,8 @@ export function createLocalClaimResult(claim, junitXml, executedAt = new Date().
     ...parsed,
     executedAt,
     junitSha256: sha256(junitXml),
-    junitXml
+    junitXml,
+    ...(releaseApkSha256 === undefined ? {} : { releaseApkSha256 })
   };
 }
 
@@ -73,6 +77,8 @@ export function verifyAndroidClaimEvidence(evidence, claim, expected) {
   invariant(result?.claim === claim && result?.status === "passed", `Android claim ${claim} has no passing release result.`);
   invariant(result.selector === `${ANDROID_TEST_CLASS}#${method}`, `Android claim ${claim} ran the wrong test selector.`);
   invariant(result.junitSha256 === sha256(result.junitXml || ""), `Android claim ${claim} JUnit digest is invalid.`);
+  invariant(result.releaseApkSha256 === expected.apkSha256,
+    `Android claim ${claim} was not run against this release APK digest.`);
   const parsed = parsePassingJUnit(result.junitXml, claim);
   for (const field of ["tests", "failures", "errors", "skipped", "testClass", "method"]) {
     invariant(result[field] === parsed[field], `Android claim ${claim} has inconsistent ${field} evidence.`);

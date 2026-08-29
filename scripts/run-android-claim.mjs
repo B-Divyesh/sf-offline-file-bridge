@@ -67,7 +67,14 @@ async function runLocally() {
     throw new Error(`@claim:${claim} requires a connected Android emulator or device. ${error instanceof Error ? error.message : ""}`);
   }
   const report = await newestPassingReport();
-  const result = createLocalClaimResult(claim, report.xml);
+  const releaseApk = resolve("android/app/build/outputs/apk/release/app-release.apk");
+  invariant(existsSync(releaseApk), `Gradle passed ${claim}, but the installed release APK is missing.`);
+  const result = createLocalClaimResult(
+    claim,
+    report.xml,
+    new Date().toISOString(),
+    sha256(await readFile(releaseApk))
+  );
   const outputDirectory = resolve(process.env.ANDROID_CLAIM_RESULTS_DIR || ".android-claim-results");
   await mkdir(outputDirectory, { recursive: true });
   await writeFile(resolve(outputDirectory, `${claim}.json`), `${JSON.stringify(result, null, 2)}\n`);

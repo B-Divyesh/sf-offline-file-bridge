@@ -49,6 +49,11 @@ jobs:
           -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "$ANDROID_KEY_ALIAS"
           -keypass "$ANDROID_KEY_PASSWORD" -keyalg RSA -keysize 2048
           -validity 10000 -dname "CN=Param Factory Test, O=Sociobot, C=IN"
+      - name: Build the signed APK and app bundle to be tested
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease bundleRelease
       - name: Run installed-APK Android instrumentation
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -61,12 +66,10 @@ jobs:
             npm run test:android-claim -- native-refresh-safety &&
             npm run test:android-claim -- consent-removal &&
             npm run test:android-claim -- native-handoff
-      - name: Build the APK and app bundle
+      - name: Run Android unit tests without rebuilding the tested release
         working-directory: android
         run: |
-          chmod +x gradlew
           ./gradlew test
-          ./gradlew assembleRelease bundleRelease
       - name: Prepare release files
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
