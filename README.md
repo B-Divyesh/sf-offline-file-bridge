@@ -42,7 +42,9 @@ npm run build
 
 The production command is `npm run build`. It writes the static site to `dist/`. The root file is `dist/index.html`.
 
-`npm test` runs browser claims on desktop and mobile Chromium. It removes only this repository's stale preview process. Playwright starts and closes its server. `npm run test:unit` checks release and native-source contracts. Android outcome claims use an installed release APK. Run one with `npm run test:android-claim -- <claim-id>`.
+`npm test` runs browser claims on desktop and mobile Chromium. It removes only this repository's stale preview process. Playwright starts and closes its server. `npm run test:unit` checks release and native-source contracts.
+
+Android outcome claims run against an installed release APK in the release workflow. Clean machines verify that APK's digest and public JUnit result. Run one with `npm run test:android-claim -- <claim-id>`.
 
 Run one claim with:
 

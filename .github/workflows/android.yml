@@ -8,6 +8,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   android:
@@ -17,6 +19,9 @@ jobs:
       ANDROID_KEYSTORE_PASSWORD: android
       ANDROID_KEY_ALIAS: factory-test
       ANDROID_KEY_PASSWORD: android
+      ANDROID_CLAIM_MODE: local
+      ANDROID_CLAIM_RESULTS_DIR: ${{ github.workspace }}/android-claim-results
+      ANDROID_API_LEVEL: "35"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -69,9 +74,18 @@ jobs:
           cp android/app/build/outputs/apk/release/app-release.apk "release/offline-file-bridge-v${VERSION}.apk"
           cp android/app/build/outputs/bundle/release/app-release.aab "release/offline-file-bridge-v${VERSION}.aab"
           node scripts/release-contract.mjs artifact "release/offline-file-bridge-v${VERSION}.apk" "$GITHUB_REF_NAME" "$RELEASE_COMMIT" "release/BUILD-PROVENANCE.json"
+          node scripts/write-android-claim-evidence.mjs "release/BUILD-PROVENANCE.json" "release/ANDROID-CLAIMS.json"
           node scripts/release-contract.mjs notes "release/BUILD-PROVENANCE.json" "release/RELEASE-NOTES.md"
           cd release
-          sha256sum "offline-file-bridge-v${VERSION}.apk" "offline-file-bridge-v${VERSION}.aab" BUILD-PROVENANCE.json > SHA256SUMS
+          sha256sum "offline-file-bridge-v${VERSION}.apk" "offline-file-bridge-v${VERSION}.aab" BUILD-PROVENANCE.json ANDROID-CLAIMS.json > SHA256SUMS
+      - name: Attest Android release files
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            release/*.apk
+            release/*.aab
+            release/BUILD-PROVENANCE.json
+            release/ANDROID-CLAIMS.json
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
@@ -81,4 +95,5 @@ jobs:
             release/*.apk
             release/*.aab
             release/BUILD-PROVENANCE.json
+            release/ANDROID-CLAIMS.json
             release/SHA256SUMS

@@ -60,7 +60,7 @@
     "claim": "Android uses the system folder picker without broad storage permission",
     "where": "landing how it works, privacy page",
     "test": "npm run test:android-claim -- scoped-folder-access",
-    "sandbox": "installed release APK on an Android emulator; launch the picker intent and inspect the installed package permissions"
+    "sandbox": "GitHub Android 35 emulator installs the release APK, launches the picker intent, and inspects installed package permissions; clean workers verify the candidate-bound JUnit and APK digest evidence from the release"
   },
   {
     "id": "free-tier",
@@ -81,7 +81,7 @@
     "claim": "A failed Android refresh keeps the previous ready folder mirror",
     "where": "landing preview, app folder record, README",
     "test": "npm run test:android-claim -- native-refresh-safety",
-    "sandbox": "installed release APK on an Android emulator; abandon a staged replacement and assert the previous ready bytes remain before a completed replacement commits"
+    "sandbox": "GitHub Android 35 emulator installs the release APK, abandons a staged replacement, and checks the previous ready bytes; clean workers verify the candidate-bound JUnit and APK digest evidence from the release"
   },
   {
     "id": "license-verification-privacy",
@@ -102,13 +102,13 @@
     "claim": "Removing an Android folder mirror deletes its files and releases its folder access",
     "where": "landing privacy section, privacy page, README",
     "test": "npm run test:android-claim -- consent-removal",
-    "sandbox": "installed release APK on an Android emulator; seed a private mirror and folder-access record, remove it, and assert files and local consent records are gone"
+    "sandbox": "GitHub Android 35 emulator installs the release APK, removes a seeded private mirror and access record, and checks both are gone; clean workers verify the candidate-bound JUnit and APK digest evidence from the release"
   },
   {
     "id": "native-handoff",
     "claim": "Android opens ready private files through the system app chooser",
     "where": "landing how it works, install walkthrough, README",
     "test": "npm run test:android-claim -- native-handoff",
-    "sandbox": "installed release APK on an Android emulator; create a ready private file and assert its chooser intent, content URI, MIME type, and read grant"
+    "sandbox": "GitHub Android 35 emulator installs the release APK and checks the chooser intent, content URI, MIME type, and read grant; clean workers verify the candidate-bound JUnit and APK digest evidence from the release"
   }
 ]
