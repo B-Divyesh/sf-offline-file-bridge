@@ -1,6 +1,6 @@
 # Landing page copy audit
 
-Audited 29 August 2026 for polish round 4. Counts treat contractions and
+Audited 29 August 2026 for polish round 5. Counts treat contractions and
 hyphenated words as one word. No landing sentence exceeds 22 words, uses a
 banned marketing word, or makes an unlisted claim.
 
@@ -55,7 +55,7 @@ banned marketing word, or makes an unlisted claim.
 | The paid license | Bridge Pro |
 | Inspecting a local sample before saving it | preview |
 
-Catalog description: “Keep approved folders ready offline for another Android app.” (9 words, 57 characters.)
+Catalog description: “Open ready files from approved Android folders in another app.” (10 words, 62 characters.)
 
 ## Privacy and documentation amendments
 

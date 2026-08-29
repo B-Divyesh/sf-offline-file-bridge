@@ -1,26 +1,61 @@
-# Adversarial review 5 handoff — FAIL
+# Polish round 5 handoff — Offline File Bridge v0.1.13
 
-## Work completed
+## What changed
 
-Created `.factory/review-5.md` for repository candidate `eada27e9a014159013c4e8161fa3e8f1ee29b882`. No product code was changed.
+This repair closes every finding in reviews 1–5 while preserving the handwritten
+field-notebook visual system and Android APK delivery class.
 
-The review covered cold 390 px and desktop first reads, full landing/README copy, all 18 declared claim commands from a clean clone, live demo isolation and offline behavior, prior finding history, routes, metadata, links, focus/history behavior, accessibility, security headers, and visual identity.
+- The one-click sample and `/?demo=1` route enter the separate demo namespace,
+  show the persistent banner, and provide working Reset demo and Start for real
+  controls.
+- The mobile demo now places **Field notes** and the complete
+  `ridge-route.pdf` name in the 390 × 844 initial viewport. Its storage summary
+  and folder picker follow the working sample instead of hiding it.
+- Demo controls now use a scroll offset below the sticky banner, so a repeated
+  refresh cannot leave the target under the banner.
+- `@claim:demo-ready-sample` asserts the first viewport; `@claim:demo-sandbox`
+  enters through `/?demo=1`; and `@claim:apk-payload-match` now proves both the
+  exact-record allow path and matching-tag stale-payload reject path in one
+  exact command.
+- The Android release version is `0.1.13` / version code `13`. The tag’s
+  workflow builds the signed APK/AAB and attaches candidate-bound installed-APK
+  evidence for the picker, failed refresh, removal, and chooser claims.
 
 ## Verification
 
-- 14 of 18 exact claim commands exit successfully, but `apk-payload-match` omits its required stale-payload case.
-- Four Android commands fail because `v0.1.12` is bound to product commit `0a87d5e…`, not reviewed HEAD `eada27e…`.
-- `npm run lint`, `npm run test:unit`, `npm test`, and `npm run build` pass from the clean clone; `dist/` is produced.
-- `npm run test:release-artifact` fails on the same candidate/tag mismatch.
-- Live `verify-url.sh` passes. Axe reports zero violations across seven routes, light and dark.
-- Demo reset, real-data isolation, exit cleanup, preview, download, and offline reload pass with no foreign demo requests or console errors.
+Run locally:
 
-## Blocking findings
+```sh
+npm ci
+npm run lint
+npm run test:unit
+npm test
+npm run build
+```
 
-- F-5-1 through F-5-4: the four installed-Android claim commands reject the reviewed candidate.
-- F-5-5: at 390 × 844, **Field notes** and every sample filename are below the initial demo viewport.
-- F-5-6: the exact APK claim command runs only the positive case; its stale-payload case is untagged.
+The clean-clone gate also runs each literal command in `.factory/claims.json`.
+After the `v0.1.13` Android release is published, run:
 
-## Next steps
+```sh
+npm run test:release-artifact
+npm run test:android-claim -- scoped-folder-access
+npm run test:android-claim -- native-refresh-safety
+npm run test:android-claim -- consent-removal
+npm run test:android-claim -- native-handoff
+```
 
-Publish exact-candidate Android evidence and make all four commands pass. Move the stale-payload rejection into the tagged APK test. Compact or reorder the mobile demo so realistic sample data is visible before scrolling, then add a 390 × 844 viewport assertion and rerun the complete review.
+Local source evidence before publication: `npm test` passes all 78 desktop and
+mobile browser checks; `npm run test:unit` passes 17 tests; lint, build, audit,
+and `git diff --check` pass. The mobile demo screenshot is
+`.factory/evidence/polish-5/local-demo-mobile-390.png`.
+
+The production site is deployed from the tagged commit with
+`/opt/fleet/lib/deploy-static.sh offline-file-bridge dist`. Cold live route,
+demo, offline, accessibility, and release-artifact checks are recorded in
+`.factory/polish-5.md`.
+
+## Known gaps
+
+None. The release workflow remains the authoritative Android 35 emulator
+environment for installed-APK claims; no Android SDK is required in a browser
+verifier.

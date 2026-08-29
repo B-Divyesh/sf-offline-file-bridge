@@ -166,14 +166,15 @@ function appPage(demo: boolean): string {
   const totalFiles = mirrors.reduce((sum, mirror) => sum + mirror.files.length, 0);
   const totalBytes = mirrors.reduce((sum, mirror) => sum + mirror.files.reduce((fileSum, file) => fileSum + file.size, 0), 0);
   const storage = storageEstimate.quota ? `${formatBytes(storageEstimate.used)} of ${formatBytes(storageEstimate.quota)}` : "Checked on device";
-  const content = `<main id="main" class="page app-page">
+  const summary = `<div class="storage-strip" aria-label="Folder mirror storage summary"><div class="storage-stat"><strong>${mirrors.length}</strong><span>folder ${mirrors.length === 1 ? "mirror" : "mirrors"}</span></div><div class="storage-stat"><strong>${totalFiles}</strong><span>ready files</span></div><div class="storage-stat"><strong>${formatBytes(totalBytes)}</strong><span>mirrored · ${storage}</span></div></div>`;
+  const folderContent = loading ? loadingState() : mirrors.length ? `<section class="folder-stack" aria-label="Folder mirrors">${mirrors.map(folderCard).join("")}</section>` : emptyState();
+  const noticeContent = notice ? `<div class="notice ${noticeType}" role="status">${esc(notice)}</div>` : "";
+  const toolbar = `<div class="app-toolbar"><button class="button" data-action="add-folder" ${loading ? "disabled" : ""}>${loading ? "Reading folder…" : "Choose a folder"}</button>${!demo && !window.showDirectoryPicker && !isNative ? `<span class="action-note">Your browser will ask for the folder files.</span>` : ""}</div>`;
+  const content = `<main id="main" class="page app-page${demo ? " demo-app-page" : ""}">
     <div class="app-head"><div><p class="eyebrow">${demo ? "Sample field log" : "Your local field log"}</p><h1 tabindex="-1">Open your offline folders</h1></div><span class="network-state ${online ? "" : "offline"}" role="status">${online ? "Online" : "Offline — ready files still open"}</span></div>
     <p class="lede">Choose a folder, refresh the folder mirror, then hand a ready file to another app.</p>
-    <div class="storage-strip" aria-label="Folder mirror storage summary"><div class="storage-stat"><strong>${mirrors.length}</strong><span>folder ${mirrors.length === 1 ? "mirror" : "mirrors"}</span></div><div class="storage-stat"><strong>${totalFiles}</strong><span>ready files</span></div><div class="storage-stat"><strong>${formatBytes(totalBytes)}</strong><span>mirrored · ${storage}</span></div></div>
-    ${notice ? `<div class="notice ${noticeType}" role="status">${esc(notice)}</div>` : ""}
-    <div class="app-toolbar"><button class="button" data-action="add-folder" ${loading ? "disabled" : ""}>${loading ? "Reading folder…" : "Choose a folder"}</button>${!demo && !window.showDirectoryPicker && !isNative ? `<span class="action-note">Your browser will ask for the folder files.</span>` : ""}</div>
     <input class="visually-hidden-input" id="folder-input" type="file" multiple webkitdirectory tabindex="-1" aria-hidden="true" />
-    ${loading ? loadingState() : mirrors.length ? `<section class="folder-stack" aria-label="Folder mirrors">${mirrors.map(folderCard).join("")}</section>` : emptyState()}
+    ${demo ? `${noticeContent}${folderContent}${summary}${toolbar}` : `${summary}${noticeContent}${toolbar}${folderContent}`}
     ${!demo ? `<section class="section" aria-label="Bridge Pro license">${pricing()}</section>` : ""}
   </main>`;
   return layout(content, demo ? "/demo" : "/app", demo);

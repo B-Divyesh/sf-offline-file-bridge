@@ -138,6 +138,8 @@ h3 { font-size: 1.16rem; }
 .demo-bar a { display: inline-flex; min-height: 44px; align-items: center; }
 
 .app-page { padding-top: 24px; }
+.demo-app-page .folder-stack { margin-top: 8px; }
+.demo-app-page button, .demo-app-page a { scroll-margin-top: 120px; }
 .app-head { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 32px; }
 .app-head h1, .legal h1, .install h1, .not-found h1 { max-width: 16ch; font-size: clamp(2.4rem, 6vw, 4.5rem); }
 .network-state { display: inline-flex; gap: 8px; align-items: center; padding: 5px 11px; border: 1px solid var(--rule); border-radius: 999px; background: var(--paper); font: 700 1rem var(--font-mono); }
@@ -212,6 +214,15 @@ h3 { font-size: 1.16rem; }
   .site-nav a { font-size: 1rem; min-height: 44px; }
   .site-nav a:nth-child(3) { display: none; }
   .page { padding-top: 24px; }
+  .demo-app-page { padding-top: 16px; }
+  .demo-app-page .app-head { gap: 8px; margin-bottom: 14px; }
+  .demo-app-page .lede { margin: 12px 0 16px; }
+  .demo-app-page .folder-header { padding-top: 16px; padding-bottom: 14px; }
+  .demo-app-page .file-row { grid-template-columns: minmax(0, 1fr); gap: 4px; min-height: 58px; }
+  .demo-app-page .file-name { overflow: visible; text-overflow: clip; white-space: normal; }
+  .demo-app-page .file-meta { grid-column: 1; grid-row: auto; }
+  .demo-app-page .file-row .plain-button { justify-self: start; }
+  .demo-app-page .storage-strip { margin: 20px 0 24px; }
   h1 { font-size: clamp(2.6rem, 14vw, 4rem); }
   .hero { gap: 42px; min-height: 0; }
   .section { padding: 64px 0; }

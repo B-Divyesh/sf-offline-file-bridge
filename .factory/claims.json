@@ -18,14 +18,14 @@
     "claim": "Demo sample data is isolated from real data",
     "where": "demo banner, privacy page",
     "test": "npm test -- --grep @claim:demo-sandbox",
-    "sandbox": "fresh browser context; assert demo-prefixed localStorage and no real IndexedDB database"
+    "sandbox": "fresh browser context; open /?demo=1, assert its banner and reset/exit controls, demo-prefixed localStorage, and no real IndexedDB database"
   },
   {
     "id": "demo-ready-sample",
     "claim": "Trying the sample opens a ready folder mirror with three realistic files",
     "where": "landing action note, demo",
     "test": "npm test -- --grep @claim:demo-ready-sample",
-    "sandbox": "fresh browser context; click the landing action and assert the demo banner, Field notes, three sample files, ready state, and no real IndexedDB database"
+    "sandbox": "fresh 390 × 844 browser context; click the landing action and assert the demo banner, Field notes, first named file above the initial viewport, three sample files, ready state, and no real IndexedDB database"
   },
   {
     "id": "demo-reset",

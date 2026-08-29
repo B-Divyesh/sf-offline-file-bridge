@@ -13,8 +13,10 @@ test("@claim:offline-reload works offline after the first visit", async ({ page,
 });
 
 test("@claim:demo-sandbox uses only its demo storage namespace", async ({ page }) => {
-  await page.goto("/demo");
+  await page.goto("/?demo=1");
   await expect(page.getByText("Demo — sample data, nothing is saved")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Reset demo" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Start for real" })).toBeVisible();
   const keys = await page.evaluate(() => Object.keys(localStorage));
   expect(keys.length).toBeGreaterThan(0);
   expect(keys.every((key) => key.startsWith("demo:") || key.startsWith("sb_license:"))).toBe(true);
@@ -23,6 +25,7 @@ test("@claim:demo-sandbox uses only its demo storage namespace", async ({ page }
 });
 
 test("@claim:demo-ready-sample opens a ready, isolated sample in one click", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await page.getByRole("link", { name: /Try it with sample data/ }).click();
   await expect(page).toHaveURL(/\/demo$/);
@@ -32,6 +35,18 @@ test("@claim:demo-ready-sample opens a ready, isolated sample in one click", asy
   await expect(page.getByRole("button", { name: "Preview ridge-route.pdf" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Preview specimen-log.csv" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Preview handoff-notes.md" })).toBeVisible();
+  const firstFilename = page.locator(".file-name", { hasText: "ridge-route.pdf" });
+  const visibleAboveFold = await Promise.all([
+    page.getByRole("heading", { level: 2, name: "Field notes" }).boundingBox(),
+    firstFilename.boundingBox()
+  ]);
+  for (const box of visibleAboveFold) {
+    expect(box).not.toBeNull();
+    expect(box!.y).toBeGreaterThanOrEqual(0);
+    expect(box!.y + box!.height).toBeLessThanOrEqual(844);
+  }
+  expect(await firstFilename.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
   const databases = await page.evaluate(async () => (await indexedDB.databases()).map((database) => database.name));
   expect(databases).not.toContain("offline-file-bridge-real");
 });

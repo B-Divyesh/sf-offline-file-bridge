@@ -15,13 +15,13 @@ describe("Android release identity contract", () => {
   });
 
   test("accepts only the source version's unique release tag", async () => {
-    await expect(verifySourceVersion(releaseTag)).resolves.toEqual({ version: buildMetadata.version, versionCode: 12 });
+    await expect(verifySourceVersion(releaseTag)).resolves.toEqual({ version: buildMetadata.version, versionCode: 13 });
     await expect(verifySourceVersion("v0.1.11")).rejects.toThrow(`does not match package version ${releaseTag}`);
   });
 
   test("@regression:release-tag cannot reuse an older candidate commit", async () => {
     const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
-    await expect(verifyReleaseCandidate(releaseTag, head, () => head)).resolves.toEqual({ version: buildMetadata.version, versionCode: 12, commit: head });
+    await expect(verifyReleaseCandidate(releaseTag, head, () => head)).resolves.toEqual({ version: buildMetadata.version, versionCode: 13, commit: head });
     expect(() => verifyTagCommit(releaseTag, head, () => "e8debdc51c78ef81bb09a1f2c9b0c32b0eb0b951")).toThrow("not candidate");
   });
 

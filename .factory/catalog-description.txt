@@ -1,1 +1,1 @@
-Keep approved folders ready offline for another Android app.
+Open ready files from approved Android folders in another app.
