@@ -1,80 +1,59 @@
-# Release 8 repair handoff
+# Independent verification 8 handoff — PASS
 
-- **Base verification report:** `fc7e2e7fd4f0f76bc07bcf2be7f299952a7f740d`
-- **Repaired release:** `v0.1.8` / Android version code `8`
-- **Artifact class:** Android APK with PWA landing and isolated demo
+- **Tested candidate:** `9a0ca69d4f41374750771d74b9237aa4095ef7c5`
+- **Tag/release:** `v0.1.8`
 - **Live URL:** <https://offline-file-bridge.sociobot.in/>
+- **Decision:** **PASS**
+- **Full evidence:** [verification-8.md](verification-8.md)
 
-## Repair
+The previous deployment-only failure is resolved. The live PWA and public APK
+both identify the exact candidate and payload fingerprint. The public APK is
+7,586,793 bytes with SHA-256
+`512b8b088249732e4c5d3304fc224194f37111a41ab33bf83a6f12afba4b09e1`.
+The live install flow enables that matching release.
 
-Verification 7 found that the deployed PWA identified a newer candidate than
-the public `v0.1.3` APK. The landing page correctly disabled the stale APK,
-but Android delivery was unavailable.
+## Verification summary
 
-This repair increments both web and Android versions to `0.1.8`/`8`. The
-Android release workflow now resolves the release tag to its commit before
-building. That resolved commit is used for the PWA build identity, the APK
-payload comparison, and the published provenance. The workflow fails before
-publication if the tag does not resolve to the candidate it is building.
+- All 17 commands in `.factory/claims.json`: PASS.
+- `npm test`: PASS, 76/76 Playwright checks.
+- `npm run test:unit`: PASS, 8/8 Vitest checks.
+- `npm run lint`: PASS.
+- `npm run build`: PASS; `dist/` produced.
+- `npm audit --omit=dev`: PASS, zero vulnerabilities.
+- `npm run test:release-artifact`: PASS for `v0.1.8`.
+- Exact-candidate GitHub Actions run `33253516356`: PASS, including installed
+  APK instrumentation and APK/AAB build.
+- Live mobile Lighthouse: 97 performance, 100 accessibility, 100 best
+  practices, 100 SEO; LCP 1.7 s and CLS 0.
+- Live demo: refresh, preview, save, reset, service-worker offline reload/open,
+  and update notification all PASS.
+- Privacy: file/demo flows were same-origin only. Sociobot license verification
+  allowed 30 requests, then returned 429 with `Retry-After: 4`.
+- Deployment: all 17 public build files matched local `dist` byte-for-byte;
+  security and cache headers were correct.
+- Accessibility: desktop/390 px, keyboard, focus, 200% text, dark/light,
+  reduced motion, and axe serious/critical checks PASS.
 
-The regression in `unit/release-contract.test.ts` recreates a release tag that
-resolves to an older commit and asserts that it is rejected. The browser
-release-identity claim tests now derive their versioned APK names from the
-current build identity, so the check remains active for each release.
+## Defects and gaps
 
-The first hosted `v0.1.4` attempt exposed a separate runner race before an
-APK could be published: `connectedReleaseAndroidTest` began with Android's
-Package Manager unavailable (`Can't find service: package`). The workflow now
-waits for both `sys.boot_completed=1` and a successful `cmd package` query
-before installing the release APK. The same regression test asserts that this
-readiness gate remains in the workflow. The runner executes its script with
-POSIX `/bin/sh` and evaluates YAML script lines separately, so the wait loop is
-kept in `scripts/wait-for-android.sh` and invoked as one command. It uses
-`set -eu` rather than the unsupported `pipefail` option. These exact runner
-compatibility conditions are regression-tested.
+- P0: none.
+- P1: none.
+- P2: none found.
+- Verifier-environment limitation: `npm run test:android` cannot start locally
+  because this image has no Java runtime. The exact-candidate hosted Android
+  job passed both JVM and installed-APK instrumentation, so no product gap
+  remains.
 
-The API 36 GitHub-hosted emulator later became shell-unresponsive while Gradle
-queried its device properties, so the test runner skipped it as an unknown API
-level. Device CI therefore uses the stable Android API 35 system image. This
-does not change the app's Android 36 compile/target SDK; it gives the
-installed-APK acceptance checks a stable Android environment and is asserted
-by the workflow regression test.
-
-## Exact local verification
-
-Run from this checkout after a clean dependency install:
-
-```sh
-npm ci                         # PASS — 148 packages installed; 0 audit vulnerabilities
-npm run test:unit              # PASS — 8/8 Vitest checks
-npm run lint                   # PASS — TypeScript no-emit
-npm run build                  # PASS — dist/ written
-npm test                       # PASS — 76/76 Playwright checks, desktop and Pixel 5 (390 px)
-npm audit --omit=dev           # PASS — 0 vulnerabilities
-```
-
-The production bundle is 39.28 KB JavaScript (13.82 KB gzip) and 14.43 KB CSS
-(4.45 KB gzip). The browser suite includes the one-click demo, storage
-isolation/reset, service-worker offline reload, refresh/update behavior,
-privacy request checks, desktop and 390 px reflow, keyboard/focus, both color
-schemes, reduced motion, and Axe serious/critical checks across every route.
-It also exercises the matching and stale-APK release states.
-
-The tag-triggered GitHub Actions job runs the Android JVM tests and installed
-release-APK emulator tests, then creates the APK, AAB, checksums, and
-`BUILD-PROVENANCE.json`. After publication, run:
+## Reproduce
 
 ```sh
+npm ci
+npm test
+npm run test:unit
+npm run lint
+npm run build
+npm audit --omit=dev
 npm run test:release-artifact
 ```
 
-It downloads the public `v0.1.8` APK and verifies every embedded web payload
-file byte-for-byte against `dist/`, plus the release provenance and the exact
-candidate commit/payload fingerprint. This is the final public-artifact check
-for the verifier-7 blocker.
-
-## Known gaps
-
-None in the product scope. Android packaging and emulator verification run in
-the tag-triggered GitHub Actions environment, as required for this artifact
-class; no APK is built inside the worker.
+No product code was changed during independent verification.
