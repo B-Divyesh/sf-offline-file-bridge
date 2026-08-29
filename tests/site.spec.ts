@@ -108,46 +108,48 @@ test("mobile secondary labels keep the 16px reading baseline", async ({ page }) 
 
 test("@claim:apk-payload-match enables the APK only for an exact published payload record", async ({ page }) => {
   const identity = JSON.parse(await readFile("dist/build-identity.json", "utf8")) as { product: string; version: string; commit: string; payloadFileCount: number; payloadTreeSha256: string };
-  const provenance = { ...identity, tag: "v0.1.3" };
+  const tag = `v${identity.version}`;
+  const provenance = { ...identity, tag };
   await page.route("https://api.github.com/repos/B-Divyesh/sf-offline-file-bridge/releases/latest", async (route) => {
     await route.fulfill({ json: {
-      tag_name: "v0.1.3",
+      tag_name: tag,
       body: `<!-- offline-file-bridge-provenance:${JSON.stringify(provenance)} -->`,
       assets: [
-        { name: "offline-file-bridge-v0.1.3.apk", browser_download_url: "https://example.test/offline-file-bridge-v0.1.3.apk" },
+        { name: `offline-file-bridge-${tag}.apk`, browser_download_url: `https://example.test/offline-file-bridge-${tag}.apk` },
         { name: "SHA256SUMS", browser_download_url: "https://example.test/SHA256SUMS" },
         { name: "BUILD-PROVENANCE.json", browser_download_url: "https://example.test/BUILD-PROVENANCE.json" }
       ]
     } });
   });
-  await page.route("https://api.github.com/repos/B-Divyesh/sf-offline-file-bridge/git/ref/tags/v0.1.3", async (route) => {
+  await page.route(`https://api.github.com/repos/B-Divyesh/sf-offline-file-bridge/git/ref/tags/${tag}`, async (route) => {
     await route.fulfill({ json: { object: { type: "commit", sha: identity.commit } } });
   });
   await page.goto("/");
   await page.getByRole("button", { name: "Download the latest APK" }).click();
-  await expect(page.getByRole("link", { name: "Download APK v0.1.3" })).toHaveAttribute("href", "https://example.test/offline-file-bridge-v0.1.3.apk");
+  await expect(page.getByRole("link", { name: `Download APK ${tag}` })).toHaveAttribute("href", `https://example.test/offline-file-bridge-${tag}.apk`);
   await expect(page.getByText("This Android release records this site's exact commit and verified payload fingerprint.")).toBeVisible();
 });
 
 test("landing refuses the verifier's stale-payload failure even when the release tag commit matches", async ({ page }) => {
   const identity = JSON.parse(await readFile("dist/build-identity.json", "utf8")) as { product: string; version: string; commit: string; payloadFileCount: number; payloadTreeSha256: string };
+  const tag = `v${identity.version}`;
   await page.route("https://api.github.com/repos/B-Divyesh/sf-offline-file-bridge/releases/latest", async (route) => {
     await route.fulfill({ json: {
-      tag_name: "v0.1.3",
-      body: `<!-- offline-file-bridge-provenance:${JSON.stringify({ ...identity, tag: "v0.1.3", payloadTreeSha256: "0".repeat(64) })} -->`,
+      tag_name: tag,
+      body: `<!-- offline-file-bridge-provenance:${JSON.stringify({ ...identity, tag, payloadTreeSha256: "0".repeat(64) })} -->`,
       assets: [
-        { name: "offline-file-bridge-v0.1.3.apk", browser_download_url: "https://example.test/stale.apk" },
+        { name: `offline-file-bridge-${tag}.apk`, browser_download_url: "https://example.test/stale.apk" },
         { name: "SHA256SUMS", browser_download_url: "https://example.test/SHA256SUMS" },
         { name: "BUILD-PROVENANCE.json", browser_download_url: "https://example.test/BUILD-PROVENANCE.json" }
       ]
     } });
   });
-  await page.route("https://api.github.com/repos/B-Divyesh/sf-offline-file-bridge/git/ref/tags/v0.1.3", async (route) => {
+  await page.route(`https://api.github.com/repos/B-Divyesh/sf-offline-file-bridge/git/ref/tags/${tag}`, async (route) => {
     await route.fulfill({ json: { object: { type: "commit", sha: identity.commit } } });
   });
   await page.goto("/");
   await page.getByRole("button", { name: "Download the latest APK" }).click();
-  await expect(page.getByRole("button", { name: "APK v0.1.3 is being published" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: `APK ${tag} is being published` })).toBeDisabled();
   await expect(page.getByText("A matching APK is not ready yet. Check again later.")).toBeVisible();
   await expect(page.locator('a[href="https://example.test/stale.apk"]')).toHaveCount(0);
 });

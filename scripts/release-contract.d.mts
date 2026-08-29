@@ -1,4 +1,6 @@
 export function verifySourceVersion(tag: string): Promise<{ version: string; versionCode: number }>;
+export function verifyTagCommit(tag: string, commit: string, resolve?: (tag: string) => string): string;
+export function verifyReleaseCandidate(tag: string, commit: string, resolve?: (tag: string) => string): Promise<{ version: string; versionCode: number; commit: string }>;
 export function verifyApk(options: {
   apkPath: string;
   tag: string;

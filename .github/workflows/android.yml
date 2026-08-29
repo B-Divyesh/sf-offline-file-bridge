@@ -30,10 +30,14 @@ jobs:
       - uses: android-actions/setup-android@v3
       - name: Install web dependencies
         run: npm ci
-      - name: Verify tag and source versions
-        run: node scripts/release-contract.mjs source "$GITHUB_REF_NAME"
+      - name: Read and verify the tagged release candidate
+        shell: bash
+        run: |
+          RELEASE_COMMIT="$(git rev-parse "${GITHUB_REF_NAME}^{commit}")"
+          printf 'RELEASE_COMMIT=%s\n' "$RELEASE_COMMIT" >> "$GITHUB_ENV"
+          node scripts/release-contract.mjs candidate "$GITHUB_REF_NAME" "$RELEASE_COMMIT"
       - name: Build and sync the PWA
-        run: npm run build && npx cap sync android
+        run: BUILD_COMMIT="$RELEASE_COMMIT" npm run build && npx cap sync android
       - name: Create the test signing key
         run: >-
           keytool -genkeypair -v -keystore "$ANDROID_KEYSTORE_PATH"
@@ -59,7 +63,7 @@ jobs:
           mkdir -p release
           cp android/app/build/outputs/apk/release/app-release.apk "release/offline-file-bridge-v${VERSION}.apk"
           cp android/app/build/outputs/bundle/release/app-release.aab "release/offline-file-bridge-v${VERSION}.aab"
-          node scripts/release-contract.mjs artifact "release/offline-file-bridge-v${VERSION}.apk" "$GITHUB_REF_NAME" "$GITHUB_SHA" "release/BUILD-PROVENANCE.json"
+          node scripts/release-contract.mjs artifact "release/offline-file-bridge-v${VERSION}.apk" "$GITHUB_REF_NAME" "$RELEASE_COMMIT" "release/BUILD-PROVENANCE.json"
           node scripts/release-contract.mjs notes "release/BUILD-PROVENANCE.json" "release/RELEASE-NOTES.md"
           cd release
           sha256sum "offline-file-bridge-v${VERSION}.apk" "offline-file-bridge-v${VERSION}.aab" BUILD-PROVENANCE.json > SHA256SUMS

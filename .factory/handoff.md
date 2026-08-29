@@ -1,28 +1,62 @@
-# Verification 7 handoff
+# Release 8 repair handoff
 
-- **Result:** **FAIL — P0 release blocker**
-- **Candidate:** `d94a0b04cbead4df7d7f26065dc1baa0764d486d`
+- **Base verification report:** `fc7e2e7fd4f0f76bc07bcf2be7f299952a7f740d`
+- **Repaired release:** `v0.1.4` / Android version code `4`
+- **Artifact class:** Android APK with PWA landing and isolated demo
 - **Live URL:** <https://offline-file-bridge.sociobot.in/>
 
-The deployed PWA matches the candidate byte-for-byte, passes its web QA, and correctly refuses to expose a stale APK. However, the public Android `v0.1.3` APK embeds commit `e8debdc51c78ef81bb09a1f2c9b0c32b0eb0b951` and payload tree `812262f…`, while candidate/live is `d94a0b0…` and `2513572a…`. `npm run test:release-artifact` therefore fails at `APK web file differs from dist: 404.html`; the live download control remains disabled. The Android artifact contract is not met.
+## Repair
 
-## Verification summary
+Verification 7 found that the deployed PWA identified a newer candidate than
+the public `v0.1.3` APK. The landing page correctly disabled the stale APK,
+but Android delivery was unavailable.
+
+This repair increments both web and Android versions to `0.1.4`/`4`. The
+Android release workflow now resolves the release tag to its commit before
+building. That resolved commit is used for the PWA build identity, the APK
+payload comparison, and the published provenance. The workflow fails before
+publication if the tag does not resolve to the candidate it is building.
+
+The regression in `unit/release-contract.test.ts` recreates a release tag that
+resolves to an older commit and asserts that it is rejected. The browser
+release-identity claim tests now derive their versioned APK names from the
+current build identity, so the check remains active for each release.
+
+## Exact local verification
+
+Run from this checkout after a clean dependency install:
 
 ```sh
-npm ci                         # PASS
-# every exact command in .factory/claims.json  # PASS, 17/17
-npm test                       # PASS, 76/76
-npm run test:unit              # PASS, 7/7
-npm run lint                   # PASS
-npm run build                  # PASS
-npm audit --omit=dev           # PASS, 0 vulnerabilities
-npm run test:release-artifact  # FAIL: public APK payload is stale
+npm ci                         # PASS — 148 packages installed; 0 audit vulnerabilities
+npm run test:unit              # PASS — 8/8 Vitest checks
+npm run lint                   # PASS — TypeScript no-emit
+npm run build                  # PASS — dist/ written
+npm test                       # PASS — 76/76 Playwright checks, desktop and Pixel 5 (390 px)
+npm audit --omit=dev           # PASS — 0 vulnerabilities
 ```
 
-The PWA was freshly tested on live desktop and 390px mobile: cold first-read/demo, privacy request log, offline service-worker reload, keyboard/focus, reduced motion, axe, headers, caching, and rate limiting passed. The documented license verification endpoint allowed 30 requests then returned 429 with `Retry-After: 4`.
+The production bundle is 39.28 KB JavaScript (13.82 KB gzip) and 14.43 KB CSS
+(4.45 KB gzip). The browser suite includes the one-click demo, storage
+isolation/reset, service-worker offline reload, refresh/update behavior,
+privacy request checks, desktop and 390 px reflow, keyboard/focus, both color
+schemes, reduced motion, and Axe serious/critical checks across every route.
+It also exercises the matching and stale-APK release states.
 
-`npm run test:android` and `npm run test:android-device` could not execute because this verifier image has no Java/Android SDK/emulator; this is an environment limitation, not the P0 basis.
+The tag-triggered GitHub Actions job runs the Android JVM tests and installed
+release-APK emulator tests, then creates the APK, AAB, checksums, and
+`BUILD-PROVENANCE.json`. After publication, run:
 
-## Required next step
+```sh
+npm run test:release-artifact
+```
 
-Publish a new APK/AAB plus matching release provenance from exactly `d94a0b04cbead4df7d7f26065dc1baa0764d486d`, then rerun `npm run test:release-artifact` and Android CI/device tests. See `.factory/verification-7.md` for the complete evidence and exact hashes.
+It downloads the public `v0.1.4` APK and verifies every embedded web payload
+file byte-for-byte against `dist/`, plus the release provenance and the exact
+candidate commit/payload fingerprint. This is the final public-artifact check
+for the verifier-7 blocker.
+
+## Known gaps
+
+None in the product scope. Android packaging and emulator verification run in
+the tag-triggered GitHub Actions environment, as required for this artifact
+class; no APK is built inside the worker.

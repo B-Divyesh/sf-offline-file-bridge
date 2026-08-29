@@ -46,6 +46,28 @@ export async function verifySourceVersion(tag) {
   return { version: packageJson.version, versionCode };
 }
 
+function resolveTagCommit(tag) {
+  return execFileSync("git", ["rev-parse", `${tag}^{commit}`], { cwd: root, encoding: "utf8" }).trim().toLowerCase();
+}
+
+export function verifyTagCommit(tag, commit, resolve = resolveTagCommit) {
+  invariant(/^[0-9a-f]{40}$/.test(commit), `Expected a full candidate commit SHA, received ${commit}.`);
+  let taggedCommit;
+  try {
+    taggedCommit = resolve(tag).trim().toLowerCase();
+  } catch {
+    throw new Error(`Release tag ${tag} is missing or cannot be resolved to a commit.`);
+  }
+  invariant(taggedCommit === commit, `Release tag ${tag} resolves to ${taggedCommit}, not candidate ${commit}.`);
+  return taggedCommit;
+}
+
+export async function verifyReleaseCandidate(tag, commit, resolve) {
+  const source = await verifySourceVersion(tag);
+  verifyTagCommit(tag, commit, resolve);
+  return { ...source, commit };
+}
+
 export async function verifyApk({ apkPath, tag, commit, provenancePath }) {
   const { version, versionCode } = await verifySourceVersion(tag);
   invariant(/^[0-9a-f]{40}$/.test(commit), `Expected a full commit SHA, received ${commit}.`);
@@ -110,6 +132,10 @@ async function main() {
     console.log(JSON.stringify(await verifySourceVersion(args[0])));
     return;
   }
+  if (mode === "candidate" && args.length === 2) {
+    console.log(JSON.stringify(await verifyReleaseCandidate(args[0], args[1])));
+    return;
+  }
   if (mode === "artifact" && args.length === 4) {
     console.log(JSON.stringify(await verifyApk({ apkPath: args[0], tag: args[1], commit: args[2], provenancePath: args[3] })));
     return;
@@ -118,7 +144,7 @@ async function main() {
     await writeReleaseNotes(args[0], args[1]);
     return;
   }
-  throw new Error("Usage: release-contract.mjs source <tag> | artifact <apk> <tag> <commit> <provenance-output> | notes <provenance> <notes-output>");
+  throw new Error("Usage: release-contract.mjs source <tag> | candidate <tag> <commit> | artifact <apk> <tag> <commit> <provenance-output> | notes <provenance> <notes-output>");
 }
 
 if (resolve(process.argv[1] || "") === fileURLToPath(import.meta.url)) {
