@@ -7,7 +7,7 @@
     "dev": "vite --host 0.0.0.0",
     "build": "tsc --noEmit && vite build && node scripts/postbuild.mjs",
     "preview": "vite preview --host 0.0.0.0",
-    "test": "npm run build && playwright test",
+    "test": "npm run build && node scripts/clean-test-preview.mjs 4173 && playwright test",
     "test:unit": "vitest run --config vitest.config.ts",
     "test:android": "cd android && ./gradlew test",
     "test:android-device": "cd android && ./gradlew connectedReleaseAndroidTest",

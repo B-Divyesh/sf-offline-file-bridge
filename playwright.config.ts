@@ -16,6 +16,7 @@ export default defineConfig({
     { name: "mobile", use: { ...devices["Pixel 5"] } }
   ],
   webServer: {
+    // Playwright owns the server process and closes it after the test run.
     command: "npm run preview -- --port 4173",
     url: "http://127.0.0.1:4173",
     reuseExistingServer: false
