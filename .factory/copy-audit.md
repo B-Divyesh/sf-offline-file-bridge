@@ -1,6 +1,8 @@
 # Landing page copy audit
 
-Audited 29 August 2026 after polish round 2. Counts treat contractions and hyphenated words as one word. No landing sentence exceeds 22 words, uses a banned marketing word, or makes an unlisted claim.
+Audited 29 August 2026 for polish round 3. Counts treat contractions and
+hyphenated words as one word. No landing sentence exceeds 22 words, uses a
+banned marketing word, or makes an unlisted claim.
 
 | Copy | Words | Result |
 | --- | ---: | --- |
@@ -12,22 +14,23 @@ Audited 29 August 2026 after polish round 2. Counts treat contractions and hyphe
 | One folder is free. | 4 | `free-tier` |
 | Files stay on your device. | 5 | `local-only` |
 | Works after the first visit. | 5 | `offline-reload` |
-| Download the latest APK | 4 | Action label |
+| Check latest APK | 3 | Checks before offering a matching download; `apk-payload-match` |
 | Install steps | 2 | Action label |
-| folder → local copy → your app | 6 | Diagram caption |
+| approved folder → folder mirror → another app | 6 | Diagram caption; one term for the approved offline copy |
 | See what is ready before you leave | 8 | Pass |
 | Every folder mirror shows its last successful refresh. | 8 | `freshness` |
-| A failed Android refresh keeps that date. | 8 | `native-refresh-safety` |
+| A failed Android refresh keeps that date. | 8 | `native-refresh-safety` (installed APK) |
 | Open the working sample | 4 | Action label |
 | How to keep a folder ready offline | 7 | Pass |
 | Android asks which folder this app may read. | 8 | `scoped-folder-access` |
 | No broad storage permission is requested. | 6 | `scoped-folder-access` |
+| Refresh the folder mirror | 4 | Step heading |
 | The folder mirror records its successful refresh time, file count, and storage size. | 13 | `freshness` |
 | Pick the local app that should receive the file, even while offline. | 12 | `native-handoff`, `file-handoff` |
 | Your folder stays under your control | 6 | Pass |
 | You approve each source folder. | 5 | `scoped-folder-access` |
 | Folder mirror files stay in app storage. | 7 | `local-only` |
-| On Android, you can remove a folder mirror at any time. | 11 | `consent-removal` |
+| On Android, you can remove a folder mirror at any time. | 11 | `consent-removal` (installed APK) |
 | What it does not do | 5 | Pass |
 | It does not replace your storage service. | 7 | Scope statement |
 | It does not crawl unapproved folders. | 6 | `scoped-folder-access` |
@@ -36,6 +39,7 @@ Audited 29 August 2026 after polish round 2. Counts treat contractions and hyphe
 | Bridge Pro adds up to eight folder mirrors and keeps 30 refresh records per folder. | 15 | `free-tier` |
 | The free version keeps one folder mirror. | 7 | `free-tier` |
 | Buy Bridge Pro | 3 | `checkout` |
+| at the Sociobot checkout (external site) | 6 | Checkout destination; `checkout` |
 | Verify license | 2 | `license-verification-privacy` |
 | Keep approved folders ready offline. | 5 | Product summary |
 | Built by Param Factory | 4 | Attribution |
@@ -44,11 +48,11 @@ Audited 29 August 2026 after polish round 2. Counts treat contractions and hyphe
 
 | Concept | One term |
 | --- | --- |
-| A user-approved offline copy of a folder | folder mirror |
+| A user-approved offline folder and its saved files | folder mirror |
 | The saved offline items | files |
 | Copy source changes into the folder mirror | refresh |
 | A completed copy with a recorded time | ready |
 | The paid license | Bridge Pro |
 | Inspecting a local sample before saving it | preview |
 
-Catalog description: “Open approved folders offline, then hand their files to other apps.” (11 words, 68 characters.)
+Catalog description: “Keep approved folders ready offline and open their files in another Android app.” (13 words, 79 characters.)

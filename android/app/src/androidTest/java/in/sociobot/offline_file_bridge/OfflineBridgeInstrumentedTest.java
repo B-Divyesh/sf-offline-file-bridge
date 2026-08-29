@@ -48,6 +48,7 @@ public class OfflineBridgeInstrumentedTest {
         MirrorTransaction.deleteTree(root);
     }
 
+    /** @claim:scoped-folder-access */
     @Test
     public void installedApkUsesScopedFolderPickerAndNoBroadStoragePermission() throws Exception {
         assertEquals("in.sociobot.offline_file_bridge", context.getPackageName());
@@ -65,8 +66,9 @@ public class OfflineBridgeInstrumentedTest {
         }
     }
 
+    /** @claim:native-refresh-safety */
     @Test
-    public void failedRefreshKeepsPreviousPrivateMirrorAndCompletedRefreshReplacesIt() throws Exception {
+    public void failedRefreshKeepsPreviousReadyFolderMirrorAndCompletedRefreshReplacesIt() throws Exception {
         File completed = new File(root, "folder");
         assertTrue(completed.mkdirs());
         write(new File(completed, "ready.txt"), "previous ready copy");
@@ -77,13 +79,14 @@ public class OfflineBridgeInstrumentedTest {
         assertArrayEquals(bytes("previous ready copy"), java.nio.file.Files.readAllBytes(new File(completed, "ready.txt").toPath()));
 
         File completedStaging = MirrorTransaction.createStagingDirectory(completed);
-        write(new File(completedStaging, "ready.txt"), "fresh private copy");
+        write(new File(completedStaging, "ready.txt"), "fresh ready file");
         MirrorTransaction.replaceCompletedMirror(completed, completedStaging);
-        assertArrayEquals(bytes("fresh private copy"), java.nio.file.Files.readAllBytes(new File(completed, "ready.txt").toPath()));
+        assertArrayEquals(bytes("fresh ready file"), java.nio.file.Files.readAllBytes(new File(completed, "ready.txt").toPath()));
     }
 
+    /** @claim:native-handoff */
     @Test
-    public void readyPrivateCopyUsesSystemChooserAndReadOnlyFileProviderUri() throws Exception {
+    public void readyPrivateFileUsesSystemChooserAndReadOnlyFileProviderUri() throws Exception {
         File ready = new File(root, "ready.txt");
         write(ready, "ready for another app");
         Intent chooser = OfflineBridgePlugin.createOpenFileChooser(context, ready, "text/plain");
@@ -100,8 +103,9 @@ public class OfflineBridgeInstrumentedTest {
         assertEquals(context.getPackageName() + ".fileprovider", uri.getAuthority());
     }
 
+    /** @claim:consent-removal */
     @Test
-    public void removalDeletesPrivateCopyAndForgetsTheExactFolderConsent() throws Exception {
+    public void removalDeletesFolderMirrorFilesAndReleasesFolderAccess() throws Exception {
         String id = "remove-fixture";
         File mirror = new File(new File(context.getFilesDir(), "offline_bridge"), id);
         assertTrue(mirror.mkdirs());

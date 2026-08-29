@@ -1,12 +1,5 @@
 [
   {
-    "id": "billing-legal",
-    "claim": "Sociobot/Dodo Payments is the merchant of record, and refunded Bridge Pro purchases revoke their licenses",
-    "where": "terms",
-    "test": "npm test -- --grep @claim:billing-legal",
-    "sandbox": "fresh terms page; assert the merchant-of-record and automatic refund-revocation disclosures"
-  },
-  {
     "id": "apk-payload-match",
     "claim": "The Android download is offered only when its published release record has this site's exact commit and verified payload fingerprint",
     "where": "landing APK download status, install page",
@@ -66,8 +59,8 @@
     "id": "scoped-folder-access",
     "claim": "Android uses the system folder picker without broad storage permission",
     "where": "landing how it works, privacy page",
-    "test": "npm test -- --grep @claim:scoped-folder-access",
-    "sandbox": "read the shipped Android manifest and native plugin; assert SAF use and absence of broad storage permissions"
+    "test": "npm run test:android-claim -- scoped-folder-access",
+    "sandbox": "installed release APK on an Android emulator; launch the picker intent and inspect the installed package permissions"
   },
   {
     "id": "free-tier",
@@ -85,10 +78,10 @@
   },
   {
     "id": "native-refresh-safety",
-    "claim": "A failed Android refresh keeps the previous ready local mirror",
+    "claim": "A failed Android refresh keeps the previous ready folder mirror",
     "where": "landing preview, app folder record, README",
-    "test": "npm run test:unit -- -t @claim:native-refresh-safety",
-    "sandbox": "native transaction regression test; a staged replacement is discarded before commit and the completed mirror remains intact"
+    "test": "npm run test:android-claim -- native-refresh-safety",
+    "sandbox": "installed release APK on an Android emulator; abandon a staged replacement and assert the previous ready bytes remain before a completed replacement commits"
   },
   {
     "id": "license-verification-privacy",
@@ -106,16 +99,16 @@
   },
   {
     "id": "consent-removal",
-    "claim": "Removing an Android mirror deletes its local copy and releases its folder access",
+    "claim": "Removing an Android folder mirror deletes its files and releases its folder access",
     "where": "landing privacy section, privacy page, README",
-    "test": "npm run test:unit -- -t @claim:consent-removal",
-    "sandbox": "native plugin regression test; assert deletion, exact persisted SAF grant release, then preference removal"
+    "test": "npm run test:android-claim -- consent-removal",
+    "sandbox": "installed release APK on an Android emulator; seed a private mirror and folder-access record, remove it, and assert files and local consent records are gone"
   },
   {
     "id": "native-handoff",
-    "claim": "Android opens ready private copies through the system app chooser",
+    "claim": "Android opens ready private files through the system app chooser",
     "where": "landing how it works, install walkthrough, README",
-    "test": "npm run test:unit -- -t @claim:native-handoff",
-    "sandbox": "native plugin/manifest regression test; assert a FileProvider URI, ACTION_VIEW chooser, and read grant"
+    "test": "npm run test:android-claim -- native-handoff",
+    "sandbox": "installed release APK on an Android emulator; create a ready private file and assert its chooser intent, content URI, MIME type, and read grant"
   }
 ]

@@ -1,5 +1,4 @@
 import { expect, test } from "@playwright/test";
-import { readFile } from "node:fs/promises";
 
 test("@claim:offline-reload works offline after the first visit", async ({ page, context }) => {
   await page.goto("/demo");
@@ -39,7 +38,7 @@ test("@claim:demo-ready-sample opens a ready, isolated sample in one click", asy
 
 test("@claim:demo-reset restores the displayed seed without a reload", async ({ page }) => {
   await page.goto("/demo");
-  await page.getByRole("button", { name: "Refresh local copy" }).click();
+  await page.getByRole("button", { name: "Refresh folder mirror" }).click();
   await expect(page.getByText("Ready · synced just now")).toBeVisible();
   await page.getByRole("button", { name: "Reset demo" }).click();
   await expect(page.getByText("Sample data was reset.")).toBeVisible();
@@ -55,7 +54,7 @@ test("@claim:local-only sends no selected or demo file data off-device", async (
     if (url.origin !== "http://127.0.0.1:4173") foreignRequests.push(request.url());
   });
   await page.goto("/demo");
-  await page.getByRole("button", { name: "Refresh local copy" }).click();
+  await page.getByRole("button", { name: "Refresh folder mirror" }).click();
   await page.getByRole("button", { name: "Preview specimen-log.csv" }).click();
   await expect(page.getByRole("dialog")).toContainText("specimen-log.csv");
   await page.goto("/app");
@@ -69,7 +68,7 @@ test("@claim:freshness shows the last successful refresh", async ({ page }) => {
   const mirror = page.locator("article").filter({ has: page.getByRole("heading", { level: 2, name: "Field notes" }) });
   await expect(mirror).toContainText("3 files");
   await expect(mirror).toContainText("280.0 KB");
-  await page.getByRole("button", { name: "Refresh local copy" }).click();
+  await page.getByRole("button", { name: "Refresh folder mirror" }).click();
   await expect(mirror.getByText("Ready · synced just now")).toBeVisible();
   await expect(page.getByText("Field notes was removed.")).toHaveCount(0);
 });
@@ -82,15 +81,6 @@ test("@claim:file-handoff opens and saves a ready sample file", async ({ page })
   await page.getByRole("button", { name: "Save sample" }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toBe("handoff-notes.md");
-});
-
-test("@claim:scoped-folder-access requests no broad Android storage permission", async () => {
-  const manifest = await readFile("android/app/src/main/AndroidManifest.xml", "utf8");
-  const plugin = await readFile("android/app/src/main/java/in/sociobot/offline_file_bridge/OfflineBridgePlugin.java", "utf8");
-  expect(manifest).not.toContain("READ_EXTERNAL_STORAGE");
-  expect(manifest).not.toContain("MANAGE_EXTERNAL_STORAGE");
-  expect(plugin).toContain("ACTION_OPEN_DOCUMENT_TREE");
-  expect(plugin).toContain("takePersistableUriPermission");
 });
 
 test("@claim:free-tier keeps one folder and lists the Pro price", async ({ page }) => {
@@ -123,7 +113,7 @@ test("@claim:free-tier keeps one folder and lists the Pro price", async ({ page 
   await expect(page.getByText("Bridge Pro keeps up to eight folder mirrors. Remove one before adding another.")).toBeVisible();
 
   await page.goto("/demo");
-  for (let index = 0; index < 31; index += 1) await page.getByRole("button", { name: "Refresh local copy" }).click();
+  for (let index = 0; index < 31; index += 1) await page.getByRole("button", { name: "Refresh folder mirror" }).click();
   await expect(page.getByText("Refresh history: 30 / 30 records")).toBeVisible();
 });
 

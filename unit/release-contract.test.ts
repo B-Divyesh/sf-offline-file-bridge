@@ -13,14 +13,14 @@ describe("Android release identity contract", () => {
   });
 
   test("accepts only the source version's unique release tag", async () => {
-    await expect(verifySourceVersion("v0.1.8")).resolves.toEqual({ version: "0.1.8", versionCode: 8 });
-    await expect(verifySourceVersion("v0.1.7")).rejects.toThrow("does not match package version v0.1.8");
+    await expect(verifySourceVersion("v0.1.9")).resolves.toEqual({ version: "0.1.9", versionCode: 9 });
+    await expect(verifySourceVersion("v0.1.8")).rejects.toThrow("does not match package version v0.1.9");
   });
 
   test("@regression:release-tag cannot reuse an older candidate commit", async () => {
     const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
-    await expect(verifyReleaseCandidate("v0.1.8", head, () => head)).resolves.toEqual({ version: "0.1.8", versionCode: 8, commit: head });
-    expect(() => verifyTagCommit("v0.1.8", head, () => "e8debdc51c78ef81bb09a1f2c9b0c32b0eb0b951")).toThrow("not candidate");
+    await expect(verifyReleaseCandidate("v0.1.9", head, () => head)).resolves.toEqual({ version: "0.1.9", versionCode: 9, commit: head });
+    expect(() => verifyTagCommit("v0.1.9", head, () => "e8debdc51c78ef81bb09a1f2c9b0c32b0eb0b951")).toThrow("not candidate");
   });
 
   test("the release job verifies the packaged web payload before publishing", async () => {
@@ -28,7 +28,10 @@ describe("Android release identity contract", () => {
     expect(workflow).toContain('git rev-parse "${GITHUB_REF_NAME}^{commit}"');
     expect(workflow).toContain('release-contract.mjs candidate "$GITHUB_REF_NAME" "$RELEASE_COMMIT"');
     expect(workflow).toContain('BUILD_COMMIT="$RELEASE_COMMIT" npm run build');
-    expect(workflow).toContain('script: sh scripts/wait-for-android.sh && cd android && ./gradlew connectedReleaseAndroidTest');
+    expect(workflow).toContain('sh scripts/wait-for-android.sh &&');
+    for (const claim of ["scoped-folder-access", "native-refresh-safety", "consent-removal", "native-handoff"]) {
+      expect(workflow).toContain(`npm run test:android-claim -- ${claim}`);
+    }
     expect(workflow).toContain('api-level: 35');
     const androidWait = await readFile("scripts/wait-for-android.sh", "utf8");
     expect(androidWait).toContain('adb shell cmd package list packages android');

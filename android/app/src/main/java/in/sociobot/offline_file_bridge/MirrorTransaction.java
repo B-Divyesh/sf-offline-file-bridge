@@ -18,7 +18,7 @@ final class MirrorTransaction {
             throw new IOException("Local storage could not be prepared.");
         }
         File staging = new File(parent, destination.getName() + ".pending-" + UUID.randomUUID());
-        if (!staging.mkdirs()) throw new IOException("A temporary local mirror could not be prepared.");
+        if (!staging.mkdirs()) throw new IOException("A temporary folder mirror could not be prepared.");
         return staging;
     }
 
@@ -30,13 +30,13 @@ final class MirrorTransaction {
         boolean hadDestination = destination.exists();
 
         if (hadDestination && !destination.renameTo(backup)) {
-            throw new IOException("The previous local mirror could not be protected.");
+            throw new IOException("The previous folder mirror could not be protected.");
         }
         if (!staging.renameTo(destination)) {
             if (hadDestination && !backup.renameTo(destination)) {
-                throw new IOException("The replacement failed and the previous local mirror needs recovery.");
+                throw new IOException("The replacement failed and the previous folder mirror needs recovery.");
             }
-            throw new IOException("The replacement local mirror could not be saved.");
+            throw new IOException("The replacement folder mirror could not be saved.");
         }
         if (hadDestination) deleteTree(backup);
     }
@@ -47,6 +47,6 @@ final class MirrorTransaction {
         if (children != null) {
             for (File child : children) deleteTree(child);
         }
-        if (!file.delete()) throw new IOException("A local mirror file could not be removed.");
+        if (!file.delete()) throw new IOException("A folder mirror file could not be removed.");
     }
 }

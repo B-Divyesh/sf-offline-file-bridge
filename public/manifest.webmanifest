@@ -12,6 +12,6 @@
     {"src":"/assets/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
   ],
   "shortcuts": [
-    {"name":"Open bridge","url":"/app","icons":[{"src":"/assets/icon-192.png","sizes":"192x192"}]}
+    {"name":"Open folders","url":"/app","icons":[{"src":"/assets/icon-192.png","sizes":"192x192"}]}
   ]
 }

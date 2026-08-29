@@ -8,7 +8,7 @@ async function pluginSource(): Promise<string> {
   return readFile(pluginPath, "utf8");
 }
 
-test("@claim:native-refresh-safety stages a complete copy before replacing the ready mirror", async () => {
+test("native source stages a complete copy before replacing the ready folder mirror", async () => {
   const source = await pluginSource();
   const sync = source.slice(source.indexOf("private JSObject sync"), source.indexOf("private void copyChildren"));
   expect(sync).toContain("File staging = MirrorTransaction.createStagingDirectory(destination);");
@@ -23,7 +23,7 @@ test("@claim:native-refresh-safety stages a complete copy before replacing the r
   expect(transaction).toContain("if (hadDestination) deleteTree(backup);");
 });
 
-test("@claim:consent-removal revokes the exact persisted SAF read grant after deleting a mirror", async () => {
+test("native source releases folder access after deleting a folder mirror", async () => {
   const source = await pluginSource();
   const removal = source.slice(source.indexOf("static void removeMirrorFromDevice"), source.indexOf("private static void releaseFolderGrant"));
   expect(removal).toContain('String uriValue = preferences.getString(id + ":uri", null);');
@@ -35,7 +35,7 @@ test("@claim:consent-removal revokes the exact persisted SAF read grant after de
   expect(source).toContain("releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)");
 });
 
-test("@claim:native-handoff exposes only private copies through Android's chooser", async () => {
+test("native source exposes only ready private files through Android's chooser", async () => {
   const [source, manifest] = await Promise.all([
     pluginSource(),
     readFile("android/app/src/main/AndroidManifest.xml", "utf8")

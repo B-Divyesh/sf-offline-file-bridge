@@ -99,7 +99,7 @@ public class OfflineBridgePlugin extends Plugin {
         } catch (ActivityNotFoundException error) {
             call.reject("No installed app can open this file type.", error);
         } catch (Exception error) {
-            call.reject("Android could not open the local copy.", error);
+            call.reject("Android could not open the ready file.", error);
         }
     }
 
@@ -114,7 +114,7 @@ public class OfflineBridgePlugin extends Plugin {
             removeMirrorFromDevice(getContext(), getPrefs(), id);
             call.resolve();
         } catch (Exception error) {
-            call.reject("The local mirror could not be removed. Try again.", error);
+            call.reject("The folder mirror could not be removed. Try again.", error);
         }
     }
 

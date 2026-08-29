@@ -10,10 +10,10 @@ One-click demo: <https://offline-file-bridge.sociobot.in/demo>
 
 ## What v1 includes
 
-- An Android Storage Access Framework picker with persisted, folder-scoped read access
+- Android's folder picker remembers read access only for folders you approve
 - Folder mirrors stored on the device
 - Visible file counts, storage sizes, and last successful refresh times
-- Android open-with handoff through a narrow `FileProvider`
+- Open a ready file in another Android app
 - In supported browsers, selected folder files stay available after reload
 - A separate, resettable sample-data sandbox
 - A free one-folder-mirror tier and a $14 Bridge Pro license for up to eight folder mirrors
@@ -40,7 +40,9 @@ npm run lint
 npm run build
 ```
 
-The exact production command is `npm run build`. It writes the deployable static site to `dist/`, with `dist/index.html` at the root. `npm test` runs the browser claims on desktop and mobile Chromium. It removes only a stale preview process from this repository before Playwright starts and closes its own server. `npm run test:unit` runs the three native source regressions; together they run every command listed in `.factory/claims.json`.
+The production command is `npm run build`. It writes the static site to `dist/`. The root file is `dist/index.html`.
+
+`npm test` runs browser claims on desktop and mobile Chromium. It removes only this repository's stale preview process. Playwright starts and closes its server. `npm run test:unit` checks release and native-source contracts. Android outcome claims use an installed release APK. Run one with `npm run test:android-claim -- <claim-id>`.
 
 Run one claim with:
 
@@ -52,7 +54,7 @@ npm test -- --grep @claim:offline-reload
 
 The Capacitor 8 project lives in `android/` with app id `in.sociobot.offline_file_bridge`.
 
-The custom `OfflineBridgePlugin` opens Android's folder picker. It copies selected files into private app storage. It hands a chosen copy to Android's app chooser.
+The Android plugin opens the approved-folder picker. It copies selected files into private app storage. It opens a ready file in Android's app chooser.
 
 ## Privacy and licenses
 

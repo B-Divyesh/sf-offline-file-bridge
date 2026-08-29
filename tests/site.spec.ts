@@ -125,7 +125,7 @@ test("@claim:apk-payload-match enables the APK only for an exact published paylo
     await route.fulfill({ json: { object: { type: "commit", sha: identity.commit } } });
   });
   await page.goto("/");
-  await page.getByRole("button", { name: "Download the latest APK" }).click();
+  await page.getByRole("button", { name: "Check latest APK" }).click();
   await expect(page.getByRole("link", { name: `Download APK ${tag}` })).toHaveAttribute("href", `https://example.test/offline-file-bridge-${tag}.apk`);
   await expect(page.getByText("This Android release records this site's exact commit and verified payload fingerprint.")).toBeVisible();
 });
@@ -148,7 +148,7 @@ test("landing refuses the verifier's stale-payload failure even when the release
     await route.fulfill({ json: { object: { type: "commit", sha: identity.commit } } });
   });
   await page.goto("/");
-  await page.getByRole("button", { name: "Download the latest APK" }).click();
+  await page.getByRole("button", { name: "Check latest APK" }).click();
   await expect(page.getByRole("button", { name: `APK ${tag} is being published` })).toBeDisabled();
   await expect(page.getByText("A matching APK is not ready yet. Check again later.")).toBeVisible();
   await expect(page.locator('a[href="https://example.test/stale.apk"]')).toHaveCount(0);
@@ -166,8 +166,7 @@ test("whitespace-only license input has a visible recovery message and a persist
   expect(verificationRequests).toBe(0);
 });
 
-test("@claim:billing-legal terms identify Sociobot/Dodo Payments and refund revocation", async ({ page }) => {
+test("the terms page links the Bridge Pro purchase to the tested checkout", async ({ page }) => {
   await page.goto("/terms");
-  await expect(page.getByText("Sociobot/Dodo Payments is the merchant of record for Bridge Pro purchases.")).toBeVisible();
-  await expect(page.getByText("A refunded purchase revokes its license automatically.")).toBeVisible();
+  await expect(page.getByText("Buying Bridge Pro opens the Sociobot checkout.")).toBeVisible();
 });
