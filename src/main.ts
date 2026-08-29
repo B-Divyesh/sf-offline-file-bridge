@@ -336,6 +336,7 @@ async function handleAction(event: Event): Promise<void> {
     notice = "Sample data was reset.";
     noticeType = "success";
     await renderRoute();
+    document.querySelector<HTMLButtonElement>('[data-action="reset-demo"]')?.focus();
   }
   if (action === "leave-demo") localStorage.removeItem("demo:offline-file-bridge");
   if (action === "refresh") await refreshMirror(target.dataset.id!);

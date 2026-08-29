@@ -45,6 +45,7 @@ test("@claim:demo-reset restores the displayed seed without a reload", async ({ 
   await expect(page.getByText("Sample data was reset.")).toBeVisible();
   await expect(page.getByText("Ready · synced 12 min ago")).toBeVisible();
   await expect(page.getByText("Ready · synced just now")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Reset demo" })).toBeFocused();
 });
 
 test("@claim:local-only sends no selected or demo file data off-device", async ({ page }) => {
