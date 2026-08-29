@@ -13,14 +13,14 @@ describe("Android release identity contract", () => {
   });
 
   test("accepts only the source version's unique release tag", async () => {
-    await expect(verifySourceVersion("v0.1.6")).resolves.toEqual({ version: "0.1.6", versionCode: 6 });
-    await expect(verifySourceVersion("v0.1.5")).rejects.toThrow("does not match package version v0.1.6");
+    await expect(verifySourceVersion("v0.1.7")).resolves.toEqual({ version: "0.1.7", versionCode: 7 });
+    await expect(verifySourceVersion("v0.1.6")).rejects.toThrow("does not match package version v0.1.7");
   });
 
   test("@regression:release-tag cannot reuse an older candidate commit", async () => {
     const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
-    await expect(verifyReleaseCandidate("v0.1.6", head, () => head)).resolves.toEqual({ version: "0.1.6", versionCode: 6, commit: head });
-    expect(() => verifyTagCommit("v0.1.6", head, () => "e8debdc51c78ef81bb09a1f2c9b0c32b0eb0b951")).toThrow("not candidate");
+    await expect(verifyReleaseCandidate("v0.1.7", head, () => head)).resolves.toEqual({ version: "0.1.7", versionCode: 7, commit: head });
+    expect(() => verifyTagCommit("v0.1.7", head, () => "e8debdc51c78ef81bb09a1f2c9b0c32b0eb0b951")).toThrow("not candidate");
   });
 
   test("the release job verifies the packaged web payload before publishing", async () => {
@@ -28,9 +28,12 @@ describe("Android release identity contract", () => {
     expect(workflow).toContain('git rev-parse "${GITHUB_REF_NAME}^{commit}"');
     expect(workflow).toContain('release-contract.mjs candidate "$GITHUB_REF_NAME" "$RELEASE_COMMIT"');
     expect(workflow).toContain('BUILD_COMMIT="$RELEASE_COMMIT" npm run build');
-    expect(workflow).toContain('adb shell cmd package list packages android');
-    expect(workflow).toContain('Android Package Manager did not become ready.');
-    expect(workflow).toContain('set -eu');
+    expect(workflow).toContain('script: sh scripts/wait-for-android.sh && cd android && ./gradlew connectedReleaseAndroidTest');
+    const androidWait = await readFile("scripts/wait-for-android.sh", "utf8");
+    expect(androidWait).toContain('adb shell cmd package list packages android');
+    expect(androidWait).toContain('Android Package Manager did not become ready.');
+    expect(androidWait).toContain('while [ "$attempt" -le 90 ]');
+    expect(androidWait).toContain('set -eu');
     expect(workflow).not.toContain('set -euo pipefail');
     expect(workflow).toContain('release-contract.mjs artifact "release/offline-file-bridge-v${VERSION}.apk" "$GITHUB_REF_NAME" "$RELEASE_COMMIT" "release/BUILD-PROVENANCE.json"');
     expect(workflow.indexOf("release-contract.mjs artifact")).toBeLessThan(workflow.indexOf("softprops/action-gh-release"));
