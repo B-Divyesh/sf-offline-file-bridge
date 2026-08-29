@@ -109,7 +109,7 @@ function landing(): string {
         <h1 id="hero-title" tabindex="-1">Keep approved folders ready offline</h1>
         <p class="lede">For Android users who need cloud files in another app when the network disappears.</p>
         <div class="hero-actions">
-          <a class="button" href="/demo" data-link>Try it with sample data <span aria-hidden="true">→</span></a>
+          <a class="button" href="/?demo=1" data-link>Try it with sample data <span aria-hidden="true">→</span></a>
           <span class="action-note">A ready folder opens. Nothing is saved.</span>
         </div>
         <ul class="facts"><li>One folder is free.</li><li>Files stay on your device.</li><li>Works after the first visit.</li></ul>
@@ -320,7 +320,8 @@ function bindEvents(): void {
   document.querySelectorAll<HTMLAnchorElement>("a[data-link]").forEach((link) => link.addEventListener("click", (event) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
-    void navigate(new URL(link.href).pathname);
+    const destination = new URL(link.href);
+    void navigate(`${destination.pathname}${destination.search}`);
   }));
   document.querySelectorAll<HTMLElement>("[data-action]").forEach((element) => element.addEventListener("click", handleAction));
   document.querySelectorAll<HTMLFormElement>("[data-license-form]").forEach((form) => form.addEventListener("submit", handleLicenseSubmit));

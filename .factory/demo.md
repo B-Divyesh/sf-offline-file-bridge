@@ -2,9 +2,9 @@
 
 ## Entry point
 
-- Hosted: `https://offline-file-bridge.sociobot.in/demo`
-- Local: run `npm run dev`, then open `http://localhost:5173/demo`
-- Query alias: `/?demo=1`
+- Hosted: `https://offline-file-bridge.sociobot.in/?demo=1`
+- Local: run `npm run dev`, then open `http://localhost:5173/?demo=1`
+- Route alias: `/demo`
 
 The first screen already contains the **Field notes** folder mirror. It has three realistic sample files:
 

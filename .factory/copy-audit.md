@@ -1,6 +1,6 @@
 # Landing page copy audit
 
-Audited 29 August 2026 for polish round 5. Counts treat contractions and
+Audited 29 August 2026 for polish round 6. Counts treat contractions and
 hyphenated words as one word. No landing sentence exceeds 22 words, uses a
 banned marketing word, or makes an unlisted claim.
 
@@ -16,6 +16,7 @@ banned marketing word, or makes an unlisted claim.
 | Works after the first visit. | 5 | `offline-reload` |
 | Check latest APK | 3 | Checks before offering a matching download; `apk-payload-match` |
 | Install steps | 2 | Action label |
+| A paper folder crosses a small bridge into a phone-shaped tray. | 11 | Informative image alternative |
 | approved folder → folder mirror → another app | 6 | Diagram caption; one term for the approved offline copy |
 | See what is ready before you leave | 8 | Pass |
 | Every folder mirror shows its last successful refresh. | 8 | `freshness` |
@@ -36,11 +37,20 @@ banned marketing word, or makes an unlisted claim.
 | It does not crawl unapproved folders. | 6 | `scoped-folder-access` |
 | After a failed Android refresh, it keeps the last ready time. | 11 | `native-refresh-safety` |
 | Keep more folder mirrors | 4 | Pass |
+| $14 / one-time purchase | 1 / 2 | `free-tier` |
 | Bridge Pro adds up to eight folder mirrors and keeps 30 refresh records per folder. | 15 | `free-tier` |
 | The free version keeps one folder mirror. | 7 | `free-tier` |
 | Buy Bridge Pro | 3 | `checkout` |
 | at the Sociobot checkout (external site) | 6 | Checkout destination; `checkout` |
 | Verify license | 2 | `license-verification-privacy` |
+| Paste the token from your purchase email. | 7 | Form instruction |
+| Spaces alone are not a token. | 6 | Validation rule |
+| This Android release records this site's exact commit and verified payload fingerprint. | 12 | `apk-payload-match` |
+| A matching APK is not ready yet. / Check again later. | 7 / 3 | Tested unavailable state and recovery |
+| This license is no longer active. / Buy a new license or restore another. | 6 / 7 | Tested license state and recovery |
+| Bridge Pro is active on this device. | 7 | Tested license state |
+| Enter the license token from your purchase email, then verify it. | 11 | Validation recovery |
+| That license is not active. / Check the token and try again. | 5 / 6 | Verification state and recovery |
 | Keep approved folders ready offline. | 5 | Product summary |
 | Built by Param Factory | 4 | Attribution |
 
@@ -55,7 +65,7 @@ banned marketing word, or makes an unlisted claim.
 | The paid license | Bridge Pro |
 | Inspecting a local sample before saving it | preview |
 
-Catalog description: “Open ready files from approved Android folders in another app.” (10 words, 62 characters.)
+Catalog description: “Keep approved Android folders ready offline and open their files in another app.” (13 words, 79 characters.)
 
 ## Privacy and documentation amendments
 

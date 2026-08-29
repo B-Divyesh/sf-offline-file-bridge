@@ -2,7 +2,7 @@
   "name": "Offline File Bridge",
   "short_name": "File Bridge",
   "description": "Keep approved folders ready offline and open their files in other apps.",
-  "start_url": "/app?v=1",
+  "start_url": "/app?v=14",
   "scope": "/",
   "display": "standalone",
   "background_color": "#F4EEDC",

@@ -6,7 +6,7 @@ Offline File Bridge is for Android users who need a cloud file in another local 
 
 Live site: <https://offline-file-bridge.sociobot.in>
 
-One-click demo: <https://offline-file-bridge.sociobot.in/demo>
+One-click demo: <https://offline-file-bridge.sociobot.in/?demo=1>
 
 ## What v1 includes
 
@@ -29,7 +29,7 @@ npm ci
 npm run dev
 ```
 
-Open `http://localhost:5173/` or go straight to `http://localhost:5173/demo`.
+Open `http://localhost:5173/` or go straight to `http://localhost:5173/?demo=1`.
 
 ## Test and build
 
@@ -44,7 +44,7 @@ The production command is `npm run build`. It writes the static site to `dist/`.
 
 `npm test` runs browser claims on desktop and mobile Chromium. It removes only this repository's stale preview process. Playwright starts and closes its server. `npm run test:unit` checks release metadata and Android source safeguards.
 
-Android outcome claims run against an installed release APK in the release workflow. A clean checkout checks the app file's checksum and the published Android test result. Run one with `npm run test:android-claim -- <claim-id>`.
+Android outcome claims run against an installed release APK in the release workflow. A clean checkout checks the app checksum and published Android result. Evidence-only commits may reuse that release; any product, claim, test, README, or configuration change requires a new one. Run one with `npm run test:android-claim -- <claim-id>`.
 
 Run one claim with:
 

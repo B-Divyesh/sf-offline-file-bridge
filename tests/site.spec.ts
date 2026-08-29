@@ -53,7 +53,18 @@ test("the folder-mirror term is consistent in app metadata", async ({ page }) =>
 test("demo query opens the isolated sample", async ({ page }) => {
   await page.goto("/?demo=1");
   await expect(page.getByText("Demo — sample data, nothing is saved")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Reset demo" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Start for real" })).toBeVisible();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Open your offline folders");
+});
+
+test("the landing sample action keeps the demo query and moves focus to its heading", async ({ page }) => {
+  await page.goto("/");
+  const action = page.getByRole("link", { name: /Try it with sample data/ });
+  await expect(action).toHaveAttribute("href", "/?demo=1");
+  await action.click();
+  await expect(page).toHaveURL(/\/\?demo=1$/);
+  await expect(page.getByRole("heading", { level: 1, name: "Open your offline folders" })).toBeFocused();
 });
 
 test("keyboard navigation reaches the primary action", async ({ page }) => {

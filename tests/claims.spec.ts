@@ -28,7 +28,7 @@ test("@claim:demo-ready-sample opens a ready, isolated sample in one click", asy
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await page.getByRole("link", { name: /Try it with sample data/ }).click();
-  await expect(page).toHaveURL(/\/demo$/);
+  await expect(page).toHaveURL(/\/\?demo=1$/);
   await expect(page.getByText("Demo — sample data, nothing is saved")).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "Field notes" })).toBeVisible();
   await expect(page.getByText("Ready · synced 12 min ago")).toBeVisible();

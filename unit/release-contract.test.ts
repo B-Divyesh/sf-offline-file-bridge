@@ -1,27 +1,42 @@
 import { readFile } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
 import { describe, expect, test } from "vitest";
-import { buildMetadata } from "../scripts/build-metadata.mjs";
+import { buildContext, buildMetadata, isPostReleaseEvidencePath, selectBuildCommit } from "../scripts/build-metadata.mjs";
 import { verifyReleaseCandidate, verifySourceVersion, verifyTagCommit } from "../scripts/release-contract.mjs";
 
 const releaseTag = `v${buildMetadata.version}`;
 
 describe("Android release identity contract", () => {
-  test("a candidate build identifies HEAD instead of an older version tag", () => {
+  test("a candidate build identifies HEAD or an evidence-only matching release", () => {
     const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
     const oldTag = execFileSync("git", ["rev-parse", "v0.1.2^{commit}"], { encoding: "utf8" }).trim();
-    expect(buildMetadata.commit).toBe(head);
+    expect([head, buildContext.tagCommit]).toContain(buildMetadata.commit);
     expect(buildMetadata.commit).not.toBe(oldTag);
   });
 
+  test("post-release evidence cannot hide product or claim changes", () => {
+    expect(isPostReleaseEvidencePath(".factory/handoff.md")).toBe(true);
+    expect(isPostReleaseEvidencePath(".factory/polish-6.md")).toBe(true);
+    expect(isPostReleaseEvidencePath(".factory/verification-artifacts/polish-6/home.png")).toBe(true);
+    for (const path of ["src/main.ts", ".factory/claims.json", ".factory/catalog-description.txt", "README.md", "tests/claims.spec.ts"]) {
+      expect(isPostReleaseEvidencePath(path)).toBe(false);
+    }
+    const release = "a".repeat(40);
+    const head = "b".repeat(40);
+    expect(selectBuildCommit({ head, tagCommit: release, tagIsAncestor: true, changedFiles: [".factory/handoff.md"] }))
+      .toMatchObject({ commit: release, releaseEquivalent: true });
+    expect(selectBuildCommit({ head, tagCommit: release, tagIsAncestor: true, changedFiles: [".factory/handoff.md", "src/main.ts"] }))
+      .toMatchObject({ commit: head, releaseEquivalent: false });
+  });
+
   test("accepts only the source version's unique release tag", async () => {
-    await expect(verifySourceVersion(releaseTag)).resolves.toEqual({ version: buildMetadata.version, versionCode: 13 });
+    await expect(verifySourceVersion(releaseTag)).resolves.toEqual({ version: buildMetadata.version, versionCode: 14 });
     await expect(verifySourceVersion("v0.1.11")).rejects.toThrow(`does not match package version ${releaseTag}`);
   });
 
   test("@regression:release-tag cannot reuse an older candidate commit", async () => {
     const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
-    await expect(verifyReleaseCandidate(releaseTag, head, () => head)).resolves.toEqual({ version: buildMetadata.version, versionCode: 13, commit: head });
+    await expect(verifyReleaseCandidate(releaseTag, head, () => head)).resolves.toEqual({ version: buildMetadata.version, versionCode: 14, commit: head });
     expect(() => verifyTagCommit(releaseTag, head, () => "e8debdc51c78ef81bb09a1f2c9b0c32b0eb0b951")).toThrow("not candidate");
   });
 
@@ -63,7 +78,7 @@ describe("Android release identity contract", () => {
 
   test("the updated service worker replaces old caches and takes control", async () => {
     const worker = await readFile("public/sw.js", "utf8");
-    expect(worker).toContain('const CACHE = "offline-file-bridge-v5"');
+    expect(worker).toContain('const CACHE = "offline-file-bridge-v6"');
     expect(worker).toContain("self.skipWaiting()");
     expect(worker).toContain("self.clients.claim()");
     expect(worker).toContain("key !== CACHE");
