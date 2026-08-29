@@ -1,33 +1,33 @@
-# Offline File Bridge — polish round 1 handoff
+# Offline File Bridge — independent verification 5 handoff
 
-- **Result:** PASS
-- **Reviewed candidate:** `5888fa3ee5647c18f6c4716a3dfa4507bb70128a`
-- **Pushed repair:** `02f2a795d77c1404ed3783bc994fb7b585c8fae4`
+- **Result:** FAIL
+- **Tested candidate:** `bff0090d80fcbadb09eb377a43e6f9f86c671b8b`
 - **Live URL:** <https://offline-file-bridge.sociobot.in/>
-- **Deployment:** Azure Static Web Apps production deployment `e2470841-1f66-4333-b929-b9ae35a5806d`, 29 August 2026 UTC
+- **Verified:** 29 August 2026 UTC
 
-All 14 findings from `review-1.md` are closed and mapped to evidence in [polish-1.md](polish-1.md). The published PWA keeps the established notebook identity and matching APK release payload. This retry adds a scoped preview-server preflight so Playwright owns and closes its test server: it removes only an old port-4173 Vite preview from this repository, never another project’s process.
+The web deployment matches the candidate build and its browser/PWA quality gates pass. The release fails because the downloadable `v0.1.2` APK contains an older web payload while the live site accepts and labels it as matching.
 
-## How to run and verify
+## Release blockers
 
-```sh
-npm ci
-npm test
-npm run test:unit
-npm run lint
-npm run build
-```
+1. Candidate web-tree SHA-256 is `ad256aac5d1577857b1045f173a994d2be854935fa1221c9e359b4a7697dfed8`; published APK provenance records `e62fb7fcc9eca061970ef64db71a9db29e2af748adcc0fecd77a9a29e939670b`. Extracted HTML, JS, CSS, service worker, and 404 differ. Publish a new version/tag with candidate-built APK/AAB and compare payload identity, not only the old tag commit.
+2. The live **“This APK matches this site”** statement is absent from `.factory/claims.json` and is false. Add an exact downloadable-APK-versus-candidate claim test.
+3. Restore the paid-unlock legal copy naming Sociobot/Dodo as merchant of record and explaining refund/revocation handling.
 
-The one-click demo is `/demo` or `/?demo=1`. It uses only `demo:offline-file-bridge`; **Reset demo** visibly restores the seeded state and **Start for real** discards the demo namespace.
+Minor: whitespace-only license input silently does nothing and the field has no persistent visible label.
 
-From a fresh clone at the repair commit, all 15 exact commands listed in `.factory/claims.json` passed independently. The aggregate suite then passed: `npm test` **72/72**, `npm run test:unit` **7/7**, `npm run lint`, `npm run build`, `npm audit --omit=dev`, and `git diff --check`. Browser coverage includes desktop/Pixel 5, offline reload, local-only request interception, demo reset/isolation, focus and route announcements, 44 px controls, 200% reflow, metadata/404/canonical handling, and Axe on every route. The production output is 38.32 KB JavaScript (13.53 KB gzip) and 14.18 KB CSS (4.38 KB gzip).
+## Verification summary
 
-Post-deploy cold checks passed:
+- All 15 exact claim commands pass after `npm ci`.
+- `npm test`: 72/72; `npm run test:unit`: 7/7; lint/build/audit pass.
+- First-read and one-click demo gates pass at desktop and 390 px.
+- Normal, boundary, invalid, persistence, recovery, keyboard, offline, and service-worker update flows pass except the license whitespace feedback noted above.
+- Demo and real-file flows make no cross-origin request. The billing verify API allows 30 requests, then returns 429 with `Retry-After: 4`.
+- Axe has zero serious/critical findings across all routes in desktop light and mobile dark modes.
+- Mobile Lighthouse: 99 performance, 100 accessibility, 100 best practices, 100 SEO; LCP 1.65 s, TBT 121 ms, CLS 0.
+- Live candidate files all byte-match fresh `dist/`; the public APK does not.
 
-- `verify-url.sh https://offline-file-bridge.sociobot.in .factory/verification-artifacts/polish-1-retry/live-url` — 200, no console errors, title/lang/main/H1/alt checks pass.
-- Direct live mobile check — demo refresh/reset, isolated storage, three sample files, no horizontal overflow, and zero serious/critical Axe findings on `/demo` and `/missing-page` pass. Screenshots are in [verification-artifacts/polish-1-retry](verification-artifacts/polish-1-retry/).
-- Live routes `/`, `/demo`, `/app`, `/privacy`, `/terms`, `/install` return 200; `/missing-page` returns 404 with no canonical URL. Security headers are present.
+Full evidence and exact findings are in [verification-5.md](verification-5.md). Screenshots and machine reports are under [verification-artifacts/verification-5](verification-artifacts/verification-5/).
 
-## Known gaps
+## Verification limitation
 
-No web/PWA review finding remains. This worker has no Java or Android SDK, so it could not rerun Gradle or device instrumentation locally. Android release build and installed-APK coverage remain in the repository’s GitHub Actions workflow; physical-device testing with the owner’s upload key remains a store-release step, not an unresolved product defect.
+This image has no Java, Android SDK, or emulator, so Gradle/device tests could not run locally. Public GitHub Actions run `33229112667` passed installed-APK Android 36 instrumentation and artifact creation for release commit `85b6c082…`; it does not establish that the older APK matches candidate `bff0090`.
