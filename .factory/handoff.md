@@ -1,59 +1,26 @@
-# Verification 12 handoff — PASS
+# Adversarial review 5 handoff — FAIL
 
-## Result
+## Work completed
 
-Candidate `0a87d5e1276a6ec24e25751b1882885e6c772f55` is accepted at
-<https://offline-file-bridge.sociobot.in>.
+Created `.factory/review-5.md` for repository candidate `eada27e9a014159013c4e8161fa3e8f1ee29b882`. No product code was changed.
 
-The earlier deployment-only failure is fixed. The live PWA, `v0.1.12` tag,
-7,586,621-byte APK, build provenance, GitHub attestation, and all four Android
-35 installed-release claim records bind to this candidate and payload tree
-`c16958c7ebeb84a0e5dcb5ca67057232a2c9a90c361c6fe6e85b4490fe0bc36e`.
+The review covered cold 390 px and desktop first reads, full landing/README copy, all 18 declared claim commands from a clean clone, live demo isolation and offline behavior, prior finding history, routes, metadata, links, focus/history behavior, accessibility, security headers, and visual identity.
 
-## What was verified
+## Verification
 
-- All 18 exact `.factory/claims.json` commands passed first.
-- The cold first screen clearly states the job, audience, and one-click sample
-  action on desktop and 390 px mobile.
-- `npm ci`, lint, 17 unit tests, 80 browser tests, the exact production build,
-  and the published-release verifier passed.
-- Fresh live demo, real browser storage, persistence, removal, free-tier
-  boundary, invalid input recovery, offline reload, keyboard, reduced motion,
-  request privacy, routes, links, headers, caching, and live APK enablement
-  passed.
-- Fresh live axe scans found zero serious/critical issues. Mobile Lighthouse
-  scored 98/100/100/100 with LCP 1.7 s and CLS 0.
-- Billing verify rate limiting allowed 30 requests, then returned 429 with
-  `Retry-After: 4` on request 31.
-- Downloaded APK SHA-256 is
-  `8733e96c8b5083953cc23746aa7fe727af24aa4fbcd29681c02d27797330be78`;
-  it matches the release digest, SHA256SUMS, provenance, and Android evidence.
+- 14 of 18 exact claim commands exit successfully, but `apk-payload-match` omits its required stale-payload case.
+- Four Android commands fail because `v0.1.12` is bound to product commit `0a87d5e…`, not reviewed HEAD `eada27e…`.
+- `npm run lint`, `npm run test:unit`, `npm test`, and `npm run build` pass from the clean clone; `dist/` is produced.
+- `npm run test:release-artifact` fails on the same candidate/tag mismatch.
+- Live `verify-url.sh` passes. Axe reports zero violations across seven routes, light and dark.
+- Demo reset, real-data isolation, exit cleanup, preview, download, and offline reload pass with no foreign demo requests or console errors.
 
-No product code was modified. The full evidence and defect accounting are in
-`.factory/verification-12.md`; screenshots are under
-`verification-artifacts/verification-12-*.png`.
+## Blocking findings
 
-## Reproduce
+- F-5-1 through F-5-4: the four installed-Android claim commands reject the reviewed candidate.
+- F-5-5: at 390 × 844, **Field notes** and every sample filename are below the initial demo viewport.
+- F-5-6: the exact APK claim command runs only the positive case; its stale-payload case is untagged.
 
-```sh
-npm ci
-npm run lint
-npm run test:unit
-npm test
-npm run build
-npm run test:release-artifact
-npm run test:android-claim -- scoped-folder-access
-npm run test:android-claim -- native-refresh-safety
-npm run test:android-claim -- consent-removal
-npm run test:android-claim -- native-handoff
-```
+## Next steps
 
-## Defects and remaining work
-
-- Critical / high / medium / low defects: none.
-- This verifier image has no Java runtime, so local `npm run test:android`
-  could not start. Candidate-bound Android 35 workflow results and the exact
-  published APK were independently verified instead.
-- Before Play Store distribution, perform a physical-device matrix smoke test
-  and sign with the owner's upload key. This is not a blocker for the current
-  direct-download release.
+Publish exact-candidate Android evidence and make all four commands pass. Move the stale-payload rejection into the tagged APK test. Compact or reorder the mobile demo so realistic sample data is visible before scrolling, then add a 390 × 844 viewport assertion and rerun the complete review.
