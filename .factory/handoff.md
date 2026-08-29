@@ -35,7 +35,30 @@ The Playwright matrix covers desktop and 390 px-class mobile behavior, keyboard 
 
 ## Android and release evidence
 
-GitHub Actions is the required Android build environment because this worker has no JDK, Android SDK, or emulator. Tag `v0.1.2` runs JDK 21, Android API 36 release-variant instrumentation, Gradle unit tests, signed-with-generated-debug-key APK/AAB builds, byte-for-byte web payload verification, and release publication. Final workflow, artifact hashes, live download, and deployment evidence are recorded after publication below.
+GitHub Actions is the required Android build environment because this worker has no JDK, Android SDK, or emulator. [Run 33229112667](https://github.com/B-Divyesh/sf-offline-file-bridge/actions/runs/33229112667) completed successfully. Its Android API 36 installed-release instrumentation, Gradle unit tests, APK/AAB build, byte-for-byte web payload verification, and release upload all passed.
+
+Public release `v0.1.2` resolves to source commit `85b6c082837b07fdc85c58be7f977b1542d27fc2`. A fresh consumer download produced:
+
+```text
+offline-file-bridge-v0.1.2.apk  7,584,941 bytes  SHA-256 24972b5c04731f96d36a22eaf52ed21432e03011b5604603e7cc50312d3c7e3e
+offline-file-bridge-v0.1.2.aab  7,475,967 bytes
+SHA256SUMS                     282 bytes
+BUILD-PROVENANCE.json          391 bytes
+```
+
+`sha256sum -c SHA256SUMS` passed for the APK, AAB, and provenance file. The APK embeds version `0.1.2` and commit `85b6c082…`. A separate consumer run of `release-contract.mjs` confirmed all 18 embedded web files equal local `dist/` byte-for-byte; its calculated provenance exactly matched the published file. Web-tree SHA-256: `e62fb7fcc9eca061970ef64db71a9db29e2af748adcc0fecd77a9a29e939670b`.
+
+## Deployment and live verification
+
+Static deployment `61ff3990-3620-4513-b41a-e43ebf7257f6` succeeded. The live `build-identity.json` reports version `0.1.2` and the same release commit `85b6c082…`. The landing action resolves the public `v0.1.2` APK and says “This APK matches this site.” All four release assets return 200 with their published sizes.
+
+Live `/`, `/demo`, `/app`, `/privacy`, `/terms`, and `/install` return 200; `/missing-page` returns the designed 404. `verify-url.sh` passed in 920 ms with no console errors. Live browser checks at desktop and 390 px passed offline reload/open, cache `offline-file-bridge-v3`, same-origin-only demo traffic, keyboard entry, no mobile overflow, reduced motion, and zero serious/critical axe findings. The response has CSP, HSTS, `nosniff`, referrer, and permissions-policy headers; hashed assets have a one-year immutable cache policy.
+
+The checkout returns 303 to hosted Dodo checkout. A fresh 35-request invalid-license burst returned 30 × 200 and 5 × 429; each 429 included `Retry-After: 4` and `x-ratelimit-after: 4`.
+
+Evidence, including desktop/mobile screenshots and verifier output, is under `.factory/evidence/repair-3/`.
+
+## Commands
 
 ## Deploy and verify
 
@@ -51,4 +74,4 @@ git push origin main v0.1.2
 /opt/fleet/lib/deploy-static.sh offline-file-bridge dist
 ```
 
-The generated debug signing key is suitable for direct test installation. A store listing still needs the owner's stable upload key; no signing secret is committed.
+The generated debug signing key is suitable for direct test installation. A store listing still needs the owner's stable upload key; no signing secret is committed. No other known release blocker remains.
