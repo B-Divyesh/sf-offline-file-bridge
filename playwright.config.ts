@@ -11,6 +11,7 @@ export default defineConfig({
   reporter: [["list"], ["html", { outputFolder: "playwright-report", open: "never" }]],
   use: {
     baseURL: "http://127.0.0.1:4173",
+    launchOptions: { args: ["--disable-dev-shm-usage"] },
     trace: "retain-on-failure",
     screenshot: "only-on-failure"
   },

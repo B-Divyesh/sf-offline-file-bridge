@@ -62,5 +62,6 @@ describe("Android release identity contract", () => {
     const config = await readFile("playwright.config.ts", "utf8");
     expect(config).toContain("fullyParallel: false");
     expect(config).toContain("workers: 1");
+    expect(config).toContain('args: ["--disable-dev-shm-usage"]');
   });
 });

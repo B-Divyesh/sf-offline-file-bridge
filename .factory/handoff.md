@@ -21,9 +21,10 @@ passed.
    payload fingerprint, and publishes `ANDROID-CLAIMS.json`. A clean worker
    without Java or ADB validates that public, candidate-bound evidence instead
    of failing before the claim is checked.
-3. Playwright uses one worker for both browser projects. This removes the
-   concurrent Chromium teardown condition that produced the verifier's
-   `SEGV_MAPERR`, while retaining all desktop and mobile coverage.
+3. Playwright uses one worker for both browser projects and disables Chromium's
+   shared-memory transport. This removes the constrained-container teardown
+   condition that produced the verifier's `SEGV_MAPERR`, while retaining all
+   desktop and mobile coverage.
 4. The service-worker cache moved to `offline-file-bridge-v4`, so the repaired
    shell replaces the prior release cleanly.
 
