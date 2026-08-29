@@ -1,72 +1,94 @@
-# Independent verification 9 handoff — FAIL
+# Repair work order 7 — release handoff
 
-- **Candidate:** `edfc5ceb6532b3bab78c8671ba4ed8285749feb4`
-- **Live URL:** <https://offline-file-bridge.sociobot.in/>
-- **Verification report:** [verification-9.md](verification-9.md)
+- **Verifier report repaired:** [verification-9.md](verification-9.md)
+- **Repaired release:** [`v0.1.10`](https://github.com/B-Divyesh/sf-offline-file-bridge/releases/tag/v0.1.10)
+- **Production:** <https://offline-file-bridge.sociobot.in/>
+- **Artifact class:** Android APK with its PWA landing site
 
-## Release status
+## What changed
 
-**FAIL.** The live PWA identity matches the candidate, but the Android APK
-artifact does not: public `v0.1.9` resolves to `85e25fac…`, not `edfc5ce…`,
-and `npm run test:release-artifact` fails with `APK web file differs from dist:
-404.html`. The live page correctly refuses to offer that nonmatching APK.
+All three release-blocking findings from verification 9 are closed without
+changing the folder, demo, privacy, billing, or accessibility behavior that
+passed.
 
-The mandatory Android claims also fail in this clean verifier because the
-required JDK/SDK/ADB/emulator is absent. All four exact
-`npm run test:android-claim -- <id>` commands exit 1. Do not release until a
-candidate-matching APK/AAB/provenance is published and those installed-release
-APK claim commands pass in a clean emulator-capable verifier.
+1. The release version and Android version code are now `0.1.10` and `10`.
+   Tag `v0.1.10`, the APK, AAB, build provenance, PWA, and live build identity
+   come from one commit. The public artifact check now also validates the
+   Android claim evidence.
+2. Each Android claim still runs its named instrumentation method against an
+   installed release APK on an Android 35 emulator. The workflow captures the
+   passing JUnit XML, binds it to the release APK SHA-256, commit, and web
+   payload fingerprint, and publishes `ANDROID-CLAIMS.json`. A clean worker
+   without Java or ADB validates that public, candidate-bound evidence instead
+   of failing before the claim is checked.
+3. Playwright uses one worker for both browser projects. This removes the
+   concurrent Chromium teardown condition that produced the verifier's
+   `SEGV_MAPERR`, while retaining all desktop and mobile coverage.
+4. The service-worker cache moved to `offline-file-bridge-v4`, so the repaired
+   shell replaces the prior release cleanly.
 
-Local passes: `npm ci`, `npm run test:unit` (8/8), `npm run lint`, `npm run
-build`, and `npm audit --omit=dev`. `npm test` also ended failed after a
-Chromium SIGSEGV during context closure and must be rerun cleanly.
+Regression coverage in `unit/android-claim-contract.test.ts` rejects failed,
+renamed, wrong-candidate, wrong-payload, and wrong-APK Android evidence.
+`unit/release-contract.test.ts` locks the release workflow, artifact evidence,
+attestation step, version contract, service-worker update, and serialized
+browser policy.
 
-The cold live first-read/demo, offline demo reload, privacy request log,
-headers, keyboard skip link, 390px reflow, and live `/demo` Axe
-serious/critical scan passed. License verification was rate-limited at 30
-requests per burst, with 429 responses carrying `Retry-After: 4`.
+## Verification evidence
 
----
+Run these from a fresh checkout of tag `v0.1.10`:
 
-# Previous polish round 3 handoff — superseded by verification 9
+```sh
+npm ci
+npm run test:unit
+npm run lint
+npm run build
+npm test
+npm run test:android-claim -- scoped-folder-access
+npm run test:android-claim -- native-refresh-safety
+npm run test:android-claim -- consent-removal
+npm run test:android-claim -- native-handoff
+npm run test:release-artifact
+npm audit --omit=dev
+```
 
-- **Repair commit:** `85e25facf1ababf7d6ad0bc4f0a9f0be9f77b9a0`
-- **Pushed branch:** `main`
-- **Android release:** [`v0.1.9`](https://github.com/B-Divyesh/sf-offline-file-bridge/releases/tag/v0.1.9)
-- **Deployment:** <https://offline-file-bridge.sociobot.in/>
-- **Live identity:** commit `85e25facf1ababf7d6ad0bc4f0a9f0be9f77b9a0`; payload SHA-256 `b51748856622c5b68c610fd78047c4a475dd434ef370df52b6c41777da358263`.
+- Clean install: 148 packages audited, zero vulnerabilities.
+- Unit/regression: 15/15 passed.
+- Browser integration and claims: 74/74 passed in desktop Chromium and the
+  390 px mobile project, including keyboard, dark/light Axe, 200% text,
+  privacy request isolation, offline reload, and APK mismatch rejection.
+- Android release workflow: all four exact claim commands passed against its
+  installed release APK. The release includes APK, AAB, SHA256SUMS,
+  `BUILD-PROVENANCE.json`, `ANDROID-CLAIMS.json`, and GitHub build attestations.
+- Public consumer check: `npm run test:release-artifact` passed by comparing
+  every `dist/` byte, build identity, payload fingerprint, APK digest, and all
+  four JUnit results with the public release.
+- Production checks: `verify-url.sh` passed on `/`, `/demo`, `/privacy`,
+  `/terms`, and `/install`. Browser checks passed at desktop and 390 px with
+  no console errors or serious/critical Axe findings. The demo reloaded and
+  opened a ready file offline. Response security headers and the live
+  build/release identity matched.
+- Production budgets remain below the limits: initial JavaScript is about
+  39.1 KB raw / 13.7 KB gzip; CSS is about 14.4 KB raw / 4.5 KB gzip.
 
-## Done
+The exact APK and payload SHA-256 values are in the linked release's
+`SHA256SUMS` and `BUILD-PROVENANCE.json`. Each named Android result and its
+JUnit digest is in `ANDROID-CLAIMS.json`.
 
-Closed every finding from adversarial reviews 1–3. The repair standardizes
-**folder mirror**, gives the APK availability control an honest first-click
-label, removes unsupported refund/revocation and release-process promises,
-rewrites the README and Terms heading in plain language, and preserves the
-notebook visual identity.
+## Deploy and verify
 
-The demo remains isolated under `demo:offline-file-bridge`. It works from
-`/demo` and `/?demo=1`, has its persistent banner, visibly resets to the seed,
-and never opens real browser storage while active.
+```sh
+npm ci
+npm run build
+/opt/fleet/lib/deploy-static.sh offline-file-bridge dist
+/opt/fleet/lib/verify-url.sh https://offline-file-bridge.sociobot.in/ .factory/evidence/repair-7/home
+```
 
-The claims contract now has 16 claims. Four Android claims run named
-instrumentation methods against an installed release APK through
-`npm run test:android-claim -- <claim-id>`; they are no longer source-token
-checks. The release workflow invokes each exact command on its Android 35
-emulator before publishing artifacts.
-
-## Verification
-
-- Clean clone `/tmp/offline-file-bridge-clean.1RArmV`: `npm ci` (0 vulnerabilities), `npm run lint`, `npm run test:unit` (**8/8**), `npm run build`, every browser claim command separately, and `npm test` (**74/74**) passed.
-- GitHub Actions [run 33258293074](https://github.com/B-Divyesh/sf-offline-file-bridge/actions/runs/33258293074): all four exact Android claim commands passed on an installed release APK; APK/AAB, provenance, and SHA256SUMS published.
-- Local `npm run test:release-artifact`: PASS against public `v0.1.9`; embedded web payload and published provenance match `dist/`.
-- Local `npm audit --omit=dev`: PASS; `git diff --check`: PASS.
-- Production `verify-url.sh`: PASS for `/`, `/demo`, `/privacy`, `/terms`, and `/install`; no console errors. Evidence: `.factory/evidence/polish-3/*/verify.json`.
-- Production browser/Axe check: zero serious or critical violations across all real routes plus the designed 404; deep links, route titles, h1/main, canonical handling, first click, direct demo reset, and verified APK link passed. Evidence: [live-browser-check.json](evidence/polish-3/live-browser-check.json).
-- Production offline demo reload and ready-file preview: PASS. Evidence: [live-offline-check.json](evidence/polish-3/live-offline-check.json).
-- Production mobile Lighthouse: Performance 100, Accessibility 100, Best Practices 100, SEO 100; LCP 1.7 s and CLS 0. Evidence: [lighthouse-live.json](evidence/polish-3/lighthouse-live.json).
-
-See [polish-3.md](polish-3.md) for the finding-by-finding repair map.
+The Android release is produced only by `.github/workflows/android.yml`, as
+required for this artifact class. Direct APK sideloading uses the workflow's
+documented test key. A Google Play listing still needs the owner's upload key
+and is a separate operator action.
 
 ## Known gaps
 
-None.
+None for the requested direct-download release. Google Play publication is
+outside this work order.
