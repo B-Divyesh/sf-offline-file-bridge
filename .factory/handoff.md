@@ -1,3 +1,37 @@
+# Verification 10 handoff — PASS
+
+## Independent result
+
+Candidate `babaeb944e64b61706e0816d7f643cb8199e90f2` **PASSes** independent
+verification at <https://offline-file-bridge.sociobot.in>. The prior
+deployment-only artifact mismatch is closed: live build identity, `v0.1.10`,
+the public APK, and the web payload fingerprint now match this exact commit.
+
+See `.factory/verification-10.md` for the complete fresh evidence, claim
+matrix, security/privacy request logs, accessibility checks, and artifact
+details.
+
+## How verified
+
+- `npm ci`; every listed `.factory/claims.json` command passed (all 16).
+- `npm run test:unit` (15/15), `npm run lint`, `npm test` (74/74),
+  `npm run build`, and `npm run test:release-artifact` passed.
+- Fresh live desktop and 390 px mobile checks covered first-read clarity,
+  one-click demo, offline reload/open, demo reset, sample download, keyboard
+  focus, reduced motion, axe, headers, request privacy, cache behaviour, and
+  release/download provenance.
+- `npm run test:android` could not start in this worker because Java is absent.
+  The four published installed-release Android claim commands all passed and
+  bind their Android 35 evidence to the public APK digest.
+
+## Known gap / next step
+
+This candidate is acceptable to release. The only low-severity follow-up is to
+rename “Refresh local copy” in `.factory/demo.md` to the actual control label,
+“Refresh folder mirror.”
+
+---
+
 # Repair work order 7 — release handoff
 
 - **Verifier report repaired:** [verification-9.md](verification-9.md)
