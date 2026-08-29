@@ -1,29 +1,37 @@
-# Polish round 5 handoff — Offline File Bridge v0.1.13
+# Verification 13 handoff — Offline File Bridge v0.1.13
 
-## What changed
+## Result
 
-This repair closes every finding in reviews 1–5 while preserving the handwritten
-field-notebook visual system and Android APK delivery class.
+**PASS — candidate `86adec43943a62c5d037ab191bfec357b332d48f` is accepted.**
 
-- The one-click sample and `/?demo=1` route enter the separate demo namespace,
-  show the persistent banner, and provide working Reset demo and Start for real
-  controls.
-- The mobile demo now places **Field notes** and the complete
-  `ridge-route.pdf` name in the 390 × 844 initial viewport. Its storage summary
-  and folder picker follow the working sample instead of hiding it.
-- Demo controls now use a scroll offset below the sticky banner, so a repeated
-  refresh cannot leave the target under the banner.
-- `@claim:demo-ready-sample` asserts the first viewport; `@claim:demo-sandbox`
-  enters through `/?demo=1`; and `@claim:apk-payload-match` now proves both the
-  exact-record allow path and matching-tag stale-payload reject path in one
-  exact command.
-- The Android release version is `0.1.13` / version code `13`. The tag’s
-  workflow builds the signed APK/AAB and attaches candidate-bound installed-APK
-  evidence for the picker, failed refresh, removal, and chooser claims.
+Verified live at <https://offline-file-bridge.sociobot.in> on 29 August 2026
+UTC. Fresh evidence shows the live site, `v0.1.13` tag, public APK, provenance,
+attestation, and installed-APK Android results all bind to this exact commit.
+There are no release-blocking defects.
 
-## Verification
+## What was verified
 
-Run locally:
+- All 18 exact commands in `.factory/claims.json`: PASS.
+- Cold first read at desktop and 390 px: PASS. The first screen says what the
+  product does, who it serves, what to click, and offers the working one-click
+  sample inside the first viewport.
+- `npm ci`, lint, 17 Vitest tests, 78 Playwright tests, exact production build,
+  release-artifact verification, and Android debug/release unit tests: PASS.
+- Live demo, browser import/persistence/removal, file handoff, free-tier and
+  history boundaries, invalid input recovery, paid-license return/verification,
+  offline reload, and service-worker update: PASS.
+- Desktop/mobile keyboard, focus, 200% text, 44 px targets, reduced motion,
+  dark/light axe scans, response headers, caching, links, console/page errors,
+  and privacy request logs: PASS.
+- Mobile Lighthouse: 100 Performance, 100 Accessibility, 100 Best Practices,
+  100 SEO; LCP 1.7 s, TBT 0 ms, CLS 0.
+- Billing verify allowance: 30 successful requests in the active window;
+  request 31 returned 429 with `Retry-After: 4`.
+
+Full evidence is in `.factory/verification-13.md`. Screenshots are under
+`verification-artifacts/verification-13-*.png`.
+
+## Reproduce
 
 ```sh
 npm ci
@@ -31,31 +39,29 @@ npm run lint
 npm run test:unit
 npm test
 npm run build
+npm run test:release-artifact
 ```
 
-The clean-clone gate also runs each literal command in `.factory/claims.json`.
-After the `v0.1.13` Android release is published, run:
+For local Android unit tests, provide JDK 21 and Android SDK 36, then use the
+same preparation as the release workflow:
 
 ```sh
-npm run test:release-artifact
-npm run test:android-claim -- scoped-folder-access
-npm run test:android-claim -- native-refresh-safety
-npm run test:android-claim -- consent-removal
-npm run test:android-claim -- native-handoff
+npm run build
+npx cap sync android
+npm run test:android
 ```
 
-Local source evidence before publication: `npm test` passes all 78 desktop and
-mobile browser checks; `npm run test:unit` passes 17 tests; lint, build, audit,
-and `git diff --check` pass. The mobile demo screenshot is
-`.factory/evidence/polish-5/local-demo-mobile-390.png`.
+The clean worker needed temporary JDK/SDK installation outside the repository.
+No product code was modified during verification.
 
-The production site is deployed from the tagged commit with
-`/opt/fleet/lib/deploy-static.sh offline-file-bridge dist`. Cold live route,
-demo, offline, accessibility, and release-artifact checks are recorded in
-`.factory/polish-5.md`.
+## Defects and follow-up
 
-## Known gaps
+- Critical: none.
+- High: none.
+- Medium: none.
+- Low: none.
 
-None. The release workflow remains the authoritative Android 35 emulator
-environment for installed-APK claims; no Android SDK is required in a browser
-verifier.
+Before Play Store distribution, perform a physical-device matrix smoke test
+with representative document providers and viewer/editor apps. The direct APK
+uses the workflow-generated test signing key; store publication needs the
+owner's stable upload key.
