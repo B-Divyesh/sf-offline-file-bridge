@@ -1,1 +1,1 @@
-Keep approved folders ready offline, then open their files in other apps.
+Open approved folders offline, then hand their files to other apps.

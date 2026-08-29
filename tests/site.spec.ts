@@ -148,7 +148,7 @@ test("landing refuses the verifier's stale-payload failure even when the release
   await page.goto("/");
   await page.getByRole("button", { name: "Download the latest APK" }).click();
   await expect(page.getByRole("button", { name: "APK v0.1.3 is being published" })).toBeDisabled();
-  await expect(page.getByText("A matching APK is not ready yet. The PWA is ready to install now.")).toBeVisible();
+  await expect(page.getByText("A matching APK is not ready yet. Check again later.")).toBeVisible();
   await expect(page.locator('a[href="https://example.test/stale.apk"]')).toHaveCount(0);
 });
 

@@ -54,17 +54,6 @@ The Capacitor 8 project lives in `android/` with app id `in.sociobot.offline_fil
 
 The custom `OfflineBridgePlugin` opens Android's folder picker. It copies selected files into private app storage. It hands a chosen copy to Android's app chooser.
 
-GitHub Actions builds Android release artifacts with JDK 21:
-
-```sh
-npm run build
-npx cap sync android
-cd android
-./gradlew assembleRelease bundleRelease
-```
-
-For a public store release, use the owner's upload key.
-
 ## Privacy and licenses
 
 Real browser mirrors use the `offline-file-bridge-real` IndexedDB database. Demo state uses only the `demo:offline-file-bridge` localStorage key. The app sends no file contents to a server. License verification sends a token only to the Sociobot billing API.

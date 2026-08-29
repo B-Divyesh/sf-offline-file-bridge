@@ -113,7 +113,7 @@ function landing(): string {
           <span class="action-note">A ready folder opens. Nothing is saved.</span>
         </div>
         <ul class="facts"><li>One folder is free.</li><li>Files stay on your device.</li><li>Works after the first visit.</li></ul>
-        <p><span data-release-action><button class="plain-button" data-action="check-release">Download the latest APK</button></span> · <a href="/install" data-link>Install steps</a> · Not on Google Play yet</p>
+        <p><span data-release-action><button class="plain-button" data-action="check-release">Download the latest APK</button></span> · <a href="/install" data-link>Install steps</a></p>
         <p id="release-note" class="sr-only" role="status"></p>
       </div>
       <figure class="hero-art">
@@ -201,7 +201,7 @@ function termsPage(): string {
 }
 
 function installPage(): string {
-  return layout(`<main id="main" class="page install"><p class="eyebrow">Android v${esc(__APP_VERSION__)}</p><h1 tabindex="-1">Install the Android bridge</h1><p>The APK is not on Google Play yet. GitHub Releases publishes the signed test build and its checksum.</p><p data-release-action><button class="button" data-action="check-release">Check latest APK</button></p><div id="release-note" class="notice" role="status">The PWA is ready now. Check GitHub when you want the APK.</div><h2>Install in three steps</h2><ol class="install-steps"><li>Download the APK from the latest release.</li><li>Open the download and allow installs from your browser when Android asks.</li><li>Open Offline File Bridge, then choose the folder Android may read.</li></ol><h2>What the package includes</h2><p>The release contains an APK for direct install and an AAB for store submission. The factory build uses a generated debug keystore. A store release needs the owner's upload key.</p><p>You can also <a href="/app" data-link>install the PWA from your browser</a>.</p><h2>Short walkthrough</h2><div class="walkthrough" aria-label="Three-screen app walkthrough"><div class="phone-frame"><b>1. Choose a folder</b><span>Android shows its folder picker. You approve one location.</span></div><div class="phone-frame"><b>2. Check the ready time</b><span>The file count, size, and last successful refresh remain visible.</span></div><div class="phone-frame"><b>3. Share or open</b><span>The Android chooser hands a private local copy to your selected app.</span></div></div></main>`, "/install");
+  return layout(`<main id="main" class="page install"><p class="eyebrow">Android v${esc(__APP_VERSION__)}</p><h1 tabindex="-1">Install Offline File Bridge</h1><p>Check for the current Android app download.</p><p data-release-action><button class="button" data-action="check-release">Check latest APK</button></p><div id="release-note" class="notice" role="status">Check for a matching APK before you download.</div><h2>Install in three steps</h2><ol class="install-steps"><li>Download the APK from the latest release.</li><li>Open the download and allow installs from your browser when Android asks.</li><li>Open Offline File Bridge, then choose the folder Android may read.</li></ol><h2>Short walkthrough</h2><div class="walkthrough" aria-label="Three-screen app walkthrough"><div class="phone-frame"><b>1. Choose a folder</b><span>Android shows its folder picker. You approve one location.</span></div><div class="phone-frame"><b>2. Check the ready time</b><span>The file count, size, and last successful refresh remain visible.</span></div><div class="phone-frame"><b>3. Share or open</b><span>The Android chooser hands a private local copy to your selected app.</span></div></div></main>`, "/install");
 }
 
 function notFoundPage(): string {
@@ -282,7 +282,7 @@ function updateMetadata(path: string, isKnownPage: boolean): void {
     "/app": "Choose approved folders, refresh local copies, and preview ready files.",
     "/privacy": "Read how Offline File Bridge stores folder mirrors and handles license checks.",
     "/terms": "Read the terms for Offline File Bridge and its one-time Bridge Pro license.",
-    "/install": "Download the Android APK or install the Offline File Bridge PWA.",
+    "/install": "Check for a matching Android APK and install Offline File Bridge in three steps.",
     "/404": "The requested Offline File Bridge page could not be found."
   };
   const description = descriptions[isKnownPage ? path : "/404"];
@@ -578,7 +578,7 @@ async function loadRelease(): Promise<void> {
       publishedIdentity.payloadTreeSha256 !== localIdentity.payloadTreeSha256) throw new Error("Release identity mismatch");
     action.innerHTML = `<a class="button" href="${esc(apk.browser_download_url)}">Download APK ${esc(release.tag_name)}</a>`;
     note.innerHTML = `This Android release records this site's exact commit and verified payload fingerprint. <a href="${esc(sums.browser_download_url)}">Download SHA256SUMS</a>.`;
-  } catch { action.innerHTML = `<button class="button secondary" disabled>APK ${esc(RELEASE_TAG)} is being published</button>`; note.textContent = "A matching APK is not ready yet. The PWA is ready to install now."; }
+  } catch { action.innerHTML = `<button class="button secondary" disabled>APK ${esc(RELEASE_TAG)} is being published</button>`; note.textContent = "A matching APK is not ready yet. Check again later."; }
 }
 
 type BuildIdentity = { product: string; version: string; commit: string; payloadFileCount: number; payloadTreeSha256: string };

@@ -1,6 +1,6 @@
 # Landing page copy audit
 
-Audited 29 August 2026. Counts treat contractions and hyphenated words as one word. No landing sentence exceeds 22 words or uses a banned marketing word.
+Audited 29 August 2026 after polish round 2. Counts treat contractions and hyphenated words as one word. No landing sentence exceeds 22 words, uses a banned marketing word, or makes an unlisted claim.
 
 | Copy | Words | Result |
 | --- | ---: | --- |
@@ -14,7 +14,6 @@ Audited 29 August 2026. Counts treat contractions and hyphenated words as one wo
 | Works after the first visit. | 5 | `offline-reload` |
 | Download the latest APK | 4 | Action label |
 | Install steps | 2 | Action label |
-| Not on Google Play yet | 5 | Current distribution status |
 | folder → local copy → your app | 6 | Diagram caption |
 | See what is ready before you leave | 8 | Pass |
 | Every folder mirror shows its last successful refresh. | 8 | `freshness` |
@@ -52,4 +51,4 @@ Audited 29 August 2026. Counts treat contractions and hyphenated words as one wo
 | The paid license | Bridge Pro |
 | Inspecting a local sample before saving it | preview |
 
-Catalog description: “Keep approved folders ready offline, then open their files in other apps.” (12 words, 75 characters.)
+Catalog description: “Open approved folders offline, then hand their files to other apps.” (11 words, 68 characters.)
