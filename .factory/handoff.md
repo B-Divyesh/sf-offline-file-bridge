@@ -1,33 +1,28 @@
-# Polish round 2 handoff
+# Verification 7 handoff
 
-- **Result:** PASS
-- **Base review:** `19930ff44d2d6162c62820bbb9abf52515d9fc33`
-- **Repair:** `8c02f364351e9f9571f767e68db3ae175e254fdb`
-- **Deployment:** `8dc21aad-0480-4304-aabd-a1972d9c5d7f`
+- **Result:** **FAIL — P0 release blocker**
+- **Candidate:** `d94a0b04cbead4df7d7f26065dc1baa0764d486d`
 - **Live URL:** <https://offline-file-bridge.sociobot.in/>
 
-## Done
+The deployed PWA matches the candidate byte-for-byte, passes its web QA, and correctly refuses to expose a stale APK. However, the public Android `v0.1.3` APK embeds commit `e8debdc51c78ef81bb09a1f2c9b0c32b0eb0b951` and payload tree `812262f…`, while candidate/live is `d94a0b0…` and `2513572a…`. `npm run test:release-artifact` therefore fails at `APK web file differs from dist: 404.html`; the live download control remains disabled. The Android artifact contract is not met.
 
-- Removed every unsupported release/process/status promise identified in review 2: Play-store status, signed-build/checksum publication, PWA readiness, AAB availability, debug-keystore/upload-key jargon, and the README GitHub Actions/JDK claim.
-- Kept the tested APK identity behavior. The UI only enables an APK download after the matching release record, tag commit, and payload fingerprint agree.
-- Preserved the required one-click `?demo=1`/`/demo` isolated sample, persistent banner, reset behavior, routing, titles, canonical behavior, 404, legal links, responsive notebook identity, and all pre-existing claim coverage.
-- Updated the verb-first catalog description: “Open approved folders offline, then hand their files to other apps.”
-
-## How to verify
+## Verification summary
 
 ```sh
-npm ci
-npm test
-npm run test:unit
-npm run lint
-npm run build
-npm audit --omit=dev
+npm ci                         # PASS
+# every exact command in .factory/claims.json  # PASS, 17/17
+npm test                       # PASS, 76/76
+npm run test:unit              # PASS, 7/7
+npm run lint                   # PASS
+npm run build                  # PASS
+npm audit --omit=dev           # PASS, 0 vulnerabilities
+npm run test:release-artifact  # FAIL: public APK payload is stale
 ```
 
-All 17 exact commands in `.factory/claims.json` were also run separately from a fresh clone of repair commit `8c02f36`; all passed with exit status 0. Aggregate results: `npm test` **76/76**, native/source unit suite **7/7**, audit **0 vulnerabilities**. The production build is 13.82 KB gzip JavaScript and 4.45 KB gzip CSS.
+The PWA was freshly tested on live desktop and 390px mobile: cold first-read/demo, privacy request log, offline service-worker reload, keyboard/focus, reduced motion, axe, headers, caching, and rate limiting passed. The documented license verification endpoint allowed 30 requests then returned 429 with `Retry-After: 4`.
 
-The live cold checks for `/`, `/demo`, and `/install` passed with no application console errors. The live mobile interaction/Axe check covers `/`, `/demo`, `/install`, and `/missing-page`; all have zero serious/critical Axe issues. The unknown route intentionally returns 404 and emits only the browser's expected failed-main-resource 404 line. See [polish evidence](evidence/polish-2/live-browser-check.json) and [finding map](polish-2.md).
+`npm run test:android` and `npm run test:android-device` could not execute because this verifier image has no Java/Android SDK/emulator; this is an environment limitation, not the P0 basis.
 
-## Known gaps / next steps
+## Required next step
 
-None from the cumulative adversarial reviews. The APK/AAB release workflow remains GitHub Actions-owned, as required for this Android artifact class; no native release was built in this static deployment work order.
+Publish a new APK/AAB plus matching release provenance from exactly `d94a0b04cbead4df7d7f26065dc1baa0764d486d`, then rerun `npm run test:release-artifact` and Android CI/device tests. See `.factory/verification-7.md` for the complete evidence and exact hashes.
