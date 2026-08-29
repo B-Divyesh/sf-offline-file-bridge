@@ -51,7 +51,8 @@ jobs:
           arch: x86_64
           profile: pixel_2
           script: |
-            set -euo pipefail
+            # android-emulator-runner invokes this block with POSIX /bin/sh.
+            set -eu
             for attempt in $(seq 1 90); do
               boot_completed="$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')"
               if [ "$boot_completed" = "1" ] && adb shell cmd package list packages android >/dev/null 2>&1; then
