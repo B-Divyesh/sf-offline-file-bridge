@@ -20,7 +20,7 @@ Run from a clean dependency install on 29 August 2026 UTC:
 ```text
 npm ci                         PASS — 149 packages, 0 vulnerabilities
 npm run lint                   PASS — TypeScript no-emit check
-npm run test:unit              PASS — 6/6
+npm run test:unit              PASS — 7/7
 npm test                       PASS — 62/62 desktop and mobile Chromium
 npm run build                  PASS — dist/ produced
 npx cap sync android           PASS
