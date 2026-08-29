@@ -193,7 +193,7 @@ function folderCard(mirror: Mirror): string {
 }
 
 function privacyPage(): string {
-  return layout(`<main id="main" class="page legal"><p class="eyebrow">Plain privacy note</p><h1 tabindex="-1">Your files stay on your device</h1><p>Offline File Bridge stores approved files and refresh records in local app storage. The website stores real data in your browser database. Demo data uses a separate <code>demo:</code> namespace.</p><h2>What leaves the device</h2><p>Your folder names and files are not sent to us. License verification sends a token only to the Sociobot billing API. The install page asks GitHub for public release details.</p><h2>Permissions</h2><p>Android asks you to choose a folder. The app keeps access to that folder until you remove the folder mirror or revoke access in Android settings.</p><h2>Deletion</h2><p>Remove a folder mirror to delete its files. Clearing this site's storage also removes browser files. Uninstalling the Android app removes its private files.</p><h2>Contact</h2><p>Questions can be sent to <a href="mailto:privacy@sociobot.in">privacy@sociobot.in</a>.</p><p>Effective: 28 August 2026.</p></main>`, "/privacy");
+  return layout(`<main id="main" class="page legal"><p class="eyebrow">Plain privacy note</p><h1 tabindex="-1">Your files stay on your device</h1><p>Offline File Bridge stores approved files and refresh records in local app storage. The website stores real data in your browser database. Demo data uses a separate <code>demo:</code> namespace.</p><h2>What leaves the device</h2><p>Your folder names and files are not sent to us. License verification sends a token only to the Sociobot billing API. The install page asks GitHub for public release details.</p><h2>Permissions</h2><p>Android asks you to choose a folder. The app keeps access to that folder until you remove the folder mirror or revoke access in Android settings.</p><h2>Deletion</h2><p>In a browser, remove a folder mirror to delete its saved files. Clearing this site's browser data removes browser folder mirrors. On Android, remove a folder mirror to delete its private files and release folder access.</p><h2>Contact</h2><p>Questions can be sent to <a href="mailto:privacy@sociobot.in">privacy@sociobot.in</a>.</p><p>Effective: 29 August 2026.</p></main>`, "/privacy");
 }
 
 function termsPage(): string {
@@ -279,7 +279,7 @@ function updateMetadata(path: string, isKnownPage: boolean): void {
   const descriptions: Record<string, string> = {
     "/": "Keep an approved folder ready offline, check its freshness, and open files in other Android apps.",
     "/demo": "Try a ready sample folder mirror. Demo data is separate from your real files.",
-    "/app": "Choose approved folders, refresh local copies, and preview ready files.",
+    "/app": "Choose approved folders, refresh folder mirrors, and preview ready files.",
     "/privacy": "Read how Offline File Bridge stores folder mirrors and handles license checks.",
     "/terms": "Read the terms for Offline File Bridge and its one-time Bridge Pro license.",
     "/install": "Check for a matching Android APK and install Offline File Bridge in three steps.",

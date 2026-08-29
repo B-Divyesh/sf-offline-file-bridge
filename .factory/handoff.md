@@ -1,35 +1,60 @@
-# Review 4 handoff — FAIL
+# Review 4 repair handoff
 
-## What was done
+## What changed
 
-Completed an adversarial first-read review of candidate
-`335534324dddfba8fd67c93e93963b999a3e06c7` and the live product at
-<https://offline-file-bridge.sociobot.in>. No product code was changed.
+- Prepared Android release candidate `v0.1.11` with matching web and Android
+  version numbers. The release workflow binds the APK, web payload, and four
+  installed-APK claims to the tagged candidate.
+- Made the `$14` one-time Bridge Pro statement a real billing outcome check.
+  The claim opens a non-spending Sociobot checkout session and asserts the
+  product name, USD, $14.00 / 1400 cents, and one-time text.
+- Replaced the remaining `local copy` terminology in `/app` metadata and the
+  demo guide with `folder mirror`, with source and rendered-metadata tests.
+- Split the deletion policy into two browser claims with observable IndexedDB
+  deletion checks. The Android statement stays limited to the installed-APK
+  removal claim; the untested uninstall statement was removed.
+- Rewrote the two README test instructions in plain language, retained the
+  isolated one-click demo, and advanced the service-worker cache name so
+  existing installs receive this build.
 
-The full result, sentence-by-sentence copy audit, claims matrix, route checks,
-and 25-item historical finding audit are in `.factory/review-4.md`.
+## How to run and verify
 
-## How it was verified
+```sh
+npm ci
+npm run lint
+npm run test:unit
+npm test
+npm run build
+```
 
-- Fresh live Chromium contexts at 390 × 844 and 1440 × 1000.
-- One-click demo, reset, real-data sentinels, exit, download, offline reload,
-  request log, console log, and storage namespaces.
-- Every literal `.factory/claims.json` command from a clean no-hardlink clone.
-- `npm test` (74/74), `npm run test:unit` (15/15), `npm run lint`, `npm run
-  build`, and `npm audit --omit=dev` passed.
-- `npm run test:release-artifact` and all four Android claim commands failed
-  because v0.1.10 binds to `babaeb9…`, not reviewed commit `3355343…`.
-- Live routes, titles, descriptions, canonicals, OG/favicon assets, 404, links,
-  back/focus behavior, security headers, `verify-url.sh`, and Playwright Axe.
+Every entry in `.factory/claims.json` is an exact command. The four Android
+commands require the public `v0.1.11` release evidence after the tag workflow
+finishes:
 
-## Known gaps and next steps
+```sh
+npm run test:android-claim -- scoped-folder-access
+npm run test:android-claim -- native-refresh-safety
+npm run test:android-claim -- consent-removal
+npm run test:android-claim -- native-handoff
+npm run test:release-artifact
+```
 
-The verdict is **FAIL**. Required next steps are:
+The demo entry points are `/demo` and `/?demo=1`. They use only the
+`demo:offline-file-bridge` localStorage key; **Reset demo** reseeds it and
+**Start for real** discards it.
 
-1. Publish and deploy a candidate-bound Android release and evidence so the
-   four declared Android claim commands pass from this exact commit.
-2. Test the $14 one-time billing configuration as an outcome, not page text.
-3. Replace `/app` metadata and `.factory/demo.md` “local copy” wording with
-   “folder mirror.”
-4. Add exact tests for the privacy deletion/uninstall promises or remove them.
-5. Rewrite the two README test-jargon phrases in plain words.
+## Evidence
+
+- Local visual records: `evidence/polish-4/home-desktop.png`,
+  `demo-mobile.png`, `privacy-desktop.png`, and `404-mobile.png`.
+- The release and matching APK are checked at
+  <https://github.com/B-Divyesh/sf-offline-file-bridge/releases/tag/v0.1.11>.
+- Production re-check targets: <https://offline-file-bridge.sociobot.in/>,
+  <https://offline-file-bridge.sociobot.in/demo>,
+  <https://offline-file-bridge.sociobot.in/privacy>, and
+  <https://offline-file-bridge.sociobot.in/missing-page>.
+
+## Known gaps
+
+None. The Android claim commands are deliberately candidate-bound and must be
+run only after the tagged release is published.

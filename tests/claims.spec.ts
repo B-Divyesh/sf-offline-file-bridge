@@ -83,7 +83,21 @@ test("@claim:file-handoff opens and saves a ready sample file", async ({ page })
   expect(download.suggestedFilename()).toBe("handoff-notes.md");
 });
 
-test("@claim:free-tier keeps one folder and lists the Pro price", async ({ page }) => {
+test("@claim:free-tier keeps one folder and verifies the Bridge Pro billing outcome", async ({ page, request }) => {
+  const checkout = await request.get("https://api.sociobot.in/api/v1/products/offline-file-bridge/checkout", { maxRedirects: 0 });
+  expect(checkout.status()).toBe(303);
+  const checkoutUrl = checkout.headers().location;
+  expect(checkoutUrl).toMatch(/^https:\/\/checkout\.dodopayments\.com\/session\//);
+  const order = await request.get(checkoutUrl!);
+  expect(order.status()).toBe(200);
+  const orderSummary = await order.text();
+  expect(orderSummary).toContain("Offline File Bridge Pro");
+  expect(orderSummary).toMatch(/Pay in\s*(?:<!--\s*-->)?\s*USD/);
+  expect(orderSummary).toContain("One-time unlock for Offline File Bridge.");
+  const price = orderSummary.match(/Offline File Bridge Pro[\s\S]{0,600}?\$(\d+\.\d{2})/);
+  expect(price?.[1]).toBe("14.00");
+  expect(Math.round(Number.parseFloat(price![1]) * 100)).toBe(1400);
+
   await page.goto("/");
   await expect(page.getByText("One folder is free.")).toBeVisible();
   await expect(page.getByText("$14")).toBeVisible();
@@ -148,4 +162,38 @@ test("@claim:browser-persistence keeps selected files after reload", async ({ pa
   await page.reload();
   await expect(page.getByText("offline-note.txt", { exact: true })).toBeVisible();
   await expect(page.getByText("route.csv", { exact: true })).toBeVisible();
+});
+
+test("@claim:browser-mirror-removal deletes a browser mirror and its saved file records", async ({ page }) => {
+  await page.goto("/app");
+  await page.locator("#folder-input").setInputFiles("tests/fixtures/bridge-folder");
+  await expect(page.getByText("offline-note.txt", { exact: true })).toBeVisible();
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: "Remove folder mirror" }).click();
+  await expect(page.getByText("No folder mirrors yet")).toBeVisible();
+  const saved = await page.evaluate(async () => new Promise<unknown[]>((resolve, reject) => {
+    const request = indexedDB.open("offline-file-bridge-real", 1);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      const database = request.result;
+      const transaction = database.transaction("mirrors", "readonly");
+      const records = transaction.objectStore("mirrors").getAll();
+      records.onsuccess = () => resolve(records.result);
+      records.onerror = () => reject(records.error);
+      transaction.oncomplete = () => database.close();
+    };
+  }));
+  expect(saved).toEqual([]);
+});
+
+test("@claim:browser-storage-clearing removes saved browser folder mirrors", async ({ page, context }) => {
+  await page.goto("/app");
+  await page.locator("#folder-input").setInputFiles("tests/fixtures/bridge-folder");
+  await expect(page.getByText("offline-note.txt", { exact: true })).toBeVisible();
+  const client = await context.newCDPSession(page);
+  await client.send("Storage.clearDataForOrigin", { origin: "http://127.0.0.1:4173", storageTypes: "all" });
+  const databases = await page.evaluate(async () => (await indexedDB.databases()).map((database) => database.name));
+  expect(databases).not.toContain("offline-file-bridge-real");
+  await page.reload();
+  await expect(page.getByText("No folder mirrors yet")).toBeVisible();
 });

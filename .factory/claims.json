@@ -67,7 +67,7 @@
     "claim": "One folder mirror is free; Bridge Pro costs $14 once and keeps up to eight folder mirrors with 30 refresh records each",
     "where": "landing facts, pricing, terms",
     "test": "npm test -- --grep @claim:free-tier",
-    "sandbox": "fresh landing page; assert the free limit, Pro capacity, exact price, and Sociobot checkout URL"
+    "sandbox": "fresh landing page plus a non-spending hosted-checkout inspection; assert the free limit, Pro capacity, USD 14.00 / 1400 cents, one-time mode, and Sociobot checkout URL"
   },
   {
     "id": "browser-persistence",
@@ -75,6 +75,20 @@
     "where": "README browser/PWA feature list, app",
     "test": "npm test -- --grep @claim:browser-persistence",
     "sandbox": "fresh browser context; select two in-memory files through the folder input, reload /app, and assert both remain"
+  },
+  {
+    "id": "browser-mirror-removal",
+    "claim": "Removing a browser folder mirror deletes its saved files",
+    "where": "privacy page, app remove action",
+    "test": "npm test -- --grep @claim:browser-mirror-removal",
+    "sandbox": "fresh browser context; import the shipped folder fixture, confirm removal, and assert the IndexedDB mirror store has no records"
+  },
+  {
+    "id": "browser-storage-clearing",
+    "claim": "Clearing this site's browser data removes browser folder mirrors",
+    "where": "privacy page",
+    "test": "npm test -- --grep @claim:browser-storage-clearing",
+    "sandbox": "fresh browser context; import the shipped folder fixture, clear all origin storage through the browser storage protocol, and assert the database is gone and the reloaded app is empty"
   },
   {
     "id": "native-refresh-safety",

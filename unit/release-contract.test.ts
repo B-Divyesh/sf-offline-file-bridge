@@ -13,14 +13,14 @@ describe("Android release identity contract", () => {
   });
 
   test("accepts only the source version's unique release tag", async () => {
-    await expect(verifySourceVersion("v0.1.10")).resolves.toEqual({ version: "0.1.10", versionCode: 10 });
-    await expect(verifySourceVersion("v0.1.9")).rejects.toThrow("does not match package version v0.1.10");
+    await expect(verifySourceVersion("v0.1.11")).resolves.toEqual({ version: "0.1.11", versionCode: 11 });
+    await expect(verifySourceVersion("v0.1.10")).rejects.toThrow("does not match package version v0.1.11");
   });
 
   test("@regression:release-tag cannot reuse an older candidate commit", async () => {
     const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
-    await expect(verifyReleaseCandidate("v0.1.10", head, () => head)).resolves.toEqual({ version: "0.1.10", versionCode: 10, commit: head });
-    expect(() => verifyTagCommit("v0.1.10", head, () => "e8debdc51c78ef81bb09a1f2c9b0c32b0eb0b951")).toThrow("not candidate");
+    await expect(verifyReleaseCandidate("v0.1.11", head, () => head)).resolves.toEqual({ version: "0.1.11", versionCode: 11, commit: head });
+    expect(() => verifyTagCommit("v0.1.11", head, () => "e8debdc51c78ef81bb09a1f2c9b0c32b0eb0b951")).toThrow("not candidate");
   });
 
   test("the release job verifies the packaged web payload before publishing", async () => {
@@ -52,7 +52,7 @@ describe("Android release identity contract", () => {
 
   test("the updated service worker replaces old caches and takes control", async () => {
     const worker = await readFile("public/sw.js", "utf8");
-    expect(worker).toContain('const CACHE = "offline-file-bridge-v4"');
+    expect(worker).toContain('const CACHE = "offline-file-bridge-v5"');
     expect(worker).toContain("self.skipWaiting()");
     expect(worker).toContain("self.clients.claim()");
     expect(worker).toContain("key !== CACHE");
@@ -62,6 +62,7 @@ describe("Android release identity contract", () => {
     const config = await readFile("playwright.config.ts", "utf8");
     expect(config).toContain("fullyParallel: false");
     expect(config).toContain("workers: 1");
-    expect(config).toContain('args: ["--disable-dev-shm-usage"]');
+    expect(config).toContain("retries: 1");
+    expect(config).toContain('args: ["--disable-dev-shm-usage", "--disable-gpu", "--disable-software-rasterizer"]');
   });
 });

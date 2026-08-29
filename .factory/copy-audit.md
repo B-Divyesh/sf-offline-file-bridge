@@ -1,6 +1,6 @@
 # Landing page copy audit
 
-Audited 29 August 2026 for polish round 3. Counts treat contractions and
+Audited 29 August 2026 for polish round 4. Counts treat contractions and
 hyphenated words as one word. No landing sentence exceeds 22 words, uses a
 banned marketing word, or makes an unlisted claim.
 
@@ -55,4 +55,14 @@ banned marketing word, or makes an unlisted claim.
 | The paid license | Bridge Pro |
 | Inspecting a local sample before saving it | preview |
 
-Catalog description: “Keep approved folders ready offline and open their files in another Android app.” (13 words, 80 characters.)
+Catalog description: “Keep approved folders ready offline for another Android app.” (9 words, 57 characters.)
+
+## Privacy and documentation amendments
+
+| Copy | Words | Result |
+| --- | ---: | --- |
+| In a browser, remove a folder mirror to delete its saved files. | 12 | `browser-mirror-removal` |
+| Clearing this site's browser data removes browser folder mirrors. | 9 | `browser-storage-clearing` |
+| On Android, remove a folder mirror to delete its private files and release folder access. | 15 | `consent-removal` |
+| `npm run test:unit` checks release metadata and Android source safeguards. | 9 | Plain developer instruction |
+| A clean checkout checks the app file's checksum and the published Android test result. | 14 | Plain developer instruction |

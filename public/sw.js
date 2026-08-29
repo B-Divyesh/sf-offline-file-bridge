@@ -1,4 +1,4 @@
-const CACHE = "offline-file-bridge-v4";
+const CACHE = "offline-file-bridge-v5";
 const APP_SHELL = ["/", "/app", "/demo", "/privacy", "/terms", "/install", "/manifest.webmanifest", "/favicon.svg", "/assets/bridge-notebook.webp", "/assets/caveat-latin.woff2", "/assets/icon-192.png"];
 
 self.addEventListener("install", (event) => {

@@ -12,7 +12,7 @@ The first screen already contains the **Field notes** folder mirror. It has thre
 - `Logs/specimen-log.csv`
 - `Notes/handoff-notes.md`
 
-Use **Refresh local copy** to update its successful refresh time. Use **Preview handoff-notes.md** to inspect a local sample, then use **Save sample** to exercise browser handoff. Turn off the browser network and reload `/demo` to verify the cached app shell and sample remain usable.
+Use **Refresh folder mirror** to update its successful refresh time. Use **Preview handoff-notes.md** to inspect a local sample, then use **Save sample** to exercise browser handoff. Turn off the browser network and reload `/demo` to verify the cached app shell and sample remain usable.
 
 ## Isolation and reset
 

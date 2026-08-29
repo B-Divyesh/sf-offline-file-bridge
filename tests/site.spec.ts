@@ -45,6 +45,11 @@ test("known routes have their own canonical URL and an unknown URL has none", as
   await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
 });
 
+test("the folder-mirror term is consistent in app metadata", async ({ page }) => {
+  await page.goto("/app");
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", "Choose approved folders, refresh folder mirrors, and preview ready files.");
+});
+
 test("demo query opens the isolated sample", async ({ page }) => {
   await page.goto("/?demo=1");
   await expect(page.getByText("Demo — sample data, nothing is saved")).toBeVisible();
