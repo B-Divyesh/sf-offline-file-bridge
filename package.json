@@ -1,6 +1,6 @@
 {
   "name": "offline-file-bridge",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,6 +11,7 @@
     "test:unit": "vitest run --config vitest.config.ts",
     "test:android": "cd android && ./gradlew test",
     "test:android-device": "cd android && ./gradlew connectedReleaseAndroidTest",
+    "test:release-artifact": "npm run build && node scripts/verify-published-release.mjs",
     "lint": "tsc --noEmit"
   },
   "dependencies": {

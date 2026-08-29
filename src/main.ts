@@ -30,6 +30,7 @@ let online = navigator.onLine;
 let storageEstimate = { used: 0, quota: 0 };
 let license: LicenseState | null = null;
 let lastFocused: HTMLElement | null = null;
+let licenseFeedback = "";
 
 const demoSeed = (): Mirror[] => [{
   id: "demo-field-notes",
@@ -156,7 +157,7 @@ function previewFolder(): string {
 function pricing(): string {
   const active = isPro();
   const revoked = license && license.checkedAt > 0 && !license.valid ? `<p class="notice">This license is no longer active. Buy a new license or restore another.</p>` : "";
-  return `<div class="price-note"><div><div class="price">$14<small>one-time purchase</small></div></div><div><h2 id="pro-title">Keep more folder mirrors</h2><p>Bridge Pro adds up to eight folder mirrors and keeps 30 refresh records per folder. The free version keeps one folder mirror.</p>${revoked}${active ? `<p class="notice success">Bridge Pro is active on this device.</p>` : `<p><a class="button" href="${CHECKOUT}">Buy Bridge Pro <span class="sr-only">at the external secure checkout</span></a></p><form class="license-form" data-license-form><label class="sr-only" for="license-token">License token</label><input id="license-token" name="license" autocomplete="off" placeholder="Paste your license token" required><button class="button small secondary" type="submit">Verify license</button></form>`}</div></div>`;
+  return `<div class="price-note"><div><div class="price">$14<small>one-time purchase</small></div></div><div><h2 id="pro-title">Keep more folder mirrors</h2><p>Bridge Pro adds up to eight folder mirrors and keeps 30 refresh records per folder. The free version keeps one folder mirror.</p>${revoked}${active ? `<p class="notice success">Bridge Pro is active on this device.</p>` : `<p><a class="button" href="${CHECKOUT}">Buy Bridge Pro <span class="sr-only">at the external secure checkout</span></a></p><form class="license-form" data-license-form novalidate><label class="license-label" for="license-token">Restore a Bridge Pro license</label><div class="license-controls"><input id="license-token" name="license" autocomplete="off" placeholder="Paste your license token" aria-describedby="license-help license-feedback" required><button class="button small secondary" type="submit">Verify license</button></div><p id="license-help" class="field-help">Paste the token from your purchase email. Spaces alone are not a token.</p><p id="license-feedback" class="field-feedback" aria-live="polite">${esc(licenseFeedback)}</p></form>`}</div></div>`;
 }
 
 function demoPage(): string { return appPage(true); }
@@ -196,7 +197,7 @@ function privacyPage(): string {
 }
 
 function termsPage(): string {
-  return layout(`<main id="main" class="page legal"><p class="eyebrow">Use terms</p><h1 tabindex="-1">Use the bridge with files you control</h1><p>Offline File Bridge is provided under the MIT License. You remain responsible for the folders and local apps you choose.</p><h2>Freshness</h2><p>A ready time records the last successful refresh. It does not promise that the source stayed unchanged afterward.</p><h2>Bridge Pro</h2><p>Bridge Pro costs $14 once. It adds up to eight folder mirrors and 30 refresh records per folder.</p><h2>No warranty</h2><p>The software is provided “as is,” without warranty. Keep another copy of important files. This tool is not a backup service.</p><h2>Contact</h2><p>Questions can be sent to <a href="mailto:support@sociobot.in">support@sociobot.in</a>.</p><p>Effective: 28 August 2026.</p></main>`, "/terms");
+  return layout(`<main id="main" class="page legal"><p class="eyebrow">Use terms</p><h1 tabindex="-1">Use the bridge with files you control</h1><p>Offline File Bridge is provided under the MIT License. You remain responsible for the folders and local apps you choose.</p><h2>Freshness</h2><p>A ready time records the last successful refresh. It does not promise that the source stayed unchanged afterward.</p><h2>Bridge Pro</h2><p>Bridge Pro costs $14 once. It adds up to eight folder mirrors and 30 refresh records per folder.</p><h2>Purchase, refunds, and access</h2><p>Sociobot/Dodo Payments is the merchant of record for Bridge Pro purchases.</p><p>Refunds are handled by Sociobot/Dodo Payments. A refunded purchase revokes its license automatically.</p><h2>No warranty</h2><p>The software is provided “as is,” without warranty. Keep another copy of important files. This tool is not a backup service.</p><h2>Contact</h2><p>Questions can be sent to <a href="mailto:support@sociobot.in">support@sociobot.in</a>.</p><p>Effective: 29 August 2026.</p></main>`, "/terms");
 }
 
 function installPage(): string {
@@ -509,7 +510,13 @@ function readError(error: unknown, fallback: string): string {
 
 async function handleLicenseSubmit(event: SubmitEvent): Promise<void> {
   event.preventDefault(); const form = event.currentTarget as HTMLFormElement; const token = new FormData(form).get("license")?.toString().trim();
-  if (!token) return;
+  if (!token) {
+    licenseFeedback = "Enter the license token from your purchase email, then verify it.";
+    await renderRoute();
+    document.querySelector<HTMLInputElement>("#license-token")?.focus();
+    return;
+  }
+  licenseFeedback = "";
   localStorage.setItem(LICENSE_KEY, token);
   await verifyLicense(token, true);
   setNotice(license?.valid ? "Bridge Pro is active on this device." : "That license is not active. Check the token and try again.", license?.valid ? "success" : "error");
@@ -555,16 +562,37 @@ async function loadRelease(): Promise<void> {
   try {
     const response = await fetch(`${RELEASE_API}/releases/latest`, { headers: { Accept: "application/vnd.github+json" } });
     if (!response.ok) throw new Error("No release");
-    const release = await response.json() as { tag_name: string; assets: Array<{ name: string; browser_download_url: string }> };
+    const release = await response.json() as { tag_name: string; body?: string; assets: Array<{ name: string; browser_download_url: string }> };
     if (release.tag_name !== RELEASE_TAG) throw new Error("Release version mismatch");
     const apk = release.assets.find((asset) => asset.name === `offline-file-bridge-${RELEASE_TAG}.apk`);
     const sums = release.assets.find((asset) => asset.name === "SHA256SUMS");
     const provenance = release.assets.find((asset) => asset.name === "BUILD-PROVENANCE.json");
     const releaseCommit = await resolveReleaseCommit(RELEASE_TAG);
-    if (!apk || !sums || !provenance || releaseCommit !== __BUILD_COMMIT__) throw new Error("Release identity mismatch");
+    const localIdentity = await loadBuildIdentity();
+    const publishedIdentity = parseReleaseProvenance(release.body || "");
+    if (!apk || !sums || !provenance || releaseCommit !== __BUILD_COMMIT__ ||
+      localIdentity.commit !== __BUILD_COMMIT__ || localIdentity.version !== __APP_VERSION__ ||
+      publishedIdentity.product !== PRODUCT || publishedIdentity.tag !== RELEASE_TAG ||
+      publishedIdentity.version !== __APP_VERSION__ || publishedIdentity.commit !== __BUILD_COMMIT__ ||
+      publishedIdentity.payloadFileCount !== localIdentity.payloadFileCount ||
+      publishedIdentity.payloadTreeSha256 !== localIdentity.payloadTreeSha256) throw new Error("Release identity mismatch");
     action.innerHTML = `<a class="button" href="${esc(apk.browser_download_url)}">Download APK ${esc(release.tag_name)}</a>`;
-    note.innerHTML = `This APK matches this site. <a href="${esc(sums.browser_download_url)}">Download SHA256SUMS</a>.`;
+    note.innerHTML = `This Android release records this site's exact commit and verified payload fingerprint. <a href="${esc(sums.browser_download_url)}">Download SHA256SUMS</a>.`;
   } catch { action.innerHTML = `<button class="button secondary" disabled>APK ${esc(RELEASE_TAG)} is being published</button>`; note.textContent = "A matching APK is not ready yet. The PWA is ready to install now."; }
+}
+
+type BuildIdentity = { product: string; version: string; commit: string; payloadFileCount: number; payloadTreeSha256: string };
+
+async function loadBuildIdentity(): Promise<BuildIdentity> {
+  const response = await fetch("/build-identity.json", { cache: "no-store" });
+  if (!response.ok) throw new Error("Build identity missing");
+  return response.json() as Promise<BuildIdentity>;
+}
+
+function parseReleaseProvenance(body: string): BuildIdentity & { tag: string } {
+  const marker = body.match(/<!-- offline-file-bridge-provenance:([^>]+) -->/);
+  if (!marker) throw new Error("Release provenance missing");
+  return JSON.parse(marker[1]) as BuildIdentity & { tag: string };
 }
 
 async function resolveReleaseCommit(tag: string): Promise<string> {

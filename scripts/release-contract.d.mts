@@ -5,3 +5,5 @@ export function verifyApk(options: {
   commit: string;
   provenancePath: string;
 }): Promise<Record<string, unknown>>;
+export function payloadManifest(directory: string): Promise<{ files: string[]; sha256: string }>;
+export function writeReleaseNotes(provenancePath: string, notesPath: string): Promise<void>;

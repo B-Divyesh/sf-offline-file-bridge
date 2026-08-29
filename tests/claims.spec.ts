@@ -143,7 +143,7 @@ test("@claim:license-verification-privacy sends a fixture token only to Sociobot
     await route.fulfill({ json: { valid: false } });
   });
   await page.goto("/");
-  await page.getByLabel("License token").fill("fixture-token");
+  await page.getByLabel("Restore a Bridge Pro license").fill("fixture-token");
   const verification = page.waitForResponse((response) => response.url() === "https://api.sociobot.in/api/v1/products/offline-file-bridge/verify?license=fixture-token");
   await page.getByRole("button", { name: "Verify license" }).click();
   await verification;

@@ -5,14 +5,16 @@ import { buildMetadata } from "../scripts/build-metadata.mjs";
 import { verifySourceVersion } from "../scripts/release-contract.mjs";
 
 describe("Android release identity contract", () => {
-  test("docs-only commits keep the immutable version tag as build identity", () => {
-    const releaseCommit = execFileSync("git", ["rev-parse", "v0.1.2^{commit}"], { encoding: "utf8" }).trim();
-    expect(buildMetadata.commit).toBe(releaseCommit);
+  test("a candidate build identifies HEAD instead of an older version tag", () => {
+    const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+    const oldTag = execFileSync("git", ["rev-parse", "v0.1.2^{commit}"], { encoding: "utf8" }).trim();
+    expect(buildMetadata.commit).toBe(head);
+    expect(buildMetadata.commit).not.toBe(oldTag);
   });
 
   test("accepts only the source version's unique release tag", async () => {
-    await expect(verifySourceVersion("v0.1.2")).resolves.toEqual({ version: "0.1.2", versionCode: 2 });
-    await expect(verifySourceVersion("v0.1.1")).rejects.toThrow("does not match package version v0.1.2");
+    await expect(verifySourceVersion("v0.1.3")).resolves.toEqual({ version: "0.1.3", versionCode: 3 });
+    await expect(verifySourceVersion("v0.1.2")).rejects.toThrow("does not match package version v0.1.3");
   });
 
   test("the release job verifies the packaged web payload before publishing", async () => {
@@ -21,6 +23,8 @@ describe("Android release identity contract", () => {
     expect(workflow).toContain('release-contract.mjs artifact "release/offline-file-bridge-v${VERSION}.apk" "$GITHUB_REF_NAME" "$GITHUB_SHA" "release/BUILD-PROVENANCE.json"');
     expect(workflow.indexOf("release-contract.mjs artifact")).toBeLessThan(workflow.indexOf("softprops/action-gh-release"));
     expect(workflow).toContain("release/BUILD-PROVENANCE.json");
+    expect(workflow).toContain('release-contract.mjs notes "release/BUILD-PROVENANCE.json" "release/RELEASE-NOTES.md"');
+    expect(workflow).toContain("body_path: release/RELEASE-NOTES.md");
   });
 
   test("the updated service worker replaces old caches and takes control", async () => {

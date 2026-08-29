@@ -25,6 +25,16 @@ async function filesBelow(directory, prefix = "") {
   return files.sort();
 }
 
+export async function payloadManifest(directory) {
+  const files = (await filesBelow(directory)).filter((file) => file !== "build-identity.json");
+  const lines = [];
+  for (const file of files) lines.push(`${digest(await readFile(join(directory, file)))}  ${file}`);
+  return {
+    files,
+    sha256: digest(`${lines.join("\n")}\n`)
+  };
+}
+
 export async function verifySourceVersion(tag) {
   const packageJson = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
   const gradle = await readFile(join(root, "android/app/build.gradle"), "utf8");
@@ -43,6 +53,7 @@ export async function verifyApk({ apkPath, tag, commit, provenancePath }) {
   const entries = new Set(execFileSync("unzip", ["-Z1", apk], { encoding: "utf8" }).trim().split("\n"));
   const dist = join(root, "dist");
   const webFiles = await filesBelow(dist);
+  const payload = await payloadManifest(dist);
   const treeLines = [];
 
   for (const file of webFiles) {
@@ -58,6 +69,8 @@ export async function verifyApk({ apkPath, tag, commit, provenancePath }) {
   invariant(identity.product === "offline-file-bridge", "APK build identity has the wrong product.");
   invariant(identity.version === version, `APK version ${identity.version} does not match ${version}.`);
   invariant(identity.commit === commit, `APK commit ${identity.commit} does not match ${commit}.`);
+  invariant(identity.payloadFileCount === payload.files.length, "APK build identity has the wrong payload file count.");
+  invariant(identity.payloadTreeSha256 === payload.sha256, "APK build identity has the wrong payload fingerprint.");
 
   const apkBytes = await readFile(apk);
   const provenance = {
@@ -69,11 +82,26 @@ export async function verifyApk({ apkPath, tag, commit, provenancePath }) {
     apk: basename(apk),
     apkSha256: digest(apkBytes),
     webFileCount: webFiles.length,
-    webTreeSha256: digest(`${treeLines.join("\n")}\n`)
+    webTreeSha256: digest(`${treeLines.join("\n")}\n`),
+    payloadFileCount: payload.files.length,
+    payloadTreeSha256: payload.sha256
   };
   await mkdir(dirname(resolve(root, provenancePath)), { recursive: true });
   await writeFile(resolve(root, provenancePath), `${JSON.stringify(provenance, null, 2)}\n`);
   return provenance;
+}
+
+export async function writeReleaseNotes(provenancePath, notesPath) {
+  const provenance = JSON.parse(await readFile(resolve(root, provenancePath), "utf8"));
+  const marker = JSON.stringify({
+    product: provenance.product,
+    tag: provenance.tag,
+    version: provenance.version,
+    commit: provenance.commit,
+    payloadFileCount: provenance.payloadFileCount,
+    payloadTreeSha256: provenance.payloadTreeSha256
+  });
+  await writeFile(resolve(root, notesPath), `<!-- offline-file-bridge-provenance:${marker} -->\n\n# Offline File Bridge ${provenance.tag}\n\nThis Android release was checked against the web payload built from commit \`${provenance.commit}\`.\n`);
 }
 
 async function main() {
@@ -86,7 +114,11 @@ async function main() {
     console.log(JSON.stringify(await verifyApk({ apkPath: args[0], tag: args[1], commit: args[2], provenancePath: args[3] })));
     return;
   }
-  throw new Error("Usage: release-contract.mjs source <tag> | artifact <apk> <tag> <commit> <provenance-output>");
+  if (mode === "notes" && args.length === 2) {
+    await writeReleaseNotes(args[0], args[1]);
+    return;
+  }
+  throw new Error("Usage: release-contract.mjs source <tag> | artifact <apk> <tag> <commit> <provenance-output> | notes <provenance> <notes-output>");
 }
 
 if (resolve(process.argv[1] || "") === fileURLToPath(import.meta.url)) {

@@ -60,13 +60,14 @@ jobs:
           cp android/app/build/outputs/apk/release/app-release.apk "release/offline-file-bridge-v${VERSION}.apk"
           cp android/app/build/outputs/bundle/release/app-release.aab "release/offline-file-bridge-v${VERSION}.aab"
           node scripts/release-contract.mjs artifact "release/offline-file-bridge-v${VERSION}.apk" "$GITHUB_REF_NAME" "$GITHUB_SHA" "release/BUILD-PROVENANCE.json"
+          node scripts/release-contract.mjs notes "release/BUILD-PROVENANCE.json" "release/RELEASE-NOTES.md"
           cd release
           sha256sum "offline-file-bridge-v${VERSION}.apk" "offline-file-bridge-v${VERSION}.aab" BUILD-PROVENANCE.json > SHA256SUMS
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: Offline File Bridge ${{ github.ref_name }}
-          generate_release_notes: true
+          body_path: release/RELEASE-NOTES.md
           files: |
             release/*.apk
             release/*.aab

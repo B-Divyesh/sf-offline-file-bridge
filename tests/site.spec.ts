@@ -106,37 +106,66 @@ test("mobile secondary labels keep the 16px reading baseline", async ({ page }) 
   }
 });
 
-test("landing exposes a direct latest-APK action", async ({ page }) => {
-  const identity = JSON.parse(await readFile("dist/build-identity.json", "utf8")) as { commit: string };
+test("@claim:apk-payload-match enables the APK only for an exact published payload record", async ({ page }) => {
+  const identity = JSON.parse(await readFile("dist/build-identity.json", "utf8")) as { product: string; version: string; commit: string; payloadFileCount: number; payloadTreeSha256: string };
+  const provenance = { ...identity, tag: "v0.1.3" };
   await page.route("https://api.github.com/repos/B-Divyesh/sf-offline-file-bridge/releases/latest", async (route) => {
     await route.fulfill({ json: {
-      tag_name: "v0.1.2",
+      tag_name: "v0.1.3",
+      body: `<!-- offline-file-bridge-provenance:${JSON.stringify(provenance)} -->`,
       assets: [
-        { name: "offline-file-bridge-v0.1.2.apk", browser_download_url: "https://example.test/offline-file-bridge-v0.1.2.apk" },
+        { name: "offline-file-bridge-v0.1.3.apk", browser_download_url: "https://example.test/offline-file-bridge-v0.1.3.apk" },
         { name: "SHA256SUMS", browser_download_url: "https://example.test/SHA256SUMS" },
         { name: "BUILD-PROVENANCE.json", browser_download_url: "https://example.test/BUILD-PROVENANCE.json" }
       ]
     } });
   });
-  await page.route("https://api.github.com/repos/B-Divyesh/sf-offline-file-bridge/git/ref/tags/v0.1.2", async (route) => {
+  await page.route("https://api.github.com/repos/B-Divyesh/sf-offline-file-bridge/git/ref/tags/v0.1.3", async (route) => {
     await route.fulfill({ json: { object: { type: "commit", sha: identity.commit } } });
   });
   await page.goto("/");
   await page.getByRole("button", { name: "Download the latest APK" }).click();
-  await expect(page.getByRole("link", { name: "Download APK v0.1.2" })).toHaveAttribute("href", "https://example.test/offline-file-bridge-v0.1.2.apk");
-  await expect(page.getByText("This APK matches this site.")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Download APK v0.1.3" })).toHaveAttribute("href", "https://example.test/offline-file-bridge-v0.1.3.apk");
+  await expect(page.getByText("This Android release records this site's exact commit and verified payload fingerprint.")).toBeVisible();
 });
 
-test("landing refuses an APK from an older candidate", async ({ page }) => {
+test("landing refuses the verifier's stale-payload failure even when the release tag commit matches", async ({ page }) => {
+  const identity = JSON.parse(await readFile("dist/build-identity.json", "utf8")) as { product: string; version: string; commit: string; payloadFileCount: number; payloadTreeSha256: string };
   await page.route("https://api.github.com/repos/B-Divyesh/sf-offline-file-bridge/releases/latest", async (route) => {
     await route.fulfill({ json: {
-      tag_name: "v0.1.1",
-      assets: [{ name: "offline-file-bridge-v0.1.1.apk", browser_download_url: "https://example.test/stale.apk" }]
+      tag_name: "v0.1.3",
+      body: `<!-- offline-file-bridge-provenance:${JSON.stringify({ ...identity, tag: "v0.1.3", payloadTreeSha256: "0".repeat(64) })} -->`,
+      assets: [
+        { name: "offline-file-bridge-v0.1.3.apk", browser_download_url: "https://example.test/stale.apk" },
+        { name: "SHA256SUMS", browser_download_url: "https://example.test/SHA256SUMS" },
+        { name: "BUILD-PROVENANCE.json", browser_download_url: "https://example.test/BUILD-PROVENANCE.json" }
+      ]
     } });
+  });
+  await page.route("https://api.github.com/repos/B-Divyesh/sf-offline-file-bridge/git/ref/tags/v0.1.3", async (route) => {
+    await route.fulfill({ json: { object: { type: "commit", sha: identity.commit } } });
   });
   await page.goto("/");
   await page.getByRole("button", { name: "Download the latest APK" }).click();
-  await expect(page.getByRole("button", { name: "APK v0.1.2 is being published" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "APK v0.1.3 is being published" })).toBeDisabled();
   await expect(page.getByText("A matching APK is not ready yet. The PWA is ready to install now.")).toBeVisible();
   await expect(page.locator('a[href="https://example.test/stale.apk"]')).toHaveCount(0);
+});
+
+test("whitespace-only license input has a visible recovery message and a persistent label", async ({ page }) => {
+  let verificationRequests = 0;
+  await page.route("**/api/v1/products/offline-file-bridge/verify*", async (route) => { verificationRequests += 1; await route.abort(); });
+  await page.goto("/");
+  await page.getByLabel("Restore a Bridge Pro license").fill("   ");
+  await page.getByRole("button", { name: "Verify license" }).click();
+  await expect(page.getByText("Enter the license token from your purchase email, then verify it.")).toBeVisible();
+  await expect(page.getByLabel("Restore a Bridge Pro license")).toBeFocused();
+  await expect(page.getByText("Paste the token from your purchase email. Spaces alone are not a token.")).toBeVisible();
+  expect(verificationRequests).toBe(0);
+});
+
+test("terms identify Sociobot/Dodo Payments and refund revocation", async ({ page }) => {
+  await page.goto("/terms");
+  await expect(page.getByText("Sociobot/Dodo Payments is the merchant of record for Bridge Pro purchases.")).toBeVisible();
+  await expect(page.getByText("A refunded purchase revokes its license automatically.")).toBeVisible();
 });

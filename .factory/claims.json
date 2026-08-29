@@ -1,5 +1,12 @@
 [
   {
+    "id": "apk-payload-match",
+    "claim": "The Android download is offered only when its published release record has this site's exact commit and verified payload fingerprint",
+    "where": "landing APK download status, install page",
+    "test": "npm test -- --grep @claim:apk-payload-match",
+    "sandbox": "fresh landing page; mock the exact release record and assert download is enabled, then reproduce a matching-tag stale payload fingerprint and assert it is disabled"
+  },
+  {
     "id": "offline-reload",
     "claim": "Works after the first visit, and ready demo files still open offline",
     "where": "landing facts, demo network state, README",
