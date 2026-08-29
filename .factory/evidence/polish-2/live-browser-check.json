@@ -1,0 +1,30 @@
+[
+  {
+    "route": "/",
+    "status": 200,
+    "axeSeriousCritical": 0,
+    "consoleErrors": 0,
+    "expected404ResourceError": false
+  },
+  {
+    "route": "/demo",
+    "status": 200,
+    "axeSeriousCritical": 0,
+    "consoleErrors": 0,
+    "expected404ResourceError": false
+  },
+  {
+    "route": "/install",
+    "status": 200,
+    "axeSeriousCritical": 0,
+    "consoleErrors": 0,
+    "expected404ResourceError": false
+  },
+  {
+    "route": "/missing-page",
+    "status": 404,
+    "axeSeriousCritical": 0,
+    "consoleErrors": 0,
+    "expected404ResourceError": true
+  }
+]

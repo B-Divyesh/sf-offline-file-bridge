@@ -1,0 +1,14 @@
+{
+  "url": "https://offline-file-bridge.sociobot.in/install",
+  "loadMs": 750,
+  "errors": [],
+  "a11y": {
+    "title": "Install — Offline File Bridge",
+    "lang": "en",
+    "h1": 1,
+    "main": true,
+    "imgsMissingAlt": 0,
+    "buttonsUnlabeled": 0,
+    "textLength": 844
+  }
+}
