@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { readFile } from "node:fs/promises";
 
 const routes = ["/", "/demo", "/app", "/privacy", "/terms", "/install", "/missing-page"];
 
@@ -74,16 +75,36 @@ test("mobile controls have 44px targets and 200% text reflows", async ({ page })
 });
 
 test("landing exposes a direct latest-APK action", async ({ page }) => {
+  const identity = JSON.parse(await readFile("dist/build-identity.json", "utf8")) as { commit: string };
+  await page.route("https://api.github.com/repos/B-Divyesh/sf-offline-file-bridge/releases/latest", async (route) => {
+    await route.fulfill({ json: {
+      tag_name: "v0.1.2",
+      assets: [
+        { name: "offline-file-bridge-v0.1.2.apk", browser_download_url: "https://example.test/offline-file-bridge-v0.1.2.apk" },
+        { name: "SHA256SUMS", browser_download_url: "https://example.test/SHA256SUMS" },
+        { name: "BUILD-PROVENANCE.json", browser_download_url: "https://example.test/BUILD-PROVENANCE.json" }
+      ]
+    } });
+  });
+  await page.route("https://api.github.com/repos/B-Divyesh/sf-offline-file-bridge/git/ref/tags/v0.1.2", async (route) => {
+    await route.fulfill({ json: { object: { type: "commit", sha: identity.commit } } });
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Download the latest APK" }).click();
+  await expect(page.getByRole("link", { name: "Download APK v0.1.2" })).toHaveAttribute("href", "https://example.test/offline-file-bridge-v0.1.2.apk");
+  await expect(page.getByText("This APK matches this site.")).toBeVisible();
+});
+
+test("landing refuses an APK from an older candidate", async ({ page }) => {
   await page.route("https://api.github.com/repos/B-Divyesh/sf-offline-file-bridge/releases/latest", async (route) => {
     await route.fulfill({ json: {
       tag_name: "v0.1.1",
-      assets: [
-        { name: "offline-file-bridge-v0.1.1.apk", browser_download_url: "https://example.test/offline-file-bridge-v0.1.1.apk" },
-        { name: "SHA256SUMS", browser_download_url: "https://example.test/SHA256SUMS" }
-      ]
+      assets: [{ name: "offline-file-bridge-v0.1.1.apk", browser_download_url: "https://example.test/stale.apk" }]
     } });
   });
   await page.goto("/");
   await page.getByRole("button", { name: "Download the latest APK" }).click();
-  await expect(page.getByRole("link", { name: "Download APK v0.1.1" })).toHaveAttribute("href", "https://example.test/offline-file-bridge-v0.1.1.apk");
+  await expect(page.getByRole("button", { name: "APK v0.1.2 is being published" })).toBeDisabled();
+  await expect(page.getByText("A matching APK is not ready yet. The PWA is ready to install now.")).toBeVisible();
+  await expect(page.locator('a[href="https://example.test/stale.apk"]')).toHaveCount(0);
 });

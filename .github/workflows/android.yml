@@ -30,6 +30,8 @@ jobs:
       - uses: android-actions/setup-android@v3
       - name: Install web dependencies
         run: npm ci
+      - name: Verify tag and source versions
+        run: node scripts/release-contract.mjs source "$GITHUB_REF_NAME"
       - name: Build and sync the PWA
         run: npm run build && npx cap sync android
       - name: Create the test signing key
@@ -57,8 +59,9 @@ jobs:
           mkdir -p release
           cp android/app/build/outputs/apk/release/app-release.apk "release/offline-file-bridge-v${VERSION}.apk"
           cp android/app/build/outputs/bundle/release/app-release.aab "release/offline-file-bridge-v${VERSION}.aab"
+          node scripts/release-contract.mjs artifact "release/offline-file-bridge-v${VERSION}.apk" "$GITHUB_REF_NAME" "$GITHUB_SHA" "release/BUILD-PROVENANCE.json"
           cd release
-          sha256sum "offline-file-bridge-v${VERSION}.apk" "offline-file-bridge-v${VERSION}.aab" > SHA256SUMS
+          sha256sum "offline-file-bridge-v${VERSION}.apk" "offline-file-bridge-v${VERSION}.aab" BUILD-PROVENANCE.json > SHA256SUMS
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
@@ -67,4 +70,5 @@ jobs:
           files: |
             release/*.apk
             release/*.aab
+            release/BUILD-PROVENANCE.json
             release/SHA256SUMS

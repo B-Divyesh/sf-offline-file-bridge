@@ -17,6 +17,8 @@ const PRODUCT = "offline-file-bridge";
 const CHECKOUT = `https://api.sociobot.in/api/v1/products/${PRODUCT}/checkout`;
 const LICENSE_KEY = `sb_license:${PRODUCT}`;
 const VERDICT_KEY = `${LICENSE_KEY}:verdict`;
+const RELEASE_TAG = `v${__APP_VERSION__}`;
+const RELEASE_API = "https://api.github.com/repos/B-Divyesh/sf-offline-file-bridge";
 const isNative = Capacitor.isNativePlatform();
 let mirrors: Mirror[] = [];
 let isDemo = false;
@@ -90,7 +92,7 @@ function footer(): string {
       <a href="/privacy" data-link>Privacy</a><a href="/terms" data-link>Terms</a>
       <a href="https://sociobot.in" rel="external">Built by Param Factory <span class="sr-only">(external site)</span></a>
     </nav>
-    <span>v0.1.1 · Generated artwork</span>
+    <span>v${esc(__APP_VERSION__)} · Generated artwork</span>
   </footer>`;
 }
 
@@ -198,7 +200,7 @@ function termsPage(): string {
 }
 
 function installPage(): string {
-  return layout(`<main id="main" class="page install"><p class="eyebrow">Android v0.1.1</p><h1 tabindex="-1">Install the Android bridge</h1><p>The APK is not on Google Play yet. GitHub Releases publishes the signed test build and its checksum.</p><p data-release-action><button class="button" data-action="check-release">Check latest APK</button></p><div id="release-note" class="notice" role="status">The PWA is ready now. Check GitHub when you want the APK.</div><h2>Install in three steps</h2><ol class="install-steps"><li>Download the APK from the latest release.</li><li>Open the download and allow installs from your browser when Android asks.</li><li>Open Offline File Bridge, then choose the folder Android may read.</li></ol><h2>What the package includes</h2><p>The release contains an APK for direct install and an AAB for store submission. The factory build uses a generated debug keystore. A store release needs the owner's upload key.</p><p>You can also <a href="/app" data-link>install the PWA from your browser</a>.</p><h2>Short walkthrough</h2><div class="walkthrough" aria-label="Three-screen app walkthrough"><div class="phone-frame"><b>1. Choose a folder</b><span>Android shows its folder picker. You approve one location.</span></div><div class="phone-frame"><b>2. Check the ready time</b><span>The file count, size, and last successful refresh remain visible.</span></div><div class="phone-frame"><b>3. Share or open</b><span>The Android chooser hands a private local copy to your selected app.</span></div></div></main>`, "/install");
+  return layout(`<main id="main" class="page install"><p class="eyebrow">Android v${esc(__APP_VERSION__)}</p><h1 tabindex="-1">Install the Android bridge</h1><p>The APK is not on Google Play yet. GitHub Releases publishes the signed test build and its checksum.</p><p data-release-action><button class="button" data-action="check-release">Check latest APK</button></p><div id="release-note" class="notice" role="status">The PWA is ready now. Check GitHub when you want the APK.</div><h2>Install in three steps</h2><ol class="install-steps"><li>Download the APK from the latest release.</li><li>Open the download and allow installs from your browser when Android asks.</li><li>Open Offline File Bridge, then choose the folder Android may read.</li></ol><h2>What the package includes</h2><p>The release contains an APK for direct install and an AAB for store submission. The factory build uses a generated debug keystore. A store release needs the owner's upload key.</p><p>You can also <a href="/app" data-link>install the PWA from your browser</a>.</p><h2>Short walkthrough</h2><div class="walkthrough" aria-label="Three-screen app walkthrough"><div class="phone-frame"><b>1. Choose a folder</b><span>Android shows its folder picker. You approve one location.</span></div><div class="phone-frame"><b>2. Check the ready time</b><span>The file count, size, and last successful refresh remain visible.</span></div><div class="phone-frame"><b>3. Share or open</b><span>The Android chooser hands a private local copy to your selected app.</span></div></div></main>`, "/install");
 }
 
 function notFoundPage(): string {
@@ -515,14 +517,29 @@ async function loadRelease(): Promise<void> {
   const action = document.querySelector<HTMLElement>("[data-release-action]"); const note = document.querySelector<HTMLElement>("#release-note");
   if (!action || !note) return;
   try {
-    const response = await fetch("https://api.github.com/repos/B-Divyesh/sf-offline-file-bridge/releases/latest", { headers: { Accept: "application/vnd.github+json" } });
+    const response = await fetch(`${RELEASE_API}/releases/latest`, { headers: { Accept: "application/vnd.github+json" } });
     if (!response.ok) throw new Error("No release");
     const release = await response.json() as { tag_name: string; assets: Array<{ name: string; browser_download_url: string }> };
-    const apk = release.assets.find((asset) => asset.name.endsWith(".apk")); const sums = release.assets.find((asset) => asset.name === "SHA256SUMS");
-    if (!apk) throw new Error("APK missing");
+    if (release.tag_name !== RELEASE_TAG) throw new Error("Release version mismatch");
+    const apk = release.assets.find((asset) => asset.name === `offline-file-bridge-${RELEASE_TAG}.apk`);
+    const sums = release.assets.find((asset) => asset.name === "SHA256SUMS");
+    const provenance = release.assets.find((asset) => asset.name === "BUILD-PROVENANCE.json");
+    const releaseCommit = await resolveReleaseCommit(RELEASE_TAG);
+    if (!apk || !sums || !provenance || releaseCommit !== __BUILD_COMMIT__) throw new Error("Release identity mismatch");
     action.innerHTML = `<a class="button" href="${esc(apk.browser_download_url)}">Download APK ${esc(release.tag_name)}</a>`;
-    note.innerHTML = `Published on GitHub Releases.${sums ? ` <a href="${esc(sums.browser_download_url)}">Download SHA256SUMS</a>.` : " The checksum file is being published."}`;
-  } catch { action.innerHTML = `<a class="button secondary" href="https://github.com/B-Divyesh/sf-offline-file-bridge/releases">View GitHub Releases</a>`; note.textContent = "The first APK is being published. The PWA is ready to install now."; }
+    note.innerHTML = `This APK matches this site. <a href="${esc(sums.browser_download_url)}">Download SHA256SUMS</a>.`;
+  } catch { action.innerHTML = `<button class="button secondary" disabled>APK ${esc(RELEASE_TAG)} is being published</button>`; note.textContent = "A matching APK is not ready yet. The PWA is ready to install now."; }
+}
+
+async function resolveReleaseCommit(tag: string): Promise<string> {
+  const response = await fetch(`${RELEASE_API}/git/ref/tags/${encodeURIComponent(tag)}`, { headers: { Accept: "application/vnd.github+json" } });
+  if (!response.ok) throw new Error("Release tag missing");
+  const ref = await response.json() as { object: { type: "commit" | "tag"; sha: string } };
+  if (ref.object.type === "commit") return ref.object.sha.toLowerCase();
+  const tagResponse = await fetch(`${RELEASE_API}/git/tags/${ref.object.sha}`, { headers: { Accept: "application/vnd.github+json" } });
+  if (!tagResponse.ok) throw new Error("Release tag missing");
+  const annotated = await tagResponse.json() as { object: { sha: string } };
+  return annotated.object.sha.toLowerCase();
 }
 
 window.addEventListener("popstate", () => void renderRoute(true));

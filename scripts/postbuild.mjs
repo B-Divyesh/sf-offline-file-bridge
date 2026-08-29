@@ -1,9 +1,11 @@
 import { copyFile, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { buildMetadata } from "./build-metadata.mjs";
 
 const dist = new URL("../dist/", import.meta.url);
 const index = join(dist.pathname, "index.html");
 await copyFile(index, join(dist.pathname, "404.html"));
+await writeFile(join(dist.pathname, "build-identity.json"), `${JSON.stringify(buildMetadata, null, 2)}\n`);
 
 const swPath = join(dist.pathname, "sw.js");
 let serviceWorker = await readFile(swPath, "utf8");

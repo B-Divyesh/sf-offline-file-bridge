@@ -61,9 +61,9 @@ cd android
 ./gradlew assembleRelease bundleRelease
 ```
 
-The workflow generates a temporary debug keystore, builds the APK and AAB, writes `SHA256SUMS`, and attaches all three files to release `v0.1.1`. A public store release must use the owner's upload key.
+The workflow generates a temporary debug keystore and publishes release `v0.1.2`. It compares every built web file inside the APK with `dist/`, records the source commit in `BUILD-PROVENANCE.json`, and checksums the APK, AAB, and provenance file. A public store release must use the owner's upload key.
 
-The release workflow also starts an Android 35 emulator and runs `npm run test:android-device`. Those installed-APK tests cover the scoped picker intent and manifest permissions, failed-refresh preservation, private `FileProvider` chooser handoff, and local-copy/consent removal.
+The release workflow also starts an Android 36 emulator and runs the release-variant installed-APK tests. They cover the scoped picker intent and manifest permissions, failed-refresh preservation, private `FileProvider` chooser handoff, and local-copy/consent removal.
 
 ## Privacy and licenses
 
