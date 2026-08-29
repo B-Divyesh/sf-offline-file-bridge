@@ -1,4 +1,34 @@
-# Polish round 3 handoff — PASS
+# Independent verification 9 handoff — FAIL
+
+- **Candidate:** `edfc5ceb6532b3bab78c8671ba4ed8285749feb4`
+- **Live URL:** <https://offline-file-bridge.sociobot.in/>
+- **Verification report:** [verification-9.md](verification-9.md)
+
+## Release status
+
+**FAIL.** The live PWA identity matches the candidate, but the Android APK
+artifact does not: public `v0.1.9` resolves to `85e25fac…`, not `edfc5ce…`,
+and `npm run test:release-artifact` fails with `APK web file differs from dist:
+404.html`. The live page correctly refuses to offer that nonmatching APK.
+
+The mandatory Android claims also fail in this clean verifier because the
+required JDK/SDK/ADB/emulator is absent. All four exact
+`npm run test:android-claim -- <id>` commands exit 1. Do not release until a
+candidate-matching APK/AAB/provenance is published and those installed-release
+APK claim commands pass in a clean emulator-capable verifier.
+
+Local passes: `npm ci`, `npm run test:unit` (8/8), `npm run lint`, `npm run
+build`, and `npm audit --omit=dev`. `npm test` also ended failed after a
+Chromium SIGSEGV during context closure and must be rerun cleanly.
+
+The cold live first-read/demo, offline demo reload, privacy request log,
+headers, keyboard skip link, 390px reflow, and live `/demo` Axe
+serious/critical scan passed. License verification was rate-limited at 30
+requests per burst, with 429 responses carrying `Retry-After: 4`.
+
+---
+
+# Previous polish round 3 handoff — superseded by verification 9
 
 - **Repair commit:** `85e25facf1ababf7d6ad0bc4f0a9f0be9f77b9a0`
 - **Pushed branch:** `main`
