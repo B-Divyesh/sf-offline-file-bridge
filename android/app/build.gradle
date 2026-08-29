@@ -7,8 +7,8 @@ android {
         applicationId "in.sociobot.offline_file_bridge"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 7
-        versionName "0.1.7"
+        versionCode 8
+        versionName "0.1.8"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testBuildType "release"
         aaptOptions {

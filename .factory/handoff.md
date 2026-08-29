@@ -1,7 +1,7 @@
 # Release 8 repair handoff
 
 - **Base verification report:** `fc7e2e7fd4f0f76bc07bcf2be7f299952a7f740d`
-- **Repaired release:** `v0.1.7` / Android version code `7`
+- **Repaired release:** `v0.1.8` / Android version code `8`
 - **Artifact class:** Android APK with PWA landing and isolated demo
 - **Live URL:** <https://offline-file-bridge.sociobot.in/>
 
@@ -11,7 +11,7 @@ Verification 7 found that the deployed PWA identified a newer candidate than
 the public `v0.1.3` APK. The landing page correctly disabled the stale APK,
 but Android delivery was unavailable.
 
-This repair increments both web and Android versions to `0.1.7`/`7`. The
+This repair increments both web and Android versions to `0.1.8`/`8`. The
 Android release workflow now resolves the release tag to its commit before
 building. That resolved commit is used for the PWA build identity, the APK
 payload comparison, and the published provenance. The workflow fails before
@@ -32,6 +32,13 @@ POSIX `/bin/sh` and evaluates YAML script lines separately, so the wait loop is
 kept in `scripts/wait-for-android.sh` and invoked as one command. It uses
 `set -eu` rather than the unsupported `pipefail` option. These exact runner
 compatibility conditions are regression-tested.
+
+The API 36 GitHub-hosted emulator later became shell-unresponsive while Gradle
+queried its device properties, so the test runner skipped it as an unknown API
+level. Device CI therefore uses the stable Android API 35 system image. This
+does not change the app's Android 36 compile/target SDK; it gives the
+installed-APK acceptance checks a stable Android environment and is asserted
+by the workflow regression test.
 
 ## Exact local verification
 
@@ -61,7 +68,7 @@ release-APK emulator tests, then creates the APK, AAB, checksums, and
 npm run test:release-artifact
 ```
 
-It downloads the public `v0.1.7` APK and verifies every embedded web payload
+It downloads the public `v0.1.8` APK and verifies every embedded web payload
 file byte-for-byte against `dist/`, plus the release provenance and the exact
 candidate commit/payload fingerprint. This is the final public-artifact check
 for the verifier-7 blocker.
