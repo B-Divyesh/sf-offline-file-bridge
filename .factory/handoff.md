@@ -1,77 +1,16 @@
-# Offline File Bridge repair 3 handoff
+# Offline File Bridge — independent verification 4 handoff
 
-**Work order:** `offline-file-bridge-repair-3`
-**Verifier base:** `479f18b596ef548eab53fc31b3201e23fa85e863`
-**Artifact class:** Android APK with static PWA landing/demo
-**Release:** `v0.1.2`
+- **Result:** PASS
+- **Candidate:** `5888fa3ee5647c18f6c4716a3dfa4507bb70128a`
+- **Live URL:** <https://offline-file-bridge.sociobot.in/>
+- **Verified:** 29 August 2026 UTC
 
-## Release blocker repaired
+The previously reported release mismatch is closed. A fresh candidate build, every publicly served deployable file, and all 18 web files embedded in the public `v0.1.2` APK match byte-for-byte. The APK/AAB/provenance checksums pass, the live download action resolves the matching package, and public Android release CI completed successfully.
 
-Independent verification found that the live site offered a `v0.1.1` APK built before candidate `dba1d1d`. The site trusted the latest release label and had no artifact-to-source proof.
+All 12 `.factory/claims.json` commands pass. Full local gates pass: `npm ci` (0 vulnerabilities), `npm run lint`, `npm run test:unit` (7/7), `npm test` (62/62), and `npm run build`. Live desktop and 390 px flows pass demo, real import/persistence/handoff, error recovery, privacy, keyboard, reduced-motion, dark-mode axe, PWA offline/update, headers, caching, and release-download checks. Fresh Lighthouse scores are 100 performance, 100 accessibility, 100 best practices, and 100 SEO; LCP is 1.81 s and CLS is 0.
 
-The repair increments the web and Android version to `0.1.2` and Android `versionCode` to 2. Each build now embeds `build-identity.json` with the product, version, and source commit. The tag workflow rejects a mismatched source version, compares every file in `dist/` byte-for-byte with the APK's embedded web shell, and publishes `BUILD-PROVENANCE.json` plus checksums. The landing page offers a download only when the latest tag is `v0.1.2`, has the exact expected assets, and resolves to the same commit embedded in the site. Otherwise it shows a non-downloadable publishing state. This closes the reported stale-artifact path at build time and at download time.
+The Sociobot license endpoint allowed 30 requests in a fresh burst, then returned 429 for the next five; every 429 included `Retry-After: 4`.
 
-Exact regressions cover a valid source/tag contract, rejection of the old `v0.1.1` tag, required pre-publish APK verification, an exact matching release response, and refusal of the prior candidate's APK.
+No release-blocking or material defect was found. One non-blocking P3 remains: several secondary mobile labels render at 12.48–14.72 px, below the design baseline, although contrast, zoom/reflow, target size, and axe checks pass. The verifier image has no Java/Android SDK, so local Gradle/emulator execution was unavailable. The public tagged GitHub Actions run passed installed-release Android 36 instrumentation and packaging; the downloaded APK was independently inspected and matched to the candidate output. A physical-device smoke and owner-key signing remain operator steps before store distribution.
 
-## Local verification
-
-Run from a clean dependency install on 29 August 2026 UTC:
-
-```text
-npm ci                         PASS — 149 packages, 0 vulnerabilities
-npm run lint                   PASS — TypeScript no-emit check
-npm run test:unit              PASS — 7/7
-npm test                       PASS — 62/62 desktop and mobile Chromium
-npm run build                  PASS — dist/ produced
-npx cap sync android           PASS
-git diff --check               PASS
-```
-
-All twelve commands in `.factory/claims.json` were also run separately and passed: nine browser claims in both Chromium projects and three native source claims in Vitest.
-
-Production payload: initial JS 37.22 kB raw / 13.33 kB gzip; CSS 14.20 kB raw / 4.39 kB gzip. Local mobile Lighthouse: performance 99, accessibility 100, best practices 100, SEO 100, LCP 2.1 s, CLS 0, TBT 0 ms. `/opt/fleet/lib/verify-url.sh` passed in 649 ms with no console errors, one H1, one main landmark, `lang=en`, a descriptive title, and no missing alt text. Evidence is under `.factory/evidence/repair-3/`.
-
-The Playwright matrix covers desktop and 390 px-class mobile behavior, keyboard focus and route transfer, 44 px targets, 200% text reflow, serious/critical axe findings on every route, reduced-motion behavior, isolated demo storage, same-origin file flows, offline reload/open, update-worker registration, and the release mismatch regression.
-
-## Android and release evidence
-
-GitHub Actions is the required Android build environment because this worker has no JDK, Android SDK, or emulator. [Run 33229112667](https://github.com/B-Divyesh/sf-offline-file-bridge/actions/runs/33229112667) completed successfully. Its Android API 36 installed-release instrumentation, Gradle unit tests, APK/AAB build, byte-for-byte web payload verification, and release upload all passed.
-
-Public release `v0.1.2` resolves to source commit `85b6c082837b07fdc85c58be7f977b1542d27fc2`. A fresh consumer download produced:
-
-```text
-offline-file-bridge-v0.1.2.apk  7,584,941 bytes  SHA-256 24972b5c04731f96d36a22eaf52ed21432e03011b5604603e7cc50312d3c7e3e
-offline-file-bridge-v0.1.2.aab  7,475,967 bytes
-SHA256SUMS                     282 bytes
-BUILD-PROVENANCE.json          391 bytes
-```
-
-`sha256sum -c SHA256SUMS` passed for the APK, AAB, and provenance file. The APK embeds version `0.1.2` and commit `85b6c082…`. A separate consumer run of `release-contract.mjs` confirmed all 18 embedded web files equal local `dist/` byte-for-byte; its calculated provenance exactly matched the published file. Web-tree SHA-256: `e62fb7fcc9eca061970ef64db71a9db29e2af748adcc0fecd77a9a29e939670b`.
-
-## Deployment and live verification
-
-Static deployment `61ff3990-3620-4513-b41a-e43ebf7257f6` succeeded. The live `build-identity.json` reports version `0.1.2` and the same release commit `85b6c082…`. The landing action resolves the public `v0.1.2` APK and says “This APK matches this site.” All four release assets return 200 with their published sizes.
-
-Live `/`, `/demo`, `/app`, `/privacy`, `/terms`, and `/install` return 200; `/missing-page` returns the designed 404. `verify-url.sh` passed in 920 ms with no console errors. Live browser checks at desktop and 390 px passed offline reload/open, cache `offline-file-bridge-v3`, same-origin-only demo traffic, keyboard entry, no mobile overflow, reduced motion, and zero serious/critical axe findings. The response has CSP, HSTS, `nosniff`, referrer, and permissions-policy headers; hashed assets have a one-year immutable cache policy.
-
-The checkout returns 303 to hosted Dodo checkout. A fresh 35-request invalid-license burst returned 30 × 200 and 5 × 429; each 429 included `Retry-After: 4` and `x-ratelimit-after: 4`.
-
-Evidence, including desktop/mobile screenshots and verifier output, is under `.factory/evidence/repair-3/`.
-
-## Commands
-
-## Deploy and verify
-
-```sh
-npm ci
-npm run lint
-npm run test:unit
-npm test
-npm run build
-npx cap sync android
-git tag v0.1.2
-git push origin main v0.1.2
-/opt/fleet/lib/deploy-static.sh offline-file-bridge dist
-```
-
-The generated debug signing key is suitable for direct test installation. A store listing still needs the owner's stable upload key; no signing secret is committed. No other known release blocker remains.
+Full evidence and commands: [.factory/verification-4.md](verification-4.md). Screenshots and URL verifier output: `.factory/verification-artifacts/`.
