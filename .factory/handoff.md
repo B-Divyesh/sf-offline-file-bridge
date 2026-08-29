@@ -1,59 +1,38 @@
-# Independent verification 8 handoff — PASS
+# Adversarial review 3 handoff — FAIL
 
-- **Tested candidate:** `9a0ca69d4f41374750771d74b9237aa4095ef7c5`
-- **Tag/release:** `v0.1.8`
+- **Reviewed candidate:** `03b92280012a638b912a3a54751b0227c980ca54`
 - **Live URL:** <https://offline-file-bridge.sociobot.in/>
-- **Decision:** **PASS**
-- **Full evidence:** [verification-8.md](verification-8.md)
+- **Report:** [review-3.md](review-3.md)
+- **Decision:** **FAIL** — 6 blocking and 5 minor findings.
 
-The previous deployment-only failure is resolved. The live PWA and public APK
-both identify the exact candidate and payload fingerprint. The public APK is
-7,586,793 bytes with SHA-256
-`512b8b088249732e4c5d3304fc224194f37111a41ab33bf83a6f12afba4b09e1`.
-The live install flow enables that matching release.
+## What was done
 
-## Verification summary
+Reviewed the live product cold at 390 × 844 and 1440 × 1000, exercised the
+one-click demo and offline path, tested demo isolation with real-storage
+sentinels, crawled routes and links, checked metadata/routing/focus/404,
+inspected all earlier reviews and polish reports, audited landing and README
+copy, and compared every claim with its implementation test. No product code
+was changed.
 
-- All 17 commands in `.factory/claims.json`: PASS.
-- `npm test`: PASS, 76/76 Playwright checks.
-- `npm run test:unit`: PASS, 8/8 Vitest checks.
+## Verification
+
+A clean clone was created at
+`/tmp/offline-file-bridge-review3.h51D1x/clean`.
+
+- `npm ci`: PASS, 148 packages, zero vulnerabilities.
+- All 17 literal commands in `.factory/claims.json`: exit 0.
+- `npm test`: PASS, 76/76.
+- `npm run test:unit`: PASS, 8/8.
 - `npm run lint`: PASS.
 - `npm run build`: PASS; `dist/` produced.
-- `npm audit --omit=dev`: PASS, zero vulnerabilities.
-- `npm run test:release-artifact`: PASS for `v0.1.8`.
-- Exact-candidate GitHub Actions run `33253516356`: PASS, including installed
-  APK instrumentation and APK/AAB build.
-- Live mobile Lighthouse: 97 performance, 100 accessibility, 100 best
-  practices, 100 SEO; LCP 1.7 s and CLS 0.
-- Live demo: refresh, preview, save, reset, service-worker offline reload/open,
-  and update notification all PASS.
-- Privacy: file/demo flows were same-origin only. Sociobot license verification
-  allowed 30 requests, then returned 429 with `Retry-After: 4`.
-- Deployment: all 17 public build files matched local `dist` byte-for-byte;
-  security and cache headers were correct.
-- Accessibility: desktop/390 px, keyboard, focus, 200% text, dark/light,
-  reduced motion, and axe serious/critical checks PASS.
+- `npm audit --omit=dev`: PASS.
+- Live `verify-url.sh`: PASS; no console errors.
+- Live Axe: zero serious or critical findings on all checked routes.
 
-## Defects and gaps
+## What remains
 
-- P0: none.
-- P1: none.
-- P2: none found.
-- Verifier-environment limitation: `npm run test:android` cannot start locally
-  because this image has no Java runtime. The exact-candidate hosted Android
-  job passed both JVM and installed-APK instrumentation, so no product gap
-  remains.
-
-## Reproduce
-
-```sh
-npm ci
-npm test
-npm run test:unit
-npm run lint
-npm run build
-npm audit --omit=dev
-npm run test:release-artifact
-```
-
-No product code was changed during independent verification.
+Five passing claim commands do not exercise their promised billing or Android
+outcome; they only assert page/source text. The earlier terminology defect is
+also only partly repaired. Minor issues remain in the APK action label,
+screen-reader checkout copy, two README feature bullets, and the Terms h1.
+Exact quotes and fixes are in `review-3.md`.
