@@ -1,7 +1,7 @@
 # Release 8 repair handoff
 
 - **Base verification report:** `fc7e2e7fd4f0f76bc07bcf2be7f299952a7f740d`
-- **Repaired release:** `v0.1.4` / Android version code `4`
+- **Repaired release:** `v0.1.5` / Android version code `5`
 - **Artifact class:** Android APK with PWA landing and isolated demo
 - **Live URL:** <https://offline-file-bridge.sociobot.in/>
 
@@ -11,7 +11,7 @@ Verification 7 found that the deployed PWA identified a newer candidate than
 the public `v0.1.3` APK. The landing page correctly disabled the stale APK,
 but Android delivery was unavailable.
 
-This repair increments both web and Android versions to `0.1.4`/`4`. The
+This repair increments both web and Android versions to `0.1.5`/`5`. The
 Android release workflow now resolves the release tag to its commit before
 building. That resolved commit is used for the PWA build identity, the APK
 payload comparison, and the published provenance. The workflow fails before
@@ -21,6 +21,13 @@ The regression in `unit/release-contract.test.ts` recreates a release tag that
 resolves to an older commit and asserts that it is rejected. The browser
 release-identity claim tests now derive their versioned APK names from the
 current build identity, so the check remains active for each release.
+
+The first hosted `v0.1.4` attempt exposed a separate runner race before an
+APK could be published: `connectedReleaseAndroidTest` began with Android's
+Package Manager unavailable (`Can't find service: package`). The workflow now
+waits for both `sys.boot_completed=1` and a successful `cmd package` query
+before installing the release APK. The same regression test asserts that this
+readiness gate remains in the workflow.
 
 ## Exact local verification
 
@@ -50,7 +57,7 @@ release-APK emulator tests, then creates the APK, AAB, checksums, and
 npm run test:release-artifact
 ```
 
-It downloads the public `v0.1.4` APK and verifies every embedded web payload
+It downloads the public `v0.1.5` APK and verifies every embedded web payload
 file byte-for-byte against `dist/`, plus the release provenance and the exact
 candidate commit/payload fingerprint. This is the final public-artifact check
 for the verifier-7 blocker.

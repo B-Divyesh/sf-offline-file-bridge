@@ -13,14 +13,14 @@ describe("Android release identity contract", () => {
   });
 
   test("accepts only the source version's unique release tag", async () => {
-    await expect(verifySourceVersion("v0.1.4")).resolves.toEqual({ version: "0.1.4", versionCode: 4 });
-    await expect(verifySourceVersion("v0.1.3")).rejects.toThrow("does not match package version v0.1.4");
+    await expect(verifySourceVersion("v0.1.5")).resolves.toEqual({ version: "0.1.5", versionCode: 5 });
+    await expect(verifySourceVersion("v0.1.4")).rejects.toThrow("does not match package version v0.1.5");
   });
 
   test("@regression:release-tag cannot reuse an older candidate commit", async () => {
     const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
-    await expect(verifyReleaseCandidate("v0.1.4", head, () => head)).resolves.toEqual({ version: "0.1.4", versionCode: 4, commit: head });
-    expect(() => verifyTagCommit("v0.1.4", head, () => "e8debdc51c78ef81bb09a1f2c9b0c32b0eb0b951")).toThrow("not candidate");
+    await expect(verifyReleaseCandidate("v0.1.5", head, () => head)).resolves.toEqual({ version: "0.1.5", versionCode: 5, commit: head });
+    expect(() => verifyTagCommit("v0.1.5", head, () => "e8debdc51c78ef81bb09a1f2c9b0c32b0eb0b951")).toThrow("not candidate");
   });
 
   test("the release job verifies the packaged web payload before publishing", async () => {
@@ -28,6 +28,8 @@ describe("Android release identity contract", () => {
     expect(workflow).toContain('git rev-parse "${GITHUB_REF_NAME}^{commit}"');
     expect(workflow).toContain('release-contract.mjs candidate "$GITHUB_REF_NAME" "$RELEASE_COMMIT"');
     expect(workflow).toContain('BUILD_COMMIT="$RELEASE_COMMIT" npm run build');
+    expect(workflow).toContain('adb shell cmd package list packages android');
+    expect(workflow).toContain('Android Package Manager did not become ready.');
     expect(workflow).toContain('release-contract.mjs artifact "release/offline-file-bridge-v${VERSION}.apk" "$GITHUB_REF_NAME" "$RELEASE_COMMIT" "release/BUILD-PROVENANCE.json"');
     expect(workflow.indexOf("release-contract.mjs artifact")).toBeLessThan(workflow.indexOf("softprops/action-gh-release"));
     expect(workflow).toContain("release/BUILD-PROVENANCE.json");
