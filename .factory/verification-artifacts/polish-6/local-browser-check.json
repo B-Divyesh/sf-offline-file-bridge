@@ -1,0 +1,27 @@
+{
+  "url": "http://127.0.0.1:4174/?demo=1",
+  "href": "/?demo=1",
+  "folder": {
+    "x": 62,
+    "y": 527.859375,
+    "width": 288,
+    "height": 33.59375
+  },
+  "file": {
+    "x": 38,
+    "y": 732.046875,
+    "width": 316,
+    "height": 24.796875
+  },
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "banner": true,
+  "resetNotice": true,
+  "resetFocus": true,
+  "seededTime": true,
+  "realDatabaseAbsent": true,
+  "seriousOrCriticalAxe": [],
+  "consoleErrors": []
+}

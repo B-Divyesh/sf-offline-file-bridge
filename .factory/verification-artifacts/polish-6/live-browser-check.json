@@ -1,0 +1,264 @@
+{
+  "checkedAt": "2026-08-29T23:58:14.729Z",
+  "hero": {
+    "title": "Offline File Bridge — keep folders ready offline",
+    "h1": "Keep approved folders ready offline",
+    "href": "/?demo=1",
+    "overflow": 0
+  },
+  "demo": {
+    "url": "https://offline-file-bridge.sociobot.in/?demo=1",
+    "folder": {
+      "x": 62,
+      "y": 527.859375,
+      "width": 288,
+      "height": 33.59375
+    },
+    "file": {
+      "x": 38,
+      "y": 732.046875,
+      "width": 316,
+      "height": 24.796875
+    },
+    "aboveFold": true,
+    "keys": [
+      "real:polish-6-sentinel",
+      "demo:offline-file-bridge"
+    ],
+    "databases": [
+      "polish-6-sentinel"
+    ],
+    "foreignRequests": [],
+    "dialogFocused": true,
+    "dialogReturnedFocus": true,
+    "reset": {
+      "seededTime": true,
+      "focused": true
+    }
+  },
+  "exit": {
+    "url": "https://offline-file-bridge.sociobot.in/app",
+    "demoKey": null,
+    "sentinel": "keep"
+  },
+  "release": {
+    "href": "https://github.com/B-Divyesh/sf-offline-file-bridge/releases/download/v0.1.14/offline-file-bridge-v0.1.14.apk",
+    "note": "This Android release records this site's exact commit and verified payload fingerprint. Download SHA256SUMS."
+  },
+  "routes": [
+    {
+      "route": "/",
+      "status": 200,
+      "title": "Offline File Bridge — keep folders ready offline",
+      "h1": "Keep approved folders ready offline",
+      "main": 1,
+      "canonical": "https://offline-file-bridge.sociobot.in/",
+      "overflow": 0
+    },
+    {
+      "route": "/demo",
+      "status": 200,
+      "title": "Demo — Offline File Bridge",
+      "h1": "Open your offline folders",
+      "main": 1,
+      "canonical": "https://offline-file-bridge.sociobot.in/demo",
+      "overflow": 0
+    },
+    {
+      "route": "/app",
+      "status": 200,
+      "title": "Folder mirrors — Offline File Bridge",
+      "h1": "Open your offline folders",
+      "main": 1,
+      "canonical": "https://offline-file-bridge.sociobot.in/app",
+      "overflow": 0
+    },
+    {
+      "route": "/privacy",
+      "status": 200,
+      "title": "Privacy — Offline File Bridge",
+      "h1": "Your files stay on your device",
+      "main": 1,
+      "canonical": "https://offline-file-bridge.sociobot.in/privacy",
+      "overflow": 0
+    },
+    {
+      "route": "/terms",
+      "status": 200,
+      "title": "Terms — Offline File Bridge",
+      "h1": "Terms for Offline File Bridge",
+      "main": 1,
+      "canonical": "https://offline-file-bridge.sociobot.in/terms",
+      "overflow": 0
+    },
+    {
+      "route": "/install",
+      "status": 200,
+      "title": "Install — Offline File Bridge",
+      "h1": "Install Offline File Bridge",
+      "main": 1,
+      "canonical": "https://offline-file-bridge.sociobot.in/install",
+      "overflow": 0
+    },
+    {
+      "route": "/missing-polish-6",
+      "status": 404,
+      "title": "Page not found — Offline File Bridge",
+      "h1": "Page not found",
+      "main": 1,
+      "canonical": null,
+      "overflow": 0
+    }
+  ],
+  "axe": [
+    {
+      "route": "/",
+      "colorScheme": "light",
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/",
+      "colorScheme": "dark",
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/demo",
+      "colorScheme": "light",
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/demo",
+      "colorScheme": "dark",
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/app",
+      "colorScheme": "light",
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/app",
+      "colorScheme": "dark",
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/privacy",
+      "colorScheme": "light",
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/privacy",
+      "colorScheme": "dark",
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/terms",
+      "colorScheme": "light",
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/terms",
+      "colorScheme": "dark",
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/install",
+      "colorScheme": "light",
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/install",
+      "colorScheme": "dark",
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/missing-polish-6",
+      "colorScheme": "light",
+      "seriousOrCritical": []
+    },
+    {
+      "route": "/missing-polish-6",
+      "colorScheme": "dark",
+      "seriousOrCritical": []
+    }
+  ],
+  "skipFocused": true,
+  "offline": {
+    "state": true,
+    "preview": true,
+    "errors": []
+  },
+  "identity": {
+    "product": "offline-file-bridge",
+    "version": "0.1.14",
+    "commit": "9d532df0109ff37b34195de6db9628d57c57cd2f",
+    "payloadFileCount": 17,
+    "payloadTreeSha256": "4d1d721277cdd61099b7be119ced855544da410b6852beb2ee4b6c64c1a487d3"
+  },
+  "assets": {
+    "manifestStatus": 200,
+    "robotsStatus": 200,
+    "sitemapStatus": 200
+  },
+  "unexpectedErrors": [],
+  "expected404Errors": [
+    {
+      "url": "https://offline-file-bridge.sociobot.in/missing-polish-6",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "url": "https://offline-file-bridge.sociobot.in/missing-polish-6",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    },
+    {
+      "url": "https://offline-file-bridge.sociobot.in/missing-polish-6",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    }
+  ],
+  "interaction": {
+    "reducedAnimations": 0,
+    "minTargetWidth": 47.125,
+    "minTargetHeight": 44,
+    "undersizedTargets": [],
+    "reflowOverflow": 0,
+    "privacyFocus": true,
+    "backFocus": true,
+    "legalLinks": [
+      {
+        "route": "/",
+        "privacy": 1,
+        "terms": 1
+      },
+      {
+        "route": "/demo",
+        "privacy": 1,
+        "terms": 1
+      },
+      {
+        "route": "/app",
+        "privacy": 1,
+        "terms": 1
+      },
+      {
+        "route": "/privacy",
+        "privacy": 1,
+        "terms": 1
+      },
+      {
+        "route": "/terms",
+        "privacy": 1,
+        "terms": 1
+      },
+      {
+        "route": "/install",
+        "privacy": 1,
+        "terms": 1
+      },
+      {
+        "route": "/missing-polish-6",
+        "privacy": 1,
+        "terms": 1
+      }
+    ]
+  }
+}
