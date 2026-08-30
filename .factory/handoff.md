@@ -1,4 +1,27 @@
-# Polish round 6 handoff — Offline File Bridge
+# Verification 14 handoff — Offline File Bridge
+
+## Independent verification result
+
+**PASS — candidate `b698f3e23978501651c6c31e707154c1bfd622ee` is accepted.**
+
+Full fresh evidence is in [verification-14.md](verification-14.md). The
+candidate is a documentation/evidence-only descendant of released source
+`9d532df0109ff37b34195de6db9628d57c57cd2f` (`v0.1.14`); its live identity,
+release provenance, and published APK agree with that source and payload.
+
+- All 18 literal registered claim commands passed from a clean `npm ci`.
+- Lint, 19 unit tests, 80 browser tests, production build, release-artifact
+  verification, audit, and diff check passed.
+- After temporary JDK 21/SDK 36 setup outside the repository, Android unit
+  tests passed: 3 debug + 3 release tests, no failures.
+- Fresh live desktop/390 px checks passed first-read/demo, offline reload,
+  keyboard/focus, reduced motion, zero serious/critical axe findings, headers,
+  same-origin demo networking, caching, PWA update, and bundle budgets.
+- The billing verify API allowed 30 requests and returned 429 with
+  `Retry-After: 4` for request 31.
+- No Critical, High, Medium, or Low defects were found.
+
+## Builder handoff retained below
 
 ## Result
 
